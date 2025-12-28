@@ -1,4 +1,4 @@
-import Homepage from "@/src/components/Homepage"
+import Services from "@/src/components/Services";
 
 const Service_data = [
 {
@@ -51,10 +51,10 @@ const Service_data = [
 ];
 
 
-export default function Home() {
-  return (
-    <div className="bg-black text-white relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black py-10">
-      <Homepage service_data={Service_data}/>
-    </div>
-  );
+export default function ServicesPage(){
+    return(
+        <section className="relative py-20 bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white overflow-hidden">
+            <Services service_data={Service_data}/>
+        </section>
+    );
 }

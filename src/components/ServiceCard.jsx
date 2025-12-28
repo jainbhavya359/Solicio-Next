@@ -1,7 +1,6 @@
-"use client";
-
-import { motion } from "framer-motion";
+// ServiceCard.tsx (SERVER COMPONENT)
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ServiceCard({
   img,
@@ -18,20 +17,20 @@ export default function ServiceCard({
       } items-center gap-10`}
     >
       {/* Image */}
-      <motion.div
-        whileHover={{ scale: 1.05, rotate: 1 }}
-        transition={{ type: "spring", stiffness: 200 }}
+      <div
         className={`relative p-6 rounded-3xl bg-gradient-to-br ${accent} shadow-2xl`}
       >
-        <img src={img} alt={title} className="w-28 h-28 object-contain" />
-      </motion.div>
+        <Image
+          src={img}
+          alt={title}
+          width={112}
+          height={112}
+          className="object-contain"
+        />
+      </div>
 
       {/* Content */}
-      <motion.div
-        whileHover={{ y: -6 }}
-        transition={{ duration: 0.3 }}
-        className="flex-1 backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl"
-      >
+      <div className="flex-1 backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl">
         <h3 className="text-3xl font-bold mb-4">{title}</h3>
         <p className="text-slate-300 leading-relaxed mb-6">
           {description}
@@ -45,7 +44,7 @@ export default function ServiceCard({
             Explore Service →
           </Link>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }

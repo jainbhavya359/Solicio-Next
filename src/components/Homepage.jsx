@@ -1,24 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 //import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import Services from "@/src/components/Services";
 import Tips from "@/src/components/Tips";
 
-export default function Homepage() {
+export default function Homepage({service_data}) {
   //const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
   const isAuthenticated = true;
   const router = useRouter();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
-    <div className="bg-black text-white">
+    <>
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -140,17 +136,12 @@ export default function Homepage() {
               image: "/story3.jpg",
             },
           ].map((story, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-xl"
-            >
-              <img
+            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-xl" key={i}>
+              <Image
                 src={story.image}
                 alt={story.name}
+                width={112}
+                height={112}
                 className="h-56 w-full object-cover"
               />
               <div className="p-6">
@@ -159,7 +150,7 @@ export default function Homepage() {
                 </p>
                 <p className="font-bold">{story.name}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
@@ -212,8 +203,8 @@ export default function Homepage() {
       </section>
 
       {/* SERVICES + TIPS */}
-      <Services />
+      <Services service_data={service_data}/>
       <Tips />
-    </div>
+    </>
   );
 }
