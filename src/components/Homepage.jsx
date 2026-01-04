@@ -10,7 +10,7 @@ import Tips from "@/src/components/Tips";
 
 export default function Homepage({service_data}) {
   //const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
-  const isAuthenticated = true;
+  const isAuthenticated = false;
   const router = useRouter();
 
   return (
@@ -59,16 +59,14 @@ export default function Homepage({service_data}) {
                 Logout
               </button>
             ) : (
-              <button
-                //onClick={() =>
-                  //loginWithRedirect({appState: { returnTo: "/" },})
-                //}
+              <Link
+                href="/signup"
                 className="px-8 py-4 rounded-full font-bold text-black
                 bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400
                 hover:opacity-90 transition shadow-lg"
               >
                 Get Started →
-              </button>
+              </Link>
             )}
 
             <Link
