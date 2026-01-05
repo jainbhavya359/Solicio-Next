@@ -3,10 +3,11 @@ import connect from "@/src/dbConfig/dbConnection";
 import User from "@/src/models/UserModel";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "../../../utils/mailer";
+import jwt from "jsonwebtoken";
 
 connect();
 
-export default async function POST(request: NextRequest){
+export async function POST(request: NextRequest){
     try{
         const reqBody = await request.json();
         console.log(reqBody);
@@ -24,14 +25,28 @@ export default async function POST(request: NextRequest){
         const newUser = new User({
             email,
             username,
-            hashedPassword
+            password: hashedPassword
         });
 
         const savedUser = await newUser.save();
 
         await sendEmail({email, emailType: "VERIFY", userid: savedUser._id});
 
-        return NextResponse.json({message: "User Registered Succesfully", success: true, savedUser});
+        const tokenData = {
+            id: user._id
+        }
+
+        const token = jwt.sign(tokenData, process.env.TOKEN_SECRET!, {expiresIn: '1h'});
+        const response = NextResponse.json({
+            message: "Signed Up SuccessFully",
+            success: true
+        },{status: 200});
+
+        response.cookies.set("token", token,{
+            httpOnly: true
+        });
+
+        return response;
 
     }catch(error: any){
         return NextResponse.json({error: error.message},{status: 500})

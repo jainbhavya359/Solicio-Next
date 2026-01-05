@@ -1,35 +1,35 @@
 "use client";
 import Link from "next/link";
-import { useState ,useEffect } from "react";
-import {useRouter} from "next/navigation";
+import { useState } from "react";
+import {redirect, useRouter} from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
 
-export default function SignupPage() {
+export default function LoginPage() {
   
   const [ user, setUser] = useState({
     email: "",
-    username: "",
     password: ""
   });
 
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function onSignup(){
+  async function onLogIn(){
     try{
         setLoading(true);
         setButtonDisabled(true);
-        const response = await axios.post("/api/signup", user);
-        console.log("Signup success", response.data);
+        const response = await axios.post("/api/login", user);
+        console.log("Login success", response.data);
     }catch(error: any){
-        console.log("Signup failed", error.message);
+        console.log("Login failed", error.message);
         toast.error(error.message);
         setButtonDisabled(false);
     }finally{
         setLoading(false);
         setButtonDisabled(false);
+        redirect("/")
     }
   }
 
@@ -64,20 +64,6 @@ export default function SignupPage() {
             />
           </div>
 
-          {/* Username */}
-          <div>
-            <label className="block text-sm mb-1 text-gray-300">
-              Username
-            </label>
-            <input
-              onChange={(e)=>{setUser({...user, username: e.target.value})}}
-              type="text"
-              value={user.username}
-              placeholder="username"
-              className="w-full rounded-lg bg-black/40 border border-white/10 px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition"
-            />
-          </div>
-
           {/* Password */}
           <div>
             <label className="block text-sm mb-1 text-gray-300">
@@ -93,27 +79,26 @@ export default function SignupPage() {
           </div>
 
           {/* Button */}
-          {loading ?
+          {loading ? 
             <div className="flex justify-center py-12">
               <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
             </div> : 
             <button
-              disabled={buttonDisabled}
-              onClick={()=> {onSignup()}}
-              type="submit"
-              className="w-full mt-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 py-3 font-semibold text-white shadow-lg hover:opacity-90 transition"
+                disabled={buttonDisabled}
+                onClick={()=> {onLogIn()}}
+                type="submit"
+                className="w-full mt-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 py-3 font-semibold text-white shadow-lg hover:opacity-90 transition"
             >
-              Sign Up
-            </button>        
-            }
-          
+                Log In
+            </button>
+          }
         </form>
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-400 mt-6">
-          Already have an account?{" "}
-          <Link href="/login" className="text-pink-400 hover:underline cursor-pointer">
-            Log in
+          Don't have an account?{" "}
+          <Link href="/signup" className="text-pink-400 hover:underline cursor-pointer">
+            Sign Up
           </Link>
         </p>
       </div>

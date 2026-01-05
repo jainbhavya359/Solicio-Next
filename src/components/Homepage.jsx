@@ -2,16 +2,25 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-//import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import Services from "@/src/components/Services";
 import Tips from "@/src/components/Tips";
+import axios from "axios";
+import { useState } from "react";
 
-export default function Homepage({service_data}) {
-  //const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
-  const isAuthenticated = false;
-  const router = useRouter();
+export default function Homepage({service_data, isAuthenticated}) {
+
+  const [logged, setLogged] = useState(isAuthenticated);
+
+  async function logout(){
+    try{
+      const response = await axios.get("/api/logout");
+      console.log(response);
+      setLogged(false);
+    }catch(error){
+      console.log("Error occured during logout", error);
+    }
+  }
 
   return (
     <>
@@ -47,11 +56,11 @@ export default function Homepage({service_data}) {
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4 justify-center">
-            {isAuthenticated ? (
+            {logged ? (
               <button
-                //onClick={() =>
-                  //logout({ logoutParams: { returnTo: window.location.origin } })
-                //}
+                onClick={() =>
+                  logout()
+                }
                 className="px-8 py-4 rounded-full font-bold text-black
                 bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400
                 hover:opacity-90 transition shadow-lg"
@@ -65,7 +74,7 @@ export default function Homepage({service_data}) {
                 bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400
                 hover:opacity-90 transition shadow-lg"
               >
-                Get Started →
+                Sign Up →
               </Link>
             )}
 

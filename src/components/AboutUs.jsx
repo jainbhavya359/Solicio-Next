@@ -1,14 +1,9 @@
 "use client"
 
-import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import Tips from "./Tips";
 
 export default function AboutUs() {
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   return (
     <>
