@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Tips() {
+export default function Tips({isAuthenticated}) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
@@ -29,7 +29,7 @@ export default function Tips() {
   const date = new Date().getDate();
   const tip = data.length ? data[(date * 7) % data.length] : null;
 
-  if ({/*!isAuthenticated*/} || loading || error || !tip) return null;
+  if (!isAuthenticated || loading || error || !tip) return null;
 
   return (
     <AnimatePresence>

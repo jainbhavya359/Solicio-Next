@@ -4,17 +4,21 @@ import User from "@/src/models/UserModel";
 
 connect();
 
-export async function POST(request: NextRequest){
+export async function GET(request: NextRequest){
     try{
-        const reqBody = await request.json();
-        console.log(reqBody);
-        const {token} = reqBody;
+        const token = request.nextUrl.searchParams.get("token");
+        console.log(token);
 
-        const user = await User.findOne({token});
+        if(!token){
+            return NextResponse.json({error: "Token Missing"},{status:400});
+        }
+
+        const user = await User.findOne({verifyToken: token, verifyTokenExpiry: { $gt: Date.now() }});
 
         if(!user){
             return NextResponse.json({error: "Invalid Token"}, {status: 400});
         }
+        console.log(user);
 
         user.isVerified = true;
         user.verifyToken = undefined;
@@ -22,9 +26,10 @@ export async function POST(request: NextRequest){
 
         const savedUser = await user.save();
 
-        return NextResponse.json({message: "User Verified Successfully", success: true, savedUser});
+        return NextResponse.redirect(new URL("/", request.url));
 
     }catch(error: any){
+        console.log(error)
         return NextResponse.json({error: error.message},{status: 500})
     }
 }

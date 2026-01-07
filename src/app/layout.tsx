@@ -4,6 +4,7 @@ import Header from "@/src/components/Header"
 import Footer from "@/src/components/Footer"
 
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

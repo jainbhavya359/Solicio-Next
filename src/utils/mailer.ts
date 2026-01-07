@@ -1,9 +1,20 @@
 import nodemailer from "nodemailer";
-import { v4 as uuidv4 } from 'uuid';
+import User from "../models/UserModel";
+import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 
-export const sendEmail = async({email, emailType, userId}: any) => {
+
+export const sendEmail = async({email, emailType}: any) => {
     try{
-        const hashedToken = uuidv4();
+        const user = await User.findOne({email});
+
+        const hashedToken = crypto.randomUUID();
+        console.log(hashedToken);
+
+        user.verifyToken = hashedToken;
+        user.verifyTokenExpiry = Date.now() + 3600000;
+
+        await user.save();
 
         const transport = nodemailer.createTransport({
             host: "sandbox.smtp.mailtrap.io",

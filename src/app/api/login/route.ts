@@ -3,6 +3,7 @@ import connect from "@/src/dbConfig/dbConnection";
 import User from "@/src/models/UserModel";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import toast from "react-hot-toast";
 
 connect();
 

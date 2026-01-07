@@ -11,7 +11,6 @@ export default async function connect() {
 
         connection.on("error", () => {
             console.log("Error occuered after connecting to DB");
-            process.exit();
         })
     }catch(error){
         console.log("Error while connecting to DB");

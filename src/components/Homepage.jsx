@@ -211,7 +211,7 @@ export default function Homepage({service_data, isAuthenticated}) {
 
       {/* SERVICES + TIPS */}
       <Services service_data={service_data}/>
-      <Tips />
+      {/*<Tips isAuthenticated={logged}/>*/}
     </>
   );
 }

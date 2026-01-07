@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {redirect, useRouter} from "next/navigation";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 
 
 export default function LoginPage() {
@@ -15,6 +15,8 @@ export default function LoginPage() {
 
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [err, setError] = useState(false);
+  const [ loggedIn, setLoggedIn ] = useState(false);
 
   async function onLogIn(){
     try{
@@ -22,22 +24,29 @@ export default function LoginPage() {
         setButtonDisabled(true);
         const response = await axios.post("/api/login", user);
         console.log("Login success", response.data);
+        setLoggedIn(true);
     }catch(error: any){
-        console.log("Login failed", error.message);
-        toast.error(error.message);
+        console.log("Login failed", error);
+        toast.error(error.response.data.error);
+        setError(true);
         setButtonDisabled(false);
     }finally{
         setLoading(false);
         setButtonDisabled(false);
-        redirect("/")
     }
   }
 
+  useEffect(()=>{
+    if(loggedIn){
+      redirect("/");
+    }
+  },[loggedIn]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_top_left,_#2b0f4a,_#060918_70%)] px-4">
+      <Toaster/>
       
       <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_40px_rgba(255,0,200,0.15)] p-8">
-        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">

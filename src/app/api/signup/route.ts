@@ -15,6 +15,7 @@ export async function POST(request: NextRequest){
 
         const user = await User.findOne({email});
         if(user){
+            
             return NextResponse.json({error: "User already exists"}, {status: 400});
         }
 
@@ -25,15 +26,17 @@ export async function POST(request: NextRequest){
         const newUser = new User({
             email,
             username,
-            password: hashedPassword
+            password: hashedPassword,
         });
 
         const savedUser = await newUser.save();
+        console.log(savedUser);
+        
 
-        await sendEmail({email, emailType: "VERIFY", userid: savedUser._id});
+        await sendEmail({email, emailType: "VERIFY"});
 
         const tokenData = {
-            id: user._id
+            id: savedUser._id
         }
 
         const token = jwt.sign(tokenData, process.env.TOKEN_SECRET!, {expiresIn: '1h'});
