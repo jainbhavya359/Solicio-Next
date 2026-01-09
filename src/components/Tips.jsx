@@ -2,23 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
 
-export default function Tips({isAuthenticated}) {
+export default function Tips() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [visible, setVisible] = useState(true);
 
+  const { isSignedIn } = useUser();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/api/tips`
-        );
-        const json = await response.json();
+        const response = await axios.get("/api/tips");
+        const json = response.data.data[0].tip;
         setData(json);
       } catch (err) {
         setError(err);
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -26,10 +29,7 @@ export default function Tips({isAuthenticated}) {
     fetchData();
   }, []);
 
-  const date = new Date().getDate();
-  const tip = data.length ? data[(date * 7) % data.length] : null;
-
-  if (!isAuthenticated || loading || error || !tip) return null;
+  if (!isSignedIn || loading || error || !data) return null;
 
   return (
     <AnimatePresence>
@@ -61,7 +61,7 @@ export default function Tips({isAuthenticated}) {
               <span className="font-semibold text-white">
                 Did you know?
               </span>{" "}
-              {tip.tip}
+              {data}
             </p>
 
             {/* Close */}

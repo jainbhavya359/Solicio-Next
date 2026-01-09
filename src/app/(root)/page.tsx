@@ -1,6 +1,8 @@
 import Homepage from "@/src/components/Homepage"
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken"
+import { auth } from "@/src/utils/auth";
+import { useUser } from "@clerk/nextjs";
 
 const Service_data = [
 {
@@ -53,22 +55,12 @@ const Service_data = [
 ];
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-  let isAuthenticated = false;
 
-  if (token) {
-    try {
-      jwt.verify(token, process.env.TOKEN_SECRET!);
-      isAuthenticated = true;
-    } catch {
-      isAuthenticated = false;
-    }
-  }
+  
 
   return (
     <div className="bg-black text-white relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black py-10">
-      <Homepage service_data={Service_data} isAuthenticated={isAuthenticated}/>
+      <Homepage service_data={Service_data} />
     </div>
   );
 }

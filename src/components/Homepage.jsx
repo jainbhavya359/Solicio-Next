@@ -7,20 +7,11 @@ import Services from "@/src/components/Services";
 import Tips from "@/src/components/Tips";
 import axios from "axios";
 import { useState } from "react";
+import { SignedIn, SignedOut, SignOutButton, SignUp, SignUpButton, useUser } from "@clerk/nextjs";
 
-export default function Homepage({service_data, isAuthenticated}) {
+export default function Homepage({service_data}) {
 
-  const [logged, setLogged] = useState(isAuthenticated);
-
-  async function logout(){
-    try{
-      const response = await axios.get("/api/logout");
-      console.log(response);
-      setLogged(false);
-    }catch(error){
-      console.log("Error occured during logout", error);
-    }
-  }
+  const { isSignedIn } = useUser();
 
   return (
     <>
@@ -56,27 +47,29 @@ export default function Homepage({service_data, isAuthenticated}) {
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4 justify-center">
-            {logged ? (
-              <button
-                onClick={() =>
-                  logout()
-                }
-                className="px-8 py-4 rounded-full font-bold text-black
-                bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400
-                hover:opacity-90 transition shadow-lg"
-              >
-                Logout
-              </button>
-            ) : (
-              <Link
-                href="/signup"
-                className="px-8 py-4 rounded-full font-bold text-black
-                bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400
-                hover:opacity-90 transition shadow-lg"
-              >
-                Sign Up →
-              </Link>
-            )}
+            <SignedIn>
+              <SignOutButton>  
+                <button
+                  className="px-8 py-4 rounded-full font-bold text-black
+                  bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400
+                  hover:opacity-90 transition shadow-lg"
+                  >
+                  Logout →
+                </button>
+              </SignOutButton>
+            </SignedIn>
+            <SignedOut>
+              <SignUpButton>
+                <button
+                  className="px-8 py-4 rounded-full font-bold text-black
+                  bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400
+                  hover:opacity-90 transition shadow-lg"
+                  >
+                  Sign Up →
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            
 
             <Link
               href="/contact"
@@ -210,8 +203,8 @@ export default function Homepage({service_data, isAuthenticated}) {
       </section>
 
       {/* SERVICES + TIPS */}
-      <Services service_data={service_data}/>
-      {/*<Tips isAuthenticated={logged}/>*/}
+      <Services service_data={service_data} isSignedIn={isSignedIn}/>
+      <Tips/>
     </>
   );
 }

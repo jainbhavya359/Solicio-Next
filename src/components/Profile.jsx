@@ -1,49 +1,58 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import StockReport from "./StockReport";
-import License_Report from "./License_Report";
+//import StockReport from "./StockReport";
+//import License_Report from "./License_Report";
+import axios from "axios";
+import {  UserButton, UserProfile, useUser } from "@clerk/nextjs";
 
-export function Profile() {
-  const { loginWithRedirect, user, isAuthenticated } = useAuth0();
+export default function Profile() {
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reload, setReload] = useState(false);
-  const location = useLocation();
+
+  const {user} = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress;
+  console.log(email);
+
+  const userButtonAppearance = {
+    elements: {
+      userButtonAvatarBox: "w-1 h-1  rounded-full ring-4 ring-indigo-500/30"
+    },
+  };
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      loginWithRedirect({ appState: { returnTo: location.pathname } });
+    if(!email){
+      setLoading(true);
       return;
     }
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getLoan`);
-        if (!res.ok) throw new Error("Network issue");
-        const json = await res.json();
-        setData(json);
+        console.log(email);
+        const res = await axios.get("/api/loans", {
+          params: { email },
+        });
+        console.log(res);
+        setData(res.data);
       } catch (err) {
         setError(err.message);
+        console.log(err);
+        throw new Error("Network issue");
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-    window.scrollTo(0, 0);
-    setReload(false);
-  }, [isAuthenticated, reload]);
+  }, [email, reload]);
 
   const onHandleClick = async (id) => {
     try {
-      await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/deleteLoans/${id}`, {
-        method: "DELETE",
-      });
+      await axios.delete(`/api/deleteLoan?id=${id}`);
       setReload(true);
     } catch (err) {
       console.error(err);
@@ -66,16 +75,15 @@ export function Profile() {
           transition={{ duration: 0.7 }}
           className="flex flex-col md:flex-row items-center gap-6"
         >
-          <img
-            src={user?.picture}
-            alt={user?.name}
-            className="w-20 h-20 rounded-full ring-4 ring-indigo-500/30"
-          />
+          
+          <UserButton appearance={userButtonAppearance}/>
+        
           <div>
-            <h1 className="text-3xl font-extrabold">{user?.name}</h1>
-            <p className="text-slate-400">{user?.email}</p>
+            <h1 className="text-3xl font-extrabold">{user?.fullName}</h1>
+            <p className="text-slate-400">{email}</p>
           </div>
         </motion.div>
+
 
         {/* LOANS */}
         <motion.div
@@ -95,7 +103,7 @@ export function Profile() {
             </div>
           ) : error ? (
             <p className="text-red-400">{error}</p>
-          ) : data && data.filter(l => l.email === user.email).length > 0 ? (
+          ) : data && data.filter(l => l.email === email).length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead className="text-slate-300 border-b border-white/10">
@@ -109,9 +117,9 @@ export function Profile() {
                 </thead>
                 <tbody>
                   {data.map((loan, i) =>
-                    loan.email === user.email ? (
+                    loan.email === email ? (
                       <tr
-                        key={loan.id}
+                        key={loan._id}
                         className="border-b border-white/5 hover:bg-white/5 transition"
                       >
                         <td className="py-4">{loan.loan}</td>
@@ -124,7 +132,7 @@ export function Profile() {
                         </td>
                         <td className="py-4">
                           <button
-                            onClick={() => onHandleClick(loan.id)}
+                            onClick={() => onHandleClick(loan._id)}
                             className="px-4 py-1 rounded-full border border-red-500 text-red-400 hover:bg-red-500/10 transition"
                           >
                             Remove
@@ -149,8 +157,7 @@ export function Profile() {
           viewport={{ once: true }}
           className="space-y-16"
         >
-          <StockReport />
-          <License_Report />
+          
         </motion.div>
 
       </div>
