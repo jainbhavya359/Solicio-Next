@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 //import License_Report from "./License_Report";
 import axios from "axios";
 import {  UserButton, UserProfile, useUser } from "@clerk/nextjs";
+import { CreditGauge, scores_rate } from "./Loan";
+import { useCreditStore } from "../store/useCreditStore";
 
 export default function Profile() {
 
@@ -13,6 +15,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reload, setReload] = useState(false);
+
+  const { score, index, show } = useCreditStore();
 
   const {user} = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
@@ -84,6 +88,24 @@ export default function Profile() {
           </div>
         </motion.div>
 
+        {show && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="mt-6 p-6 rounded-2xl bg-black/40 border border-white/10"
+          >
+            <h3 className="text-lg font-semibold text-slate-300 mb-2">
+              Your Estimated Credit Score
+            </h3>
+
+            <CreditGauge score={score} />
+
+            <p className="text-slate-300 mt-4">
+              {scores_rate[index]}
+            </p>
+          </motion.div>
+        )}
 
         {/* LOANS */}
         <motion.div
@@ -148,6 +170,8 @@ export default function Profile() {
             <p className="text-slate-400">No loans found.</p>
           )}
         </motion.div>
+
+
 
         {/* REPORTS */}
         <motion.div

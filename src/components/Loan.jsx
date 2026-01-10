@@ -1,27 +1,149 @@
-import React, { useState, useEffect } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+"use client"
+
+import { useState, useEffect } from "react";
+import { animate, motion, useMotionValue } from "framer-motion";
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+import { useCreditStore } from "../store/useCreditStore";
+
+function AnimatedScore({value}) {
+  const score = useMotionValue(0);
+  const [display, setDisplay] = useState(0);
+
+   const getColor = () => {
+    if (score < 600) return "#ef4444";
+    if (score < 700) return "#f59e0b";
+    return "#22c55e";
+  };
+
+  useEffect(() => {
+    const controls = animate(score, value, {
+      duration: 1.2,
+      ease: "easeOut",
+    });
+
+    const unsubscribe = score.on("change", (latest) => {
+      setDisplay(Math.round(latest));
+    });
+
+    return () => {
+      controls.stop();
+      unsubscribe();
+    };
+  }, [value, score]);
+
+  return (
+    <motion.span className="text-4xl font-extrabold">
+      <div
+          className="text-6xl font-extrabold tracking-tight"
+          style={{ color: getColor() }}
+        >
+      {display}
+
+        </div>
+    </motion.span>
+  );
+}
+
+
+export function CreditGauge({ score }) {
+  const radius = 90;
+  const stroke = 12; // slightly thinner
+  const normalizedRadius = radius - stroke * 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+
+  const progress = Math.min(Math.max((score - 300) / 550, 0), 1);
+  const halfCircumference = circumference / 2;
+  const dashOffset = halfCircumference * (1 - progress);
+
+  const getColor = () => {
+    if (score < 600) return "#ef4444";
+    if (score < 700) return "#f59e0b";
+    return "#22c55e";
+  };
+
+  return (
+    <div className="flex flex-col items-center mt-10">
+      {/* GAUGE */}
+      <div className="relative w-80 h-32">
+        <svg
+          viewBox="0 0 220 220"
+          className="absolute inset-0 rotate-180"
+        >
+          {/* Background arc */}
+          <circle
+            cx="110"
+            cy="110"
+            r={normalizedRadius}
+            fill="transparent"
+            stroke="#1f2937"
+            strokeWidth={stroke}
+            strokeDasharray={`${halfCircumference} ${circumference}`}
+          />
+
+          {/* Animated arc */}
+          <motion.circle
+            key={score}
+            cx="110"
+            cy="110"
+            r={normalizedRadius}
+            fill="transparent"
+            stroke={getColor()}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={`${halfCircumference} ${circumference}`}
+            initial={{ strokeDashoffset: halfCircumference }}
+            animate={{ strokeDashoffset: dashOffset }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            style={{
+              filter: `drop-shadow(0 0 10px ${getColor()}66)`,
+            }}
+          />
+        </svg>
+      </div>
+
+      {/* SCORE — COMPLETELY SEPARATE LAYER */}
+      <div className="text-center -mt-2">
+        <div
+          className="text-6xl font-extrabold tracking-tight"
+          style={{ color: getColor() }}
+        >
+          <AnimatedScore value={score} />
+        </div>
+        <div className="text-sm text-slate-400 mt-1">
+          Credit Score
+        </div>
+      </div>
+
+      {/* RANGE */}
+      <div className="flex justify-between w-64 mt-2 text-xs text-slate-500">
+        <span>300</span>
+        <span>850</span>
+      </div>
+    </div>
+  );
+}
+
+export const scores_rate = [
+  "Poor 🚨 High risk — difficult approvals & high interest.",
+  "Fair ⚠️ Below average — approvals with strict terms.",
+  "Good 🙂 Acceptable — loans possible, not best rates.",
+  "Very Good ✅ Safe — better rates & approvals.",
+  "Excellent 🌟 Elite — best interest & limits.",
+];
 
 export default function Loan() {
-  const { user, isAuthenticated, loginWithRedirect } = useAuth0();
-  const location = useLocation();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress.emailAddress
+  const name = user?.fullName;
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+      if(!email){
+        return;
+      }
   }, []);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      loginWithRedirect({ appState: { returnTo: location.pathname } });
-    } else {
-      setName(user.name);
-      setEmail(user.email);
-    }
-  }, [isAuthenticated, user]);
 
   /* Loan form */
   const [loanName, setLoanName] = useState("");
@@ -29,52 +151,58 @@ export default function Loan() {
   const [amount, setAmount] = useState(0);
   const [panNum, setPanNum] = useState("");
   const [date, setDate] = useState("");
+  const [tenure, setTenure] = useState("");
 
   /* Credit score */
   const [paymentHistory, setPaymentHistory] = useState(95);
   const [ratio, setRatio] = useState(30);
   const [year, setYear] = useState(5);
   const [inquiries, setInquiries] = useState(2);
-  const [credit, setCredit] = useState(0);
-  const [index, setIndex] = useState(0);
-  const [show, setShow] = useState(false);
+  const { score, index, show, setScore, setIndex, showResult } = useCreditStore();
 
-  const scores_rate = [
-    "Poor 🚨 High risk — difficult approvals & high interest.",
-    "Fair ⚠️ Below average — approvals with strict terms.",
-    "Good 🙂 Acceptable — loans possible, not best rates.",
-    "Very Good ✅ Safe — better rates & approvals.",
-    "Excellent 🌟 Elite — best interest & limits.",
-  ];
+  
 
   const calculateScore = () => {
-    const score =
-      ((35 * paymentHistory) +
-        (30 * ratio) +
-        (15 * year) +
-        (10 * inquiries)) *
-      0.1;
+    const ph = Number(paymentHistory);
+    const util = Number(ratio);
+    const yrs = Number(year);
+    const inq = Number(inquiries);
 
-    setCredit(Math.round(score));
+    // Normalize factors
+    const paymentFactor = (ph / 100) * 35;
+    const utilizationFactor = (1 - util / 100) * 30;
+    const historyFactor = Math.min(yrs / 20, 1) * 15;
+    const inquiryFactor = Math.max(1 - inq / 10, 0) * 20;
 
-    if (score <= 549) setIndex(0);
-    else if (score <= 649) setIndex(1);
-    else if (score <= 699) setIndex(2);
-    else if (score <= 749) setIndex(3);
-    else setIndex(4);
+    const rawScore =
+      paymentFactor +
+      utilizationFactor +
+      historyFactor +
+      inquiryFactor;
 
-    setShow(true);
+    // Scale to credit score range
+    const finalScore = Math.round(300 + rawScore * 5.5);
+
+    let idx = 0;
+
+    if (finalScore >= 750) idx = 4;
+    else if (finalScore >= 700) idx = 3;
+    else if (finalScore >= 650) idx = 2;
+    else if (finalScore >= 600) idx = 1;
+    else idx = 0;
+
+    setIndex(idx);
+
+
+    setScore(Math.min(Math.max(finalScore, 300), 850));
+    showResult(true);
   };
 
   const handleChange = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/loan`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      const res = await axios.post(
+        "/api/loans", JSON.stringify({
             loanName,
             lender,
             amount,
@@ -82,24 +210,28 @@ export default function Loan() {
             date,
             name,
             email,
-          }),
-        }
-      );
-      if (res.ok) {
+            tenure
+          }) );
+
+      console.log(res)
+      if (res.data.success) {
         setLoanName("");
         setLender("");
         setAmount(0);
         setPanNum("");
         setDate("");
+        setTenure("");
+
+        toast("Loan Added")
       }
     } catch {
-      alert("Error occurred");
+      toast("Error occurred");
     }
   };
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white py-28">
-
+      <Toaster />
       {/* Background blobs */}
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/30 blur-3xl rounded-full" />
       <div className="absolute top-1/2 -right-32 w-96 h-96 bg-pink-600/30 blur-3xl rounded-full" />
@@ -148,12 +280,22 @@ export default function Loan() {
           </button>
 
           {show && (
-            <div className="mt-6 p-6 rounded-2xl bg-black/40 border border-white/10">
-              <h3 className="text-xl font-bold">
-                Score: <span className="text-indigo-400">{credit}</span>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="mt-6 p-6 rounded-2xl bg-black/40 border border-white/10"
+            >
+              <h3 className="text-lg font-semibold text-slate-300 mb-2">
+                Your Estimated Credit Score
               </h3>
-              <p className="text-slate-300 mt-2">{scores_rate[index]}</p>
-            </div>
+
+              <CreditGauge score={score} />
+
+              <p className="text-slate-300 mt-4">
+                {scores_rate[index]}
+              </p>
+            </motion.div>
           )}
         </motion.div>
 
@@ -170,10 +312,11 @@ export default function Loan() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {[
-              ["Loan Name", loanName, setLoanName],
+              ["Loan Type", loanName, setLoanName],
               ["Lender", lender, setLender],
               ["Amount (₹)", amount, setAmount],
               ["PAN Number", panNum, setPanNum],
+              ["Tenure", tenure, setTenure],
             ].map(([label, value, setter], i) => (
               <div key={i}>
                 <label className="text-sm text-slate-300">{label}</label>
@@ -256,225 +399,3 @@ export default function Loan() {
     </section>
   );
 }
-
-
-
-// import React from "react";
-// import { useState, useEffect } from "react";
-// import { useAuth0 } from "@auth0/auth0-react";
-// import { Services } from "./Services";
-// import { useLocation } from "react-router-dom";
-
-
-// export default function Loan (){
-//     const { user, isAuthenticated, loginWithRedirect } = useAuth0();
-//     const [ name, setName ] = useState("");
-//     const [ email, setEmail ] = useState("");
-//     const location = useLocation();
-
-//     useEffect(() =>{
-//         window.scrollTo(0,0);
-//     }, []);
-
-//     useEffect(() => {
-//         if(!isAuthenticated){
-//             loginWithRedirect({
-//                 appState: { returnTo: location.pathname }
-//             });
-//         }else{
-//             setName(user.name);
-//             setEmail(user.email);
-//         }
-//     }, [isAuthenticated, user, loginWithRedirect]);
-
-//     const [ loanName , setLoanName ] = useState("");
-//     const [ lender, setLender ] = useState("");
-//     const [ amount, setAmount ] = useState(0);
-//     const [ panNum, setPanNum ] = useState("");
-//     const [ date, setDate ] = useState("");
-
-//     const [ paymentHistory, setPaymentHistory ] = useState(95);
-//     const [ ratio, setRatio ] = useState(30);
-//     const [ year, setYear ] = useState(5);
-//     const [ inquiries, setInquiries] = useState(2);
-//     const [ credit, setCredit ] = useState(0);
-//     const [ index, setIndex ] = useState(0);
-
-//     const [ show, setShow] = useState(false);
-
-//     const handleChange = async(event) => {
-//         event.preventDefault();
-
-//         if(isAuthenticated){
-            
-//         }
-//         try{
-//             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/loan`, {
-//                 method: 'POST',
-//                 headers: { 'Content-Type': 'application/json' },
-//                 body: JSON.stringify({loanName, lender, amount, panNum, date, name, email})
-//             });
-
-//             if (response.ok) {
-//                 setLoanName("");
-//                 setAmount(0);
-//                 setLender("");
-//                 setPanNum("");
-//                 setDate("");
-//             } else {
-//                 alert('Failed to send message');
-//             }
-//         } catch (err) {
-//             console.error('Error:', err);
-//             alert('Error occurred');
-//         }
-//     }
-
-//     const scores_rate = [
-//         "Poor 🚨   High risk : difficult to get loans or credit cards. If approved, interest rates will be very high.",
-//         "Fair ⚠️   Below average : lenders may approve but with strict terms, collateral, or higher interest rates.",
-//         "Good 🙂   Acceptable score : you may get loans, though not always the best terms.",
-//         "Very Good ✅   Safe range : most banks/NBFCs will offer loans & cards with decent interest rates.",
-//         "Excellent 🌟   Top-tier credit profile : easy approvals, higher limits, and lowest interest rates."
-//     ];
-
-//     const calculateScore = () => {
-//         setCredit(((35 * paymentHistory) + (30 * ratio) + (15 * year) + (10 * inquiries))*0.1);
-
-        
-
-//         if(credit <= 549){
-//             setIndex(0);
-//         }else if(credit > 549 && credit <= 649){
-//             setIndex(1);
-//         }else if(credit > 649 && credit <= 699){
-//             setIndex(2);
-//         }else if(credit > 699 && credit <= 749){
-//             setIndex(3);
-//         }else if(credit > 749 && credit <= 900){
-//             setIndex(4);
-//         }
-
-//         setShow(true);
-//     }
-
-//     return (
-//         <div className="m-2 pt-9 mt-7">
-
-//             <div className="flex flex-col justify-start gap-4 rounded-xl shadow-md p-5 m-5 bg-gray-50">
-//                 <h2 className="text-2xl font-bold border-b-2 pb-3 text-indigo-500">Credit Score Simulator</h2>
-//                 <div>
-//                     <p>
-//                         This tool is a simplified simulator to help you understand the major factors that contribute to a business credit score. Input your data and see a simulated score and what it means.
-//                     </p>
-//                     <em className="text-gray-500 text-sm">Note: This is not a real credit score calculation and should be used for educational purposes only.</em>
-//                 </div>
-                
-//                 <div className="grid grid-cols-2 grid-rows-2">
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Payment History (%)</label>
-//                         <input type="number" className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" onChange={(e)=>{setPaymentHistory(e.target.value)}} min="0" max="100" value={paymentHistory} />
-//                         <p className="text-gray-500 text-sm">Percentage of on-time payments (e.g., 95 for 95%).</p>
-//                     </div>
-                    
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Credit Utilization Ratio (%)</label>
-//                         <input type="number" className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" onChange={(e)=>{setRatio(e.target.value)}} min="0" max="100" value={ratio} />
-//                         <p className="text-gray-500 text-sm">Percentage of available credit used (ideally below 30%).</p>
-//                     </div>
-
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Years of Credit History</label>
-//                         <input type="number" className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" onChange={(e)=>{setYear(e.target.value)}} min="0" value={year} />
-//                         <p className="text-gray-500 text-sm">The age of your oldest credit account in years.</p>
-//                     </div>
-
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Recent Credit Inquiries</label>
-//                         <input type="number" className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" onChange={(e)=>{setInquiries(e.target.value)}} min="0" value={inquiries} />
-//                         <p className="text-gray-500 text-sm">Number of times you have recently applied for new credit.</p>
-//                     </div>
-//                 </div>
-
-//                 <button onClick={calculateScore} className="bg-indigo-200 w-1/6 rounded-3xl p-2 shadow-md shadow-indigo-100 transition delay-100 duration-200 hover:-translate-y-1 hover:scale-105">Calculate Score</button>
-                
-//                 <div className={show ? "block rounded-xl shadow-[inset_0_4px_6px_rgba(0,0,0,0.09)] p-5" : "hidden rounded-xl shadow-[inset_0_4px_6px_rgba(0,0,0,0.09)] p-5"}>
-//                     <h3>Simulated Credit Score: <span id="scoreValue">{credit}</span></h3>
-//                     <p >{scores_rate[index]}</p>
-//                 </div>
-//                 <div></div>
-//             </div>
-
-//             <div className="flex flex-col justify-start gap-4 rounded-xl shadow-md p-5 m-5 bg-gray-50">
-//                 <h2 className="text-teal-600 text-2xl font-bold border-b-2 pb-3">My Loan Statements</h2>
-//                 <p>
-//                     Keep all your loan information in one place. Add new loans to your list to easily track and manage your financial obligations.
-//                 </p>
-                
-//                 <div className="grid grid-cols-2 grid-rows-2">
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Loan Name</label>
-//                         <input type="text" onChange={(e) => setLoanName(e.target.value)} className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" placeholder="e.g., Working Capital Loan" />
-//                     </div>
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Lender</label>
-//                         <input type="text" onChange={(e) => setLender(e.target.value)} className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" placeholder="e.g., State Bank of India" />
-//                     </div>
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Amount (₹)</label>
-//                         <input type="number" onChange={(e) => setAmount(e.target.value)} className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" placeholder="e.g., 500000" />
-//                     </div>
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Pan Number</label>
-//                         <input type="text" onChange={(e) => setPanNum(e.target.value)} className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" placeholder="e.g., ABCDE1234F" />
-//                     </div>
-//                     <div className="flex flex-col justify-start m-3">
-//                         <label>Start Date</label>
-//                         <input type="date" onChange={(e) => setDate(e.target.value)} className="border border-gray-300 rounded w-5/6 pl-3 pr-10 py-2 focus:outline-none" />
-//                     </div>
-//                 </div>
-//                 <button onClick={handleChange} className="bg-emerald-200 w-1/6 rounded-3xl p-2 shadow-md shadow-emerald-100 transition delay-100 duration-200 hover:-translate-y-1 hover:scale-105">Add Loan</button>
-
-//                 <div id="loanList" className="loan-list">
-//                 </div>
-//             </div>
-
-//             <div className="rounded-xl shadow-[inset_0_4px_6px_rgba(0,0,0,0.09)] p-5 m-5 bg-gray-50">
-//                 <h2 class="font-bold text-2xl border-b-2 text-teal-600 mb-4">Affordable Loan Finder</h2>
-//                 <p class="section-description">Explore these government schemes and trusted organizations that provide loans with affordable interest rates for MSMEs.</p>
-
-//                 <div class="list-container">
-//                     <div className="flex flex-col justify-start gap-4 rounded-xl shadow-md p-8 m-4">
-//                         <h3 className="text-xl font-bold">Pradhan Mantri Mudra Yojana (PMMY)</h3>
-//                         <p class="list-description">
-//                             Provides loans up to ₹10 lakh to non-corporate, non-farm small/micro-enterprises. The scheme has three categories: Shishu (up to ₹50k), Kishore (₹50k-₹5 lakh), and Tarun (₹5 lakh-₹10 lakh).
-//                         </p>
-//                         <a href="https://www.mudra.org.in/" target="_blank" className="text-purple-800">
-//                             Official Website →
-//                         </a>
-//                     </div>
-
-//                     <div className="flex flex-col justify-start gap-4 rounded-xl shadow-md p-8 m-4">
-//                         <h3 className="text-xl font-bold">Credit Guarantee Fund Trust for Micro &amp; Small Enterprises (CGTMSE)</h3>
-//                         <p class="list-description">
-//                             Offers collateral-free loans up to ₹2 crore. It provides a guarantee cover to the lending institutions, making it easier for MSMEs to secure funding without third-party guarantees.
-//                         </p>
-//                         <a href="https://www.cgtmse.in/" target="_blank" className="text-purple-800">
-//                             Official Website →
-//                         </a>
-//                     </div>
-
-//                     <div className="flex flex-col justify-start gap-4 rounded-xl shadow-md p-8 m-4">
-//                         <h3 className="text-xl font-bold">SIDBI (Small Industries Development Bank of India)</h3>
-//                         <p class="list-description">
-//                             A major financial institution dedicated to MSME development. SIDBI offers a wide range of loans for modernization, expansion, and working capital under various schemes.
-//                         </p>
-//                         <a href="https://www.sidbi.in/" target="_blank" className="text-purple-800">
-//                             Official Website →
-//                         </a>
-//                     </div>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// }

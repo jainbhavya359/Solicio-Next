@@ -1,24 +1,31 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { motion } from "framer-motion";
+"use client";
 
-export default function StockReport() {
-  const { user } = useAuth0();
+import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+
+export default function StockHistory() {
+  const { user } = useUser()
 
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
+  const email = user?.primaryEmailAddress.emailAddress;
+
   useEffect(() => {
+    if(!email) return;
+
     const fetchStock = async () => {
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/api/getstock`
-        );
-        if (!response.ok) throw new Error("Network error");
-        const json = await response.json();
-        setData(json);
-      } catch {
+        const response = await axios.get(`/api/stock?email=${email}`);
+        if (!response.data) throw new Error("Network error");
+        console.log(response.data);
+        setData(response.data);
+        console.log(data);
+    } catch {
+        toast("Nextwork Error");
         setError(true);
       } finally {
         setLoading(false);
@@ -26,30 +33,8 @@ export default function StockReport() {
     };
 
     fetchStock();
-  }, []);
+  }, [email]);
 
-  /* Aggregate stock safely */
-  const aggregatedStock = useMemo(() => {
-    if (!data || !user) return [];
-
-    return data
-      .filter((item) => item.email === user.email)
-      .reduce((acc, curr) => {
-        const existing = acc.find(
-          (item) =>
-            item.product_name === curr.product_name &&
-            item.price === curr.price &&
-            item.date === curr.date
-        );
-
-        if (existing) {
-          existing.quantity += curr.quantity;
-        } else {
-          acc.push({ ...curr });
-        }
-        return acc;
-      }, []);
-  }, [data, user]);
 
   return (
     <motion.section
@@ -60,7 +45,7 @@ export default function StockReport() {
       className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl"
     >
       <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-        Current Stock Report
+        Current Stock History
       </h2>
 
       {loading ? (
@@ -69,7 +54,7 @@ export default function StockReport() {
         </div>
       ) : error ? (
         <p className="text-red-400">Error loading stock data.</p>
-      ) : aggregatedStock.length === 0 ? (
+      ) : data.length === 0 ? (
         <p className="text-slate-400">
           No stock data found. Add inventory to view your report.
         </p>
@@ -85,13 +70,13 @@ export default function StockReport() {
               </tr>
             </thead>
             <tbody>
-              {aggregatedStock.map((stock, index) => (
+              {data.map((stock, index) => (
                 <tr
-                  key={index}
+                  key={stock._id}
                   className="border-b border-white/5 hover:bg-white/5 transition"
                 >
-                  <td className="py-4">{stock.product_name}</td>
-                  <td className="py-4 font-semibold">{stock.quantity}</td>
+                  <td className="py-4">{stock.name}</td>
+                  <td className="py-4 font-semibold">{stock.quantity} {stock.unit}</td>
                   <td className="py-4">
                     ₹{stock.price.toLocaleString()}
                   </td>

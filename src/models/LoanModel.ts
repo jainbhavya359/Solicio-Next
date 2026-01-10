@@ -28,6 +28,10 @@ const Loans = new Schema({
     date: {
         type: Date,
         default: Date.now()
+    },
+    tenure: {
+        type: String,
+        required: true,
     }
 });
 

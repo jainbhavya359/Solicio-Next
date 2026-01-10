@@ -24,3 +24,30 @@ export async function GET(request: NextRequest){
         return NextResponse.json({error: "Loan api Failed"}, {status: 500});
     }
 }
+
+export async function POST(request: NextRequest) {
+    try{
+        const reqBody = await request.json();
+        console.log(reqBody);
+
+        const newLoan = new Loan({
+            name: reqBody.name,
+            email: reqBody.email,
+            loan: reqBody.loanName,
+            lender: reqBody.lender,
+            amount: reqBody.amount,
+            pan_number: reqBody.panNum,
+            date: reqBody.date,
+        });
+
+        console.log(newLoan);
+
+        const savedLoan = await newLoan.save();
+        console.log(savedLoan);
+
+        return NextResponse.json({message: "Loan Added Successfully", success: true});
+    }catch(error){
+        console.error("Loan API error:", error);
+        return NextResponse.json({error: "Loan api Failed"}, {status: 500});
+    }
+}
