@@ -1,35 +1,48 @@
 import {Schema, model, models} from "mongoose";
 
-export const StockSchema = new Schema({
-    name: {
-        type: String,
-        required: true
+export const StockSchema = new Schema(
+    {
+        name: {
+            type: String,
+            required: true
+        },
+        quantity: {
+            type: Number,
+            required: true
+        },
+        unit: {
+            type: String,
+            default: "pcs",
+        },
+        seq: {
+            type: Number,
+            required:  true
+        },
+        entryNo: {
+            type: String,
+            required: true,
+        },
+        price: {
+            type: Number,
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now()
+        },
+        email: {
+            type: String,
+            required: true,
+        },
+        voucher: {
+            type: String,
+            required: true,
+        }
     },
-    quantity: {
-        type: Number,
-        required: true
-    },
-    unit: {
-        type: String,
-        default: "pcs",
-    },
-    price: {
-        type: Number,
-        required: true
-    },
-    date: {
-        type: Date,
-        default: Date.now()
-    },
-    email: {
-        type: String,
-        required: true,
-    },
-    voucher: {
-        type: String,
-        required: true,
+    {
+        timestamps: true
     }
-});
+);
 
 const Stock = models.stock || model("stock", StockSchema);
 

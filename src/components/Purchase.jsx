@@ -5,20 +5,23 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { UNITS } from "../utils/store";
+import { useRouter } from "next/navigation";
 
-export default function Purchase({ newPurchase, setReload, email }) {
+export default function Purchase({ newPurchase }) {
 
-  
   const [productName, setProductName] = useState("");
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [purchasePrice, setPurchasePrice] = useState(1000);
   const [unit, setUnit] = useState("");
+  const [date, setDate] = useState( new Date().toISOString().split("T")[0] );
   const [loading, setLoading] = useState(false);
-
-  const date = new Date().toISOString().split("T")[0];
 
   const [units, setUnits] = useState(UNITS);
   const [customUnit, setCustomUnit] = useState("");
+
+  const {user} = useUser();
+  
+  const email = user?.primaryEmailAddress.emailAddress;
 
   useEffect(()=>{
     if(!email) return;
@@ -46,7 +49,7 @@ export default function Purchase({ newPurchase, setReload, email }) {
   const addStock = async () => {
     
 
-    if (!productName || purchaseQuantity <= 0 || purchasePrice <= 0) {
+    if (!productName || purchaseQuantity <= 0 || purchasePrice <= 0 || unit.length == 0) {
       toast("Invalid Purchase");
       return;
     }
@@ -79,7 +82,6 @@ export default function Purchase({ newPurchase, setReload, email }) {
       toast("Failed to add stock onto server");
     } finally {
       setLoading(false);
-      setReload(true);
     }
   };
 
@@ -160,14 +162,14 @@ export default function Purchase({ newPurchase, setReload, email }) {
         </div>
 
         <div>
-            <label className="text-sm text-slate-300">Purchase Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none"
-            />
-          </div>
+          <label className="text-sm text-slate-300">Purchase Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none"
+          />
+        </div>
       </div>
 
       <button

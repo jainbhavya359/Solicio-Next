@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -6,7 +6,8 @@ import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import toast from "react-hot-toast";
 
-export default function StockReport() {
+export default function SalesHistory() {
+
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
@@ -14,19 +15,20 @@ export default function StockReport() {
   const {user} = useUser();
   
   const email = user?.primaryEmailAddress.emailAddress;
+  
 
   useEffect(() => {
     if(!email) return;
 
+
     const fetchStock = async () => {
       try {
-        const response = await axios.get(`/api/totalStock?email=${email}`);
+        const response = await axios.get(`/api/sellStock?email=${email}`);
         if (!response.data) throw new Error("Network error");
         setData(response.data);
-        console.log(data);
-      } catch(error) {
+    } catch {
+        toast("Nextwork Error");
         setError(true);
-        toast(error);
       } finally {
         setLoading(false);
       }
@@ -34,7 +36,6 @@ export default function StockReport() {
 
     fetchStock();
   }, [email]);
-
 
 
   return (
@@ -46,8 +47,12 @@ export default function StockReport() {
       className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl"
     >
       <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-        Current Stock Report
+        Current Sales Report
       </h2>
+
+      <p className="text-slate-300 mb-15">
+        Insights into your recent sales activity.
+      </p>
 
       {loading ? (
         <div className="flex justify-center py-10">
@@ -57,7 +62,7 @@ export default function StockReport() {
         <p className="text-red-400">Error loading stock data.</p>
       ) : data.length === 0 ? (
         <p className="text-slate-400">
-          No stock data found. Add inventory to view your report.
+          No sales history yet.
         </p>
       ) : (
         <div className="overflow-x-auto">
@@ -65,29 +70,29 @@ export default function StockReport() {
             <thead className="border-b border-white/10 text-slate-300">
               <tr>
                 <th className="py-3 text-left">Product</th>
+                <th className="py-3 text-left">Voucher Type</th>
                 <th className="py-3 text-left">Quantity</th>
-                <th className="py-3 text-left">Total Value (₹)</th>
-                <th className="py-3 text-left">Updated At</th>
-                <th className="py-3 text-left">Created At</th>
+                <th className="py-3 text-left">Price per Unit(₹)</th>
+                <th className="py-3 text-left">Date</th>
+                <th className="py-3 text-left">EntryNo</th>
               </tr>
             </thead>
             <tbody>
               {data.map((stock, index) => (
                 <tr
-                  key={index}
+                  key={stock._id}
                   className="border-b border-white/5 hover:bg-white/5 transition"
                 >
                   <td className="py-4">{stock.name}</td>
+                  <td className="py-4">{stock.voucher}</td>
                   <td className="py-4 font-semibold">{stock.quantity} {stock.unit}</td>
                   <td className="py-4">
                     ₹{stock.price.toLocaleString()}
                   </td>
                   <td className="py-4 text-slate-400">
-                    {new Date(stock.updatedAt).toISOString().split("T")[0]}
+                    {new Date(stock.date).toISOString().split("T")[0]}
                   </td>
-                  <td className="py-4 text-slate-400">
-                    {new Date(stock.createdAt).toISOString().split("T")[0]}
-                  </td>
+                  <td className="py-4">{stock.entryNo}</td>
                 </tr>
               ))}
             </tbody>

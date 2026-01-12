@@ -3,7 +3,6 @@ import { EntryCounter } from "@/src/models/EntryCounterModel";
 import Stock from "@/src/models/stockModel";
 import { TotalStock } from "@/src/models/totalStockModel";
 import mongoose from "mongoose";
-import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -23,6 +22,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const currentStock = await TotalStock.findOne(
+        { email, name, unit },
+        null,
+        { session }
+    );
+
+    if (!currentStock || currentStock.quantity < quantity) {
+        throw new Error("INSUFFICIENT_STOCK");
+    }
+
     const dateKey = new Date(date)
       .toISOString()
       .slice(0, 10)
@@ -39,7 +48,7 @@ export async function POST(request: NextRequest) {
       seq
     ).padStart(3, "0")}`;
 
-    const newStock = await Stock.create(
+    const newSale = await Stock.create(
       [
         {
           name,
@@ -61,8 +70,8 @@ export async function POST(request: NextRequest) {
       {
         $setOnInsert: { email, name, unit },
         $inc: {
-          quantity,
-          price: quantity * price,
+          quantity: -quantity,
+          price: -quantity * price,
         },
         $set: { updatedAt: date },
       },
@@ -94,7 +103,7 @@ export async function GET(request: NextRequest){
             return NextResponse.json({error: "No email Found"},{status: 400});
         }
 
-        const Stocks = await Stock.find({email, voucher: "Purchase"}).sort({date: -1, createdAt: -1});
+        const Stocks = await Stock.find({email, voucher: "Sale"}).sort({date: -1, createdAt: -1});
 
         return NextResponse.json(Stocks);
     }catch(error){

@@ -13,9 +13,7 @@ export async function GET(request: NextRequest){
             return NextResponse.json({error: "No email Found"},{status: 400});
         }
 
-        const stocks = await TotalStock.find({email});
-
-        console.log(stocks);
+        const stocks = await TotalStock.find({email}).sort({quantity: -1});
 
         return NextResponse.json(stocks);
     }catch(error){

@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 import StockReport from "./StockReport";
 import Sale from "./Sale"
 import { useUser } from "@clerk/nextjs";
+import SalesReport from "./SalesReport"
 
 export default function Inventory() {
   const [newPurchase, setNewPurchase] = useState(false);
@@ -21,7 +22,7 @@ export default function Inventory() {
     if(!email){
       return;
     }
-  },[email]);
+  },[email, reload]);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white py-28">
@@ -77,48 +78,22 @@ export default function Inventory() {
         {/* PURCHASE */}
         {newPurchase && (
           <div className="space-y-6">
-            <Purchase newPurchase={newPurchase} setReload={setReload} email={email}/>
+            <Purchase newPurchase={newPurchase} />
           </div>
         )}
 
         {/* SOLD FORM */}
         {newSale && (
-          <Sale email={email}/>
+          <Sale />
         )}
 
         {/* STOCK REPORT */}
-        <StockReport email={email}/>
+        <StockReport />
 
         {/* SALES REPORT */}
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl">
-          <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
-            Sales Report
-          </h2>
+        <SalesReport />
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="border-b border-white/10 text-slate-300">
-                <tr>
-                  <th className="py-3 text-left">Product</th>
-                  <th className="py-3 text-left">Quantity</th>
-                  <th className="py-3 text-left">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td
-                    colSpan="3"
-                    className="py-6 text-center text-slate-400"
-                  >
-                    No sales history yet.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <StockHistory relaod={reload} email={email}/>
+        <StockHistory />
 
       </div>
     </section>

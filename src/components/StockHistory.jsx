@@ -6,13 +6,16 @@ import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import toast from "react-hot-toast";
 
-export default function StockHistory({ reload, email }) {
+export default function StockHistory() {
 
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
-
+  const {user} = useUser();
+  
+  const email = user?.primaryEmailAddress.emailAddress;
+  
 
   useEffect(() => {
     if(!email) return;
@@ -32,7 +35,7 @@ export default function StockHistory({ reload, email }) {
     };
 
     fetchStock();
-  }, [email, reload]);
+  }, [email]);
 
 
   return (
@@ -48,7 +51,7 @@ export default function StockHistory({ reload, email }) {
       </h2>
 
       <p className="text-slate-300 mb-15">
-        Insights into your recent sales activity.
+        Insights into your recent purchase activity.
       </p>
 
       {loading ? (
@@ -71,6 +74,7 @@ export default function StockHistory({ reload, email }) {
                 <th className="py-3 text-left">Quantity</th>
                 <th className="py-3 text-left">Price per Unit(₹)</th>
                 <th className="py-3 text-left">Date</th>
+                <th className="py-3 text-left">EntryNo</th>
               </tr>
             </thead>
             <tbody>
@@ -88,6 +92,7 @@ export default function StockHistory({ reload, email }) {
                   <td className="py-4 text-slate-400">
                     {new Date(stock.date).toISOString().split("T")[0]}
                   </td>
+                  <td className="py-4">{stock.entryNo}</td>
                 </tr>
               ))}
             </tbody>
