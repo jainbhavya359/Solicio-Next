@@ -6,8 +6,10 @@ import { motion } from "framer-motion";
 //import License_Report from "./License_Report";
 import axios from "axios";
 import {  UserButton, UserProfile, useUser } from "@clerk/nextjs";
-import { CreditGauge, scores_rate } from "./Loan";
+import { CreditGauge } from "./Loan";
 import { useCreditStore } from "../store/useCreditStore";
+import StockHistory from "./StockHistory";
+import { scores_rate } from "../utils/store";
 
 export default function Profile() {
 
@@ -181,7 +183,7 @@ export default function Profile() {
           viewport={{ once: true }}
           className="space-y-16"
         >
-          
+          <StockHistory />
         </motion.div>
 
       </div>

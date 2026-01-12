@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { useCreditStore } from "../store/useCreditStore";
+import { scores_rate } from "../utils/store";
 
 function AnimatedScore({value}) {
   const score = useMotionValue(0);
@@ -124,14 +125,6 @@ export function CreditGauge({ score }) {
     </div>
   );
 }
-
-export const scores_rate = [
-  "Poor 🚨 High risk — difficult approvals & high interest.",
-  "Fair ⚠️ Below average — approvals with strict terms.",
-  "Good 🙂 Acceptable — loans possible, not best rates.",
-  "Very Good ✅ Safe — better rates & approvals.",
-  "Excellent 🌟 Elite — best interest & limits.",
-];
 
 export default function Loan() {
 

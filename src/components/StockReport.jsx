@@ -1,55 +1,38 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+"use client"
+
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+import toast from "react-hot-toast";
 
-export default function StockReport() {
-  const { user } = useAuth0();
-
+export default function StockReport({email}) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
+
   useEffect(() => {
+    if(!email) return;
+
     const fetchStock = async () => {
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/api/getstock`
-        );
-        if (!response.ok) throw new Error("Network error");
-        const json = await response.json();
-        setData(json);
-      } catch {
+        const response = await axios.get(`/api/totalStock?email=${email}`);
+        if (!response.data) throw new Error("Network error");
+        setData(response.data);
+        console.log(data);
+      } catch(error) {
         setError(true);
+        toast(error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchStock();
-  }, []);
+  }, [email]);
 
-  /* Aggregate stock safely */
-  const aggregatedStock = useMemo(() => {
-    if (!data || !user) return [];
 
-    return data
-      .filter((item) => item.email === user.email)
-      .reduce((acc, curr) => {
-        const existing = acc.find(
-          (item) =>
-            item.product_name === curr.product_name &&
-            item.price === curr.price &&
-            item.date === curr.date
-        );
-
-        if (existing) {
-          existing.quantity += curr.quantity;
-        } else {
-          acc.push({ ...curr });
-        }
-        return acc;
-      }, []);
-  }, [data, user]);
 
   return (
     <motion.section
@@ -69,7 +52,7 @@ export default function StockReport() {
         </div>
       ) : error ? (
         <p className="text-red-400">Error loading stock data.</p>
-      ) : aggregatedStock.length === 0 ? (
+      ) : data.length === 0 ? (
         <p className="text-slate-400">
           No stock data found. Add inventory to view your report.
         </p>
@@ -80,23 +63,27 @@ export default function StockReport() {
               <tr>
                 <th className="py-3 text-left">Product</th>
                 <th className="py-3 text-left">Quantity</th>
-                <th className="py-3 text-left">Price (₹)</th>
-                <th className="py-3 text-left">Date</th>
+                <th className="py-3 text-left">Total Price (₹)</th>
+                <th className="py-3 text-left">Updated At</th>
+                <th className="py-3 text-left">Created At</th>
               </tr>
             </thead>
             <tbody>
-              {aggregatedStock.map((stock, index) => (
+              {data.map((stock, index) => (
                 <tr
                   key={index}
                   className="border-b border-white/5 hover:bg-white/5 transition"
                 >
-                  <td className="py-4">{stock.product_name}</td>
+                  <td className="py-4">{stock.name}</td>
                   <td className="py-4 font-semibold">{stock.quantity}</td>
                   <td className="py-4">
                     ₹{stock.price.toLocaleString()}
                   </td>
                   <td className="py-4 text-slate-400">
-                    {new Date(stock.date).toISOString().split("T")[0]}
+                    {new Date(stock.updatedAt).toISOString().split("T")[0]}
+                  </td>
+                  <td className="py-4 text-slate-400">
+                    {new Date(stock.createdAt).toISOString().split("T")[0]}
                   </td>
                 </tr>
               ))}

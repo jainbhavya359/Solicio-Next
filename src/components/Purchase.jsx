@@ -3,11 +3,12 @@
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { UNITS } from "../utils/store";
 
-export default function Purchase({ newPurchase }) {
+export default function Purchase({ newPurchase, setReload, email }) {
 
-  const [email, setEmail] = useState("");
+  
   const [productName, setProductName] = useState("");
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [purchasePrice, setPurchasePrice] = useState(1000);
@@ -16,17 +17,35 @@ export default function Purchase({ newPurchase }) {
 
   const date = new Date().toISOString().split("T")[0];
 
-  const { user } = useUser();
+  const [units, setUnits] = useState(UNITS);
+  const [customUnit, setCustomUnit] = useState("");
 
-  
   useEffect(()=>{
-    if(!email){
-      setEmail(user?.primaryEmailAddress.emailAddress);
-      return;
-    }
+    if(!email) return;
   },[email]);
 
+  const handleCustomUnit = () => {
+    const formatted = customUnit.trim();
+
+    if (!formatted) return;
+
+    // Normalize (important)
+    const normalized =
+      formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase();
+
+    // Prevent duplicates
+    if (!units.includes(normalized)) {
+      setUnits((prev) => [...prev.filter(u => u !== "Custom"), normalized, "Custom"]);
+    }
+
+    // Auto-select new unit
+    setUnit(normalized);
+    setCustomUnit("");
+  };
+
   const addStock = async () => {
+    
+
     if (!productName || purchaseQuantity <= 0 || purchasePrice <= 0) {
       toast("Invalid Purchase");
       return;
@@ -37,11 +56,12 @@ export default function Purchase({ newPurchase }) {
       const response = await axios.post("/api/stock",
         JSON.stringify({
             email,
-            productName,
-            purchaseQuantity,
-            purchasePrice,
+            name: productName.toLowerCase(),
+            quantity: purchaseQuantity,
+            price: purchasePrice,
             unit,
             date,
+            voucher: "Purchase",
           })
       );
 
@@ -59,6 +79,7 @@ export default function Purchase({ newPurchase }) {
       toast("Failed to add stock onto server");
     } finally {
       setLoading(false);
+      setReload(true);
     }
   };
 
@@ -66,7 +87,7 @@ export default function Purchase({ newPurchase }) {
 
   return (
     <section className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl">
-      <Toaster />
+      
       <h3 className="text-3xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
         Record a New Purchase
       </h3>
@@ -95,18 +116,40 @@ export default function Purchase({ newPurchase }) {
         </div>
 
         <div>
-          <label className="text-sm text-slate-300">Unit</label>
-          <input
-            type="text"
-            value={unit}
-            onChange={(e) => setUnit(e.target.value)}
-            placeholder="e.g., Pcs"
-            className="mt-2 w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none focus:border-emerald-400"
-          />
-        </div>
+        <label className="text-sm text-slate-300">Unit (Recomended to keep same)</label>
+
+        <select
+          value={unit}
+          onChange={(e) => setUnit(e.target.value)}
+          className="mt-2 w-full px-4 py-3 rounded-xl 
+                    bg-black/40 border border-white/10 
+                    outline-none focus:border-emerald-400
+                    text-slate-200"
+        >
+          <option value="" className="bg-slate-900">Select Unit</option>
+
+          {units.map((u) => (
+            <option key={u} value={u} className="bg-slate-900">
+              {u}
+            </option>
+          ))}
+        </select>
+
+          {unit === "Custom" && (
+            <input
+              type="text"
+              value={customUnit}
+              onChange={(e) => setCustomUnit(e.target.value)}
+              onBlur={handleCustomUnit}
+              placeholder="Enter custom unit"
+              className="mt-2 w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10"
+            />
+          )}
+
+      </div>
 
         <div>
-          <label className="text-sm text-slate-300">Price (₹)</label>
+          <label className="text-sm text-slate-300">Price per unit(₹)</label>
           <input
             type="number"
             min="0"
@@ -117,14 +160,14 @@ export default function Purchase({ newPurchase }) {
         </div>
 
         <div>
-              <label className="text-sm text-slate-300">Purchase Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none"
-              />
-            </div>
+            <label className="text-sm text-slate-300">Purchase Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none"
+            />
+          </div>
       </div>
 
       <button

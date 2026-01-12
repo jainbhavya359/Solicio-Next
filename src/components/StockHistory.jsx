@@ -1,29 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
+import toast from "react-hot-toast";
 
-export default function StockHistory() {
-  const { user } = useUser()
+export default function StockHistory({ reload, email }) {
 
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
-  const email = user?.primaryEmailAddress.emailAddress;
+
 
   useEffect(() => {
     if(!email) return;
+
 
     const fetchStock = async () => {
       try {
         const response = await axios.get(`/api/stock?email=${email}`);
         if (!response.data) throw new Error("Network error");
-        console.log(response.data);
         setData(response.data);
-        console.log(data);
     } catch {
         toast("Nextwork Error");
         setError(true);
@@ -33,7 +32,7 @@ export default function StockHistory() {
     };
 
     fetchStock();
-  }, [email]);
+  }, [email, reload]);
 
 
   return (
@@ -47,6 +46,10 @@ export default function StockHistory() {
       <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
         Current Stock History
       </h2>
+
+      <p className="text-slate-300 mb-15">
+        Insights into your recent sales activity.
+      </p>
 
       {loading ? (
         <div className="flex justify-center py-10">
@@ -64,8 +67,9 @@ export default function StockHistory() {
             <thead className="border-b border-white/10 text-slate-300">
               <tr>
                 <th className="py-3 text-left">Product</th>
+                <th className="py-3 text-left">Voucher Type</th>
                 <th className="py-3 text-left">Quantity</th>
-                <th className="py-3 text-left">Price (₹)</th>
+                <th className="py-3 text-left">Price per Unit(₹)</th>
                 <th className="py-3 text-left">Date</th>
               </tr>
             </thead>
@@ -76,6 +80,7 @@ export default function StockHistory() {
                   className="border-b border-white/5 hover:bg-white/5 transition"
                 >
                   <td className="py-4">{stock.name}</td>
+                  <td className="py-4">{stock.voucher}</td>
                   <td className="py-4 font-semibold">{stock.quantity} {stock.unit}</td>
                   <td className="py-4">
                     ₹{stock.price.toLocaleString()}

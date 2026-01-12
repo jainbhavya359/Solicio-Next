@@ -24,6 +24,10 @@ export const StockSchema = new Schema({
     email: {
         type: String,
         required: true,
+    },
+    voucher: {
+        type: String,
+        required: true,
     }
 });
 

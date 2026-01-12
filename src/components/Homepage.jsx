@@ -5,8 +5,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import Services from "@/src/components/Services";
 import Tips from "@/src/components/Tips";
-import axios from "axios";
-import { useState } from "react";
 import { SignedIn, SignedOut, SignOutButton, SignUp, SignUpButton, useUser } from "@clerk/nextjs";
 
 export default function Homepage({service_data}) {
@@ -38,7 +36,7 @@ export default function Homepage({service_data}) {
           className="relative z-10 max-w-4xl text-center px-6"
         >
           <h1 className="text-5xl md:text-7xl font-extrabold leading-tight bg-gradient-to-r from-indigo-400 via-pink-400 to-amber-400 bg-clip-text text-transparent">
-            Bring Your Business Online
+            Manage Your Business Online
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-slate-300">
