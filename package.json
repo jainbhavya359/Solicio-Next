@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.7",
+    "@heroicons/react": "^2.2.0",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^0.562.0",
     "mailtrap": "^4.4.0",
     "mailtrap-client": "^1.1.1",
     "mongoose": "^9.1.1",

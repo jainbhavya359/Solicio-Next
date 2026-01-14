@@ -6,10 +6,12 @@ import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import toast from "react-hot-toast";
 
-export default function StockReport() {
+export default function StockReport({visible}) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+
+  if (!visible) return null;
 
   const {user} = useUser();
   

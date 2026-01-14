@@ -78,7 +78,7 @@ export default function Inventory() {
         {/* PURCHASE */}
         {newPurchase && (
           <div className="space-y-6">
-            <Purchase newPurchase={newPurchase} />
+            <Purchase visible={newPurchase} />
           </div>
         )}
 

@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         $setOnInsert: { email, name, unit },
         $inc: {
           quantity: -quantity,
-          price: -quantity * price,
+          price: -quantity * (currentStock.price/currentStock.quantity),
         },
         $set: { updatedAt: date },
       },
