@@ -1,5 +1,6 @@
 import connect from "@/src/dbConfig/dbConnection";
 import { EntryCounter } from "@/src/models/EntryCounterModel";
+import { Products } from "@/src/models/ProductModel";
 import Stock from "@/src/models/stockModel";
 import { TotalStock } from "@/src/models/totalStockModel";
 import mongoose from "mongoose";
@@ -13,17 +14,22 @@ export async function POST(request: NextRequest) {
   session.startTransaction();
 
   try {
-    const { email, name, quantity, price, unit, date, voucher } =
+    const { email, name, quantity, price, unit, date, voucher, sellingPrice } =
       await request.json();
 
-    if (!email || !name || !quantity || !unit || !voucher) {
+    if (!email || !name || !quantity || !unit || !voucher || price == null) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const dateKey = new Date(date)
+    const safeDate = date ? new Date(date) : new Date();
+    if (isNaN(safeDate.getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
+
+    const dateKey = new Date(safeDate)
       .toISOString()
       .slice(0, 10)
       .replace(/-/g, "");
@@ -46,7 +52,7 @@ export async function POST(request: NextRequest) {
           quantity,
           price,
           unit,
-          date,
+          safeDate,
           email,
           seq,
           entryNo,
@@ -64,9 +70,22 @@ export async function POST(request: NextRequest) {
           quantity,
           price: quantity * price,
         },
-        $set: { updatedAt: date },
+        $set: { updatedAt: safeDate },
       },
       { upsert: true, session }
+    );
+
+    await Products.updateOne(
+      { email, name, unit },
+      {
+        $inc: {
+          quantity,
+        },
+        $set: {
+          purchasePrice: price,
+        },
+      },
+      { session }
     );
 
     await session.commitTransaction();
@@ -94,7 +113,7 @@ export async function GET(request: NextRequest){
             return NextResponse.json({error: "No email Found"},{status: 400});
         }
 
-        const Stocks = await Stock.find({email, voucher: "Purchase"}).sort({date: -1, createdAt: -1});
+        const Stocks = await Stock.find({email}).sort({date: -1, createdAt: -1});
 
         return NextResponse.json(Stocks);
     }catch(error){

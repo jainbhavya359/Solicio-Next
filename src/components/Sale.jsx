@@ -2,17 +2,19 @@
 
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Plus, Minus, Package } from "lucide-react";
 
-export default function Sale({ visible }) {
+export default function Sale({ visible, preSelectedProduct }) {
   const { user } = useUser();
   const email = user?.primaryEmailAddress.emailAddress;
 
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProducts, setShowProducts] = useState(false);
+
+  const dropdownRef = useRef(null);
 
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState("");
@@ -22,13 +24,32 @@ export default function Sale({ visible }) {
 
   const [loading, setLoading] = useState(false);
 
+  console.log(selectedProduct);
+
   if (!visible) return null;
+  /* ---------------- Close dropdown on outside click ---------------- */
+  useEffect(() => {
+    const handler = (e) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
+        setShowProducts(false);
+      }
+    };
+
+    document.addEventListener("click", handler);
+    return () =>
+      document.removeEventListener("click", handler);
+  }, []);
+
 
   /* ---------------- Fetch Products ---------------- */
   useEffect(() => {
     if (!email) return;
 
-    axios
+    const fetchRroducts = async () => {
+      await axios
       .get("/api/products", { params: { email } })
       .then((res) => {
         const list = Array.isArray(res.data)
@@ -38,19 +59,32 @@ export default function Sale({ visible }) {
           : [];
 
         setProducts(
-  list.filter(p =>
-    p?.name &&
-    p?.unit &&
-    typeof p.quantity === "number"
-  )
-);
+          list.filter(p => p && p.name && p.unit)
+        );
 
       })
       .catch(() => toast.error("Failed to load products"));
+    }
+
+    fetchRroducts();
+
+    if(preSelectedProduct.length != 0){
+      setSelectedProduct(preSelectedProduct);
+    }
   }, [email]);
 
   /* ---------------- Quantity Controls ---------------- */
-  const increment = () => setQuantity(q => q + 1);
+    const increment = () => {
+    if (!selectedProduct) return;
+
+    setQuantity((q) => {
+      if (q >= selectedProduct.quantity) {
+        toast.error("Not enough stock");
+        return q;
+      }
+      return q + 1;
+    });
+  };
   const decrement = () => setQuantity(q => (q > 1 ? q - 1 : 1));
 
   /* ---------------- Submit Sale ---------------- */
@@ -98,83 +132,83 @@ export default function Sale({ visible }) {
       </p>
 
       {/* Product Selector */}
-<div className="mb-6">
-  <label className="text-xs text-slate-400 mb-1 block">
-    Product
-  </label>
+      <div className="mb-6" ref={dropdownRef}>
+        <label className="text-xs text-slate-400 mb-1 block">
+          Product
+        </label>
 
-  <div className="relative">
-    <button
-      onClick={() => setShowProducts(v => !v)}
-      className="w-full px-5 py-4 rounded-2xl
-      bg-black/50 border border-white/10
-      text-left text-white
-      hover:border-rose-400 transition"
-    >
-      {selectedProduct
-        ? `${selectedProduct.name} (${selectedProduct.unit})`
-        : "Select product"}
-    </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowProducts(v => !v)}
+            className="w-full px-5 py-4 rounded-2xl
+            bg-black/50 border border-white/10
+            text-left text-white
+            hover:border-rose-400 transition"
+          >
+            {selectedProduct
+              ? `${selectedProduct.name} (${selectedProduct.unit})`
+              : "Select product"}
+          </button>
 
-    {showProducts && (
-  <div className="absolute z-50 mt-2 w-full
-    rounded-2xl border border-white/10
-    bg-slate-900/95 backdrop-blur-xl
-    shadow-2xl max-h-64 overflow-auto">
+          {showProducts && (
+            <div className="absolute z-50 mt-2 w-full
+              rounded-2xl border border-white/10
+              bg-slate-900/95 backdrop-blur-xl
+              shadow-2xl max-h-64 overflow-auto">
 
-    {products.map((p) => {
-      const outOfStock = p.quantity <= 0;
-      const lowStock = p.quantity > 0 && p.quantity <= 5;
+              {products.map((p) => {
+                const outOfStock = p.quantity <= 0;
+                const lowStock = p.quantity > 0 && p.quantity <= 5;
 
-      return (
-        <button
-          key={p._id ?? `${p.name}-${p.unit}`}
-          disabled={outOfStock}
-          onClick={() => {
-            setSelectedProduct(p);
-            setShowProducts(false);
-          }}
-          className={`w-full px-5 py-3 text-left flex items-center justify-between
-            transition
-            ${outOfStock
-              ? "opacity-40 cursor-not-allowed"
-              : "hover:bg-white/10"}
-          `}
-        >
-          {/* Product Name */}
-          <div>
-            <p className="text-white font-medium">
-              {p.name}
-            </p>
-            <p className="text-xs text-slate-400">
-              Unit: {p.unit}
-            </p>
-          </div>
+                return (
+                  <button
+                    key={p._id ?? `${p.name}-${p.unit}`}
+                    disabled={outOfStock}
+                    onClick={() => {
+                      setSelectedProduct(p);
+                      setShowProducts(false);
+                      setPrice(p.sellingPrice)
+                    }}
+                    className={`w-full px-5 py-3 text-left flex items-center justify-between
+                      transition
+                      ${outOfStock
+                        ? "opacity-40 cursor-not-allowed"
+                        : "hover:bg-white/10"}
+                    `}
+                  >
+                    {/* Product Name */}
+                    <div>
+                      <p className="text-white font-medium">
+                        {p.name}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Unit: {p.unit}
+                      </p>
+                    </div>
 
-          {/* Stock Indicator */}
-          <div className="text-right">
-            {outOfStock ? (
-              <span className="text-xs text-red-400 font-semibold">
-                Out of stock
-              </span>
-            ) : lowStock ? (
-              <span className="text-xs text-amber-400 font-semibold">
-                {p.quantity} left
-              </span>
-            ) : (
-              <span className="text-xs text-emerald-400 font-semibold">
-                {p.quantity} in stock
-              </span>
-            )}
-          </div>
-        </button>
-      );
-    })}
-  </div>
-)}
-
-  </div>
-</div>
+                    {/* Stock Indicator */}
+                    <div className="text-right">
+                      {outOfStock ? (
+                        <span className="text-xs text-red-400 font-semibold">
+                          Out of stock
+                        </span>
+                      ) : lowStock ? (
+                        <span className="text-xs text-amber-400 font-semibold">
+                          {p.quantity} left
+                        </span>
+                      ) : (
+                        <span className="text-xs text-emerald-400 font-semibold">
+                          {p.quantity} in stock
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
 
 
       {/* Product Card */}
@@ -223,25 +257,26 @@ export default function Sale({ visible }) {
           type="number"
           placeholder="Selling price per unit (₹)"
           value={price}
+          min={0}
           onChange={(e) => setPrice(e.target.value)}
           className="px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
         />
 
         <div className="rounded-2xl bg-black/40 border border-white/10 p-4
-  hover:border-rose-400 transition">
-  <label className="text-xs text-slate-400">
-    Sale Date
-  </label>
+          hover:border-rose-400 transition">
+          <label className="text-xs text-slate-400">
+            Sale Date
+          </label>
 
-  <input
-    type="date"
-    value={date}
-    onChange={(e) => setDate(e.target.value)}
-    className="mt-2 w-full bg-transparent
-    text-white text-sm outline-none
-    [color-scheme:dark]"
-  />
-</div>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="mt-2 w-full bg-transparent
+            text-white text-sm outline-none
+            [color-scheme:dark]"
+          />
+        </div>
 
       </div>
 

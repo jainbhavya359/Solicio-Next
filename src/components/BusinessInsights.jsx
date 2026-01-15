@@ -1,17 +1,57 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Purchase from"@/src/components/Purchase";
 import { Toaster } from "react-hot-toast";
 import StockReport from "./StockReport";
 import Sale from "./Sale";
 
+const PanelMotion = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 20 }}
+    transition={{ duration: 0.45, ease: "easeOut" }}
+  >
+    {children}
+  </motion.div>
+);
+
 
 export default function BusinessInsights() {
   const [newPurchase, setNewPurchase] = useState(false);
   const [newSale, setNewSale] = useState(false);
   const [ viewStock, setViewStock ] = useState(false);
+  const [ product, setProduct ] = useState("");
+
+  // const [data, setData] = useState([]);
+
+  // if (!visible) return null;
+
+  // const {user} = useUser();
+  
+  // const email = user?.primaryEmailAddress.emailAddress;
+
+  // useEffect(() => {
+  //   if(!email) return;
+
+  //   const fetchStock = async () => {
+  //     try {
+  //       const response = await axios.get(`/api/totalStock?email=${email}`);
+  //       if (!response.data) throw new Error("Network error");
+  //       setData(response.data);
+  //       console.log(data);
+  //     } catch(error) {
+  //       setError(true);
+  //       toast(error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchStock();
+  // }, [email]);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-black text-white py-28">
@@ -129,7 +169,6 @@ export default function BusinessInsights() {
               onClick={() => {
                 setNewPurchase(true);
                 setNewSale(false);
-                setViewStock(false);
               }} 
               className="px-6 py-3 rounded-full font-bold text-black bg-gradient-to-r from-indigo-400 to-indigo-600 hover:opacity-90 transition"
             >
@@ -140,7 +179,6 @@ export default function BusinessInsights() {
               onClick={() => {
                 setNewSale(true);
                 setNewPurchase(false);
-                setViewStock(false);
               }} 
               className="px-6 py-3 rounded-full font-bold text-black bg-gradient-to-r from-pink-400 to-pink-600 hover:opacity-90 transition"
             >
@@ -164,23 +202,31 @@ export default function BusinessInsights() {
           </p>
         </motion.div>
 
-        {newPurchase && (
-          <div className="space-y-6">
-            <Purchase visible={newPurchase} />
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {newPurchase && (
+            <PanelMotion key="purchase">
+              <Purchase visible={true} preSelectedProduct={product} />
+            </PanelMotion>
+          )}
 
-        {viewStock && (
-          <div className="space-y-6">
-            <StockReport visible={viewStock} />
-          </div>
-        )}
+          {newSale && (
+            <PanelMotion key="sale">
+              <Sale visible={true} preSelectedProduct={product} />
+            </PanelMotion>
+          )}
 
-        {newSale && (
-          <div className="space-y-6">
-            <Sale visible={newSale} />
-          </div>
-        )}
+          {viewStock && (
+            <PanelMotion key="stock">
+              <StockReport
+                visible={true}
+                productSetter={setProduct}
+                purchaseSetter={setNewPurchase}
+                saleSetter={setNewSale}
+              />
+            </PanelMotion>
+          )}
+        </AnimatePresence>
+
       </div>
 
     </section>

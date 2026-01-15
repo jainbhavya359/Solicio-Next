@@ -8,6 +8,18 @@ import StockReport from "./StockReport";
 import Sale from "./Sale"
 import { useUser } from "@clerk/nextjs";
 import SalesReport from "./SalesReport"
+import { AnimatePresence, motion } from "framer-motion";
+
+const PanelMotion = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 20 }}
+    transition={{ duration: 0.45, ease: "easeOut" }}
+  >
+    {children}
+  </motion.div>
+);
 
 export default function Inventory() {
   const [newPurchase, setNewPurchase] = useState(false);
@@ -76,22 +88,22 @@ export default function Inventory() {
         </div>
 
         {/* PURCHASE */}
-        {newPurchase && (
-          <div className="space-y-6">
-            <Purchase visible={newPurchase} />
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {newPurchase && (
+            <PanelMotion key="purchase">
+              <Purchase visible={true} preSelectedProduct={""} />
+            </PanelMotion>
+          )}
 
-        {/* SOLD FORM */}
-        {newSale && (
-          <Sale />
-        )}
+          {newSale && (
+            <PanelMotion key="sale">
+              <Sale visible={true} preSelectedProduct={""} />
+            </PanelMotion>
+          )}
+        </AnimatePresence>
 
         {/* STOCK REPORT */}
         <StockReport />
-
-        {/* SALES REPORT */}
-        <SalesReport />
 
         <StockHistory />
 

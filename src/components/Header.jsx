@@ -32,7 +32,7 @@ export default function Header() {
     { href: "/about", label: "About" },
     { href: "/services", label: "Services" },
     { href: "/contact", label: "Contact" },
-    { href: "/profile", label: "Profile" },
+    { href: "/DashBoard", label: "DashBoard" },
   ];
 
   return (

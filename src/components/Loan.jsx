@@ -223,172 +223,208 @@ export default function Loan() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white py-28">
-      <Toaster />
-      {/* Background blobs */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/30 blur-3xl rounded-full" />
-      <div className="absolute top-1/2 -right-32 w-96 h-96 bg-pink-600/30 blur-3xl rounded-full" />
+  <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white py-28">
+    <Toaster />
 
-      <div className="relative max-w-7xl mx-auto px-6 space-y-24">
+    {/* Ambient blobs */}
+    <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/30 blur-3xl rounded-full" />
+    <div className="absolute top-1/2 -right-32 w-96 h-96 bg-pink-600/30 blur-3xl rounded-full" />
 
-        {/* CREDIT SCORE */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl"
-        >
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent mb-4">
-            Credit Score Simulator
-          </h2>
-          <p className="text-slate-300 mb-6">
-            Estimate your business credit strength and understand how lenders
-            see you.
+    <div className="relative max-w-7xl mx-auto px-6 space-y-20">
+
+      {/* HEADER */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-400 via-pink-400 to-emerald-400 bg-clip-text text-transparent">
+          Credit & Loans
+        </h1>
+        <p className="text-slate-300 mt-4 max-w-2xl">
+          Understand your credit strength and manage business loans confidently.
+        </p>
+      </motion.div>
+
+      {/* SUMMARY CARDS (like StockReport) */}
+      <div className="grid sm:grid-cols-3 gap-4">
+        <div className="bg-black/40 border border-white/10 rounded-2xl p-6">
+          <p className="text-xs text-slate-400">Estimated Score</p>
+          <p className="text-3xl font-bold text-indigo-400">
+            {score || "--"}
           </p>
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              ["Payment History (%)", paymentHistory, setPaymentHistory],
-              ["Credit Utilization (%)", ratio, setRatio],
-              ["Credit History (Years)", year, setYear],
-              ["Recent Inquiries", inquiries, setInquiries],
-            ].map(([label, value, setter], i) => (
-              <div key={i}>
-                <label className="text-sm text-slate-300">{label}</label>
-                <input
-                  type="number"
-                  value={value}
-                  onChange={(e) => setter(e.target.value)}
-                  className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
-                />
-              </div>
-            ))}
-          </div>
+        <div className="bg-black/40 border border-white/10 rounded-2xl p-6">
+          <p className="text-xs text-slate-400">Credit Category</p>
+          <p className="text-3xl font-bold text-white">
+            {show ? ["Poor", "Fair", "Good", "Very Good", "Excellent"][index] : "--"}
+          </p>
+        </div>
 
-          <button
-            onClick={calculateScore}
-            className="mt-8 px-8 py-3 rounded-full font-bold text-black bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400 hover:opacity-90 transition shadow-lg"
+        <div className="bg-black/40 border border-white/10 rounded-2xl p-6">
+          <p className="text-xs text-slate-400">Risk Level</p>
+          <p
+            className={`text-3xl font-bold ${
+              index <= 1
+                ? "text-red-400"
+                : index === 2
+                ? "text-amber-400"
+                : "text-emerald-400"
+            }`}
           >
-            Calculate Score →
-          </button>
+            {show ? (index <= 1 ? "High" : index === 2 ? "Medium" : "Low") : "--"}
+          </p>
+        </div>
+      </div>
 
-          {show && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="mt-6 p-6 rounded-2xl bg-black/40 border border-white/10"
-            >
-              <h3 className="text-lg font-semibold text-slate-300 mb-2">
-                Your Estimated Credit Score
-              </h3>
+      {/* CREDIT SCORE SIMULATOR CARD */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl backdrop-blur-xl"
+      >
+        <h2 className="text-3xl font-bold mb-6">
+          Credit Score Simulator
+        </h2>
 
-              <CreditGauge score={score} />
-
-              <p className="text-slate-300 mt-4">
-                {scores_rate[index]}
-              </p>
-            </motion.div>
-          )}
-        </motion.div>
-
-        {/* ADD LOAN */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl"
-        >
-          <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-            Add Loan
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              ["Loan Type", loanName, setLoanName],
-              ["Lender", lender, setLender],
-              ["Amount (₹)", amount, setAmount],
-              ["PAN Number", panNum, setPanNum],
-              ["Tenure", tenure, setTenure],
-            ].map(([label, value, setter], i) => (
-              <div key={i}>
-                <label className="text-sm text-slate-300">{label}</label>
-                <input
-                  value={value}
-                  onChange={(e) => setter(e.target.value)}
-                  className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none"
-                />
-              </div>
-            ))}
-
-            <div>
-              <label className="text-sm text-slate-300">Start Date</label>
+        <div className="grid md:grid-cols-2 gap-6">
+          {[
+            ["Payment History (%)", paymentHistory, setPaymentHistory],
+            ["Credit Utilization (%)", ratio, setRatio],
+            ["Credit History (Years)", year, setYear],
+            ["Recent Inquiries", inquiries, setInquiries],
+          ].map(([label, value, setter], i) => (
+            <div key={i}>
+              <label className="text-sm text-slate-300">{label}</label>
               <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                type="number"
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
+              />
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={calculateScore}
+          className="mt-8 px-8 py-3 rounded-full font-bold text-black
+          bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400"
+        >
+          Calculate Score →
+        </button>
+
+        {show && (
+          <div className="mt-8 bg-black/40 border border-white/10 rounded-2xl p-6">
+            <CreditGauge score={score} />
+            <p className="text-slate-300 mt-4">
+              {scores_rate[index]}
+            </p>
+          </div>
+        )}
+      </motion.div>
+
+      {/* ADD LOAN (ACTION CARD) */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl backdrop-blur-xl"
+      >
+        <h2 className="text-3xl font-bold mb-6">
+          Add Loan
+        </h2>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {[
+            ["Loan Type", loanName, setLoanName],
+            ["Lender", lender, setLender],
+            ["Amount (₹)", amount, setAmount],
+            ["PAN Number", panNum, setPanNum],
+            ["Tenure", tenure, setTenure],
+          ].map(([label, value, setter], i) => (
+            <div key={i}>
+              <label className="text-sm text-slate-300">{label}</label>
+              <input
+                value={value}
+                onChange={(e) => setter(e.target.value)}
                 className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none"
               />
             </div>
-          </div>
-
-          <button
-            onClick={handleChange}
-            className="mt-8 px-8 py-3 rounded-full font-bold text-black bg-gradient-to-r from-emerald-400 to-teal-400 hover:opacity-90 transition shadow-lg"
-          >
-            Add Loan →
-          </button>
-        </motion.div>
-
-        {/* AFFORDABLE LOANS */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-6"
-        >
-          <h2 className="text-3xl font-bold text-center">
-            Affordable Loan Schemes
-          </h2>
-
-          {[
-            {
-              title: "Pradhan Mantri Mudra Yojana",
-              desc:
-                "Loans up to ₹10 lakh for MSMEs under Shishu, Kishore & Tarun categories.",
-              link: "https://www.mudra.org.in/",
-            },
-            {
-              title: "CGTMSE",
-              desc:
-                "Collateral-free loans up to ₹2 crore with government guarantee.",
-              link: "https://www.cgtmse.in/",
-            },
-            {
-              title: "SIDBI",
-              desc:
-                "MSME-focused loans for expansion, modernization & working capital.",
-              link: "https://www.sidbi.in/",
-            },
-          ].map((s, i) => (
-            <div
-              key={i}
-              className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl"
-            >
-              <h3 className="text-xl font-bold mb-2">{s.title}</h3>
-              <p className="text-slate-300 mb-3">{s.desc}</p>
-              <a
-                href={s.link}
-                target="_blank"
-                className="text-indigo-400 hover:underline"
-              >
-                Official Website →
-              </a>
-            </div>
           ))}
-        </motion.div>
 
-      </div>
-    </section>
-  );
+          <div>
+            <label className="text-sm text-slate-300">Start Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full mt-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleChange}
+          className="mt-8 px-8 py-3 rounded-full font-bold text-black
+          bg-gradient-to-r from-emerald-400 to-teal-400"
+        >
+          Add Loan →
+        </button>
+      </motion.div>
+
+      {/* LOAN SCHEMES (CARD GRID like StockReport) */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        {[
+          {
+            title: "Pradhan Mantri Mudra Yojana",
+            desc: "Loans up to ₹10 lakh for MSMEs.",
+            link: "https://www.mudra.org.in/",
+          },
+          {
+            title: "CGTMSE",
+            desc: "Collateral-free loans up to ₹2 crore.",
+            link: "https://www.cgtmse.in/",
+          },
+          {
+            title: "SIDBI",
+            desc: "Loans for MSME expansion & working capital.",
+            link: "https://www.sidbi.in/",
+          },
+        ].map((s, i) => (
+          <div
+            key={i}
+            className="bg-black/40 border border-white/10 rounded-2xl p-6
+            hover:border-indigo-400/50 transition"
+          >
+            <h3 className="text-lg font-bold mb-2">
+              {s.title}
+            </h3>
+            <p className="text-slate-300 mb-3">
+              {s.desc}
+            </p>
+            <a
+              href={s.link}
+              target="_blank"
+              className="text-indigo-400 hover:underline"
+            >
+              Official Website →
+            </a>
+          </div>
+        ))}
+      </motion.div>
+
+    </div>
+  </section>
+);
 }

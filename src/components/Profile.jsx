@@ -10,6 +10,7 @@ import { CreditGauge } from "./Loan";
 import { useCreditStore } from "../store/useCreditStore";
 import StockHistory from "./StockHistory";
 import { scores_rate } from "../utils/store";
+import StockReport from "./StockReport";
 
 export default function Profile() {
 
@@ -128,50 +129,58 @@ export default function Profile() {
           ) : error ? (
             <p className="text-red-400">{error}</p>
           ) : data && data.filter(l => l.email === email).length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="text-slate-300 border-b border-white/10">
-                  <tr>
-                    <th className="py-3 text-left">Loan</th>
-                    <th className="py-3 text-left">Bank</th>
-                    <th className="py-3 text-left">Amount</th>
-                    <th className="py-3 text-left">Date</th>
-                    <th className="py-3 text-left">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((loan, i) =>
-                    loan.email === email ? (
-                      <tr
-                        key={loan._id}
-                        className="border-b border-white/5 hover:bg-white/5 transition"
-                      >
-                        <td className="py-4">{loan.loan}</td>
-                        <td className="py-4">{loan.lender}</td>
-                        <td className="py-4 font-semibold">
-                          ₹{loan.amount.toLocaleString()}
-                        </td>
-                        <td className="py-4 text-slate-400">
-                          {new Date(loan.date).toISOString().split("T")[0]}
-                        </td>
-                        <td className="py-4">
-                          <button
-                            onClick={() => onHandleClick(loan._id)}
-                            className="px-4 py-1 rounded-full border border-red-500 text-red-400 hover:bg-red-500/10 transition"
-                          >
-                            Remove
-                          </button>
-                        </td>
-                      </tr>
-                    ) : null
-                  )}
-                </tbody>
-              </table>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {data
+                .filter(loan => loan.email === email)
+                .map((loan) => (
+                  <motion.div
+                    key={loan._id}
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.2 }}
+                    className="bg-black/40 border border-white/10 rounded-2xl p-6
+                    hover:border-indigo-400/50 transition"
+                  >
+                    {/* Header */}
+                    <div className="mb-4">
+                      <p className="text-lg font-semibold text-white">
+                        {loan.loan}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {loan.lender}
+                      </p>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="mb-4">
+                      <p className="text-xs text-slate-400">Loan Amount</p>
+                      <p className="text-2xl font-bold text-emerald-400">
+                        ₹{loan.amount.toLocaleString()}
+                      </p>
+                    </div>
+
+                    {/* Date */}
+                    <div className="text-xs text-slate-400 mb-4">
+                      Started on{" "}
+                      {new Date(loan.date).toISOString().split("T")[0]}
+                    </div>
+
+                    {/* Action */}
+                    <button
+                      onClick={() => onHandleClick(loan._id)}
+                      className="w-full px-4 py-2 rounded-xl
+                      border border-red-500/60 text-red-400
+                      hover:bg-red-500/10 transition"
+                    >
+                      Remove Loan
+                    </button>
+                  </motion.div>
+                ))}
             </div>
           ) : (
             <p className="text-slate-400">No loans found.</p>
           )}
         </motion.div>
+
 
 
 
@@ -183,8 +192,15 @@ export default function Profile() {
           viewport={{ once: true }}
           className="space-y-16"
         >
-          <StockHistory />
+          <StockReport visible={true}
+                productSetter={""}
+                purchaseSetter={""}
+                saleSetter={""}/>
         </motion.div>
+
+
+        <StockHistory />
+        
 
       </div>
     </section>

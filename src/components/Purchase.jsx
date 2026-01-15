@@ -2,30 +2,50 @@
 
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Plus, Minus, Package } from "lucide-react";
 
-export default function Purchase({ visible }) {
+export default function Purchase({ visible, preSelectedProduct }) {
   const { user } = useUser();
   const email = user?.primaryEmailAddress.emailAddress;
 
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showProducts, setShowProducts] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
-  const [newProductName, setNewProductName] = useState("");
-  const [newUnit, setNewUnit] = useState("");
 
+  const dropdownRef = useRef(null);
 
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState("");
+  const [sellingPrice, setSellingPrice] = useState("");
   const [date, setDate] = useState(
     new Date().toISOString().split("T")[0]
   );
 
+  const [newProductName, setNewProductName] = useState("");
+  const [newUnit, setNewUnit] = useState("");
+
   const [loading, setLoading] = useState(false);
 
   if (!visible) return null;
+
+  /* ---------------- Close dropdown on outside click ---------------- */
+  useEffect(() => {
+    const handler = (e) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
+        setShowProducts(false);
+      }
+    };
+
+    document.addEventListener("click", handler);
+    return () =>
+      document.removeEventListener("click", handler);
+  }, []);
 
   /* ---------------- Fetch Products ---------------- */
   useEffect(() => {
@@ -36,23 +56,22 @@ export default function Purchase({ visible }) {
       .then((res) => {
         const list = Array.isArray(res.data)
           ? res.data
-          : Array.isArray(res.data?.products)
-          ? res.data.products
-          : [];
+          : res.data?.products ?? [];
 
-        setProducts(
-          list.filter(p => p && p.name && p.unit)
-        );
+        setProducts(list.filter(p => p?.name && p?.unit));
       })
       .catch(() => toast.error("Failed to load products"));
+
+    if(preSelectedProduct.length != 0){
+      setSelectedProduct(preSelectedProduct);
+    }
   }, [email]);
 
-
   /* ---------------- Quantity Controls ---------------- */
-  const increment = () => setQuantity((q) => q + 1);
-  const decrement = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
+  const increment = () => setQuantity(q => q + 1);
+  const decrement = () => setQuantity(q => (q > 1 ? q - 1 : 1));
 
-  /* ---------------- Submit ---------------- */
+  /* ---------------- Submit Purchase ---------------- */
   const addStock = async () => {
     if (!selectedProduct || price <= 0) {
       toast.error("Select product and enter price");
@@ -64,9 +83,10 @@ export default function Purchase({ visible }) {
       const res = await axios.post("/api/stock", {
         email,
         name: selectedProduct.name,
+        unit: selectedProduct.unit,
         quantity,
         price,
-        unit: selectedProduct.unit,
+        sellingPrice,
         date,
         voucher: "Purchase",
       });
@@ -75,6 +95,7 @@ export default function Purchase({ visible }) {
         toast.success("Purchase added");
         setQuantity(1);
         setPrice("");
+        setSellingPrice("");
         setSelectedProduct(null);
       }
     } catch {
@@ -91,43 +112,64 @@ export default function Purchase({ visible }) {
         Quick Purchase
       </h3>
       <p className="text-sm text-slate-400 mb-6">
-        Click to restock items instantly
+        Restock items instantly
       </p>
 
       {/* Product Selector */}
-      <div className="mb-6">
-        <label className="text-xs text-slate-400">Product</label>
-        <select
-          value={selectedProduct?.name || ""}
-          onChange={(e) => {
-            if (e.target.value === "__add_new__") {
-              setShowAddProduct(true);
-              return;
-            }
+      <div className="mb-6" ref={dropdownRef}>
+        <label className="text-xs text-slate-400 mb-1 block">
+          Product
+        </label>
 
-            const prod = products.find(
-              (p) => p.name === e.target.value
-            );
-            setSelectedProduct(prod);
-          }}
-          className="w-full mt-1 px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
+        <button
+          onClick={() => setShowProducts(v => !v)}
+          className="w-full px-5 py-4 rounded-2xl
+          bg-black/50 border border-white/10
+          text-left text-white
+          hover:border-emerald-400 transition"
         >
-          <option value="">Select product</option>
+          {selectedProduct
+            ? `${selectedProduct.name} (${selectedProduct.unit})`
+            : "Select product"}
+        </button>
 
-          {products.map((p) => (
-            <option
-              key={p._id ?? `${p.name}-${p.unit}`}
-              value={p.name}
+        {showProducts && (
+          <div className="absolute z-50 mt-2 w-full
+            rounded-2xl border border-white/10
+            bg-slate-900/95 backdrop-blur-xl
+            shadow-2xl max-h-64 overflow-auto">
+
+            {products.map((p) => (
+              <button
+                key={p._id ?? `${p.name}-${p.unit}`}
+                onClick={() => {
+                  setSelectedProduct(p);
+                  setShowProducts(false);
+                  setPrice(p.purchasePrice ?? "");
+                  setSellingPrice(p.sellingPrice ?? "");
+                }}
+                className="w-full px-5 py-3 text-left
+                hover:bg-white/10 transition"
+              >
+                <p className="text-white font-medium">{p.name}</p>
+                <p className="text-xs text-slate-400">
+                  Unit: {p.unit}
+                </p>
+              </button>
+            ))}
+
+            <button
+              onClick={() => {
+                setShowAddProduct(true);
+                setShowProducts(false);
+              }}
+              className="w-full px-5 py-3 text-left
+              text-emerald-400 hover:bg-white/10"
             >
-              {p.name} ({p.unit})
-            </option>
-          ))}
-
-          <option key="__add_new__" value="__add_new__">
-            ➕ Add new product
-          </option>
-
-        </select>
+              ➕ Add new product
+            </button>
+          </div>
+        )}
       </div>
 
       {showAddProduct && (
@@ -149,6 +191,14 @@ export default function Purchase({ visible }) {
                 placeholder="Unit (kg, pcs, box...)"
                 value={newUnit}
                 onChange={(e) => setNewUnit(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
+              />
+
+              <input
+                type="number"
+                placeholder="Selling Price per unit (Optional)"
+                value={sellingPrice}
+                onChange={(e) => setSellingPrice(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
               />
             </div>
@@ -173,6 +223,7 @@ export default function Purchase({ visible }) {
                       email,
                       name: newProductName.toLowerCase(),
                       unit: newUnit,
+                      sellingPrice,
                     });
 
                     const created = res.data?.product ?? res.data;
@@ -189,7 +240,7 @@ export default function Purchase({ visible }) {
                     setShowAddProduct(false);
                     setNewProductName("");
                     setNewUnit("");
-                    
+                    setSellPrice("");
                   } catch {
                     toast.error("Failed to add product");
                   }
@@ -202,7 +253,6 @@ export default function Purchase({ visible }) {
           </div>
         </div>
       )}
-
 
       {/* Product Card */}
       {selectedProduct && (
@@ -221,51 +271,49 @@ export default function Purchase({ visible }) {
             </div>
           </div>
 
-          {/* Quantity Controls */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={decrement}
-              className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20"
-            >
+            <button onClick={decrement} className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20">
               <Minus />
             </button>
-
             <span className="w-8 text-center text-white font-bold">
               {quantity}
             </span>
-
-            <button
-              onClick={increment}
-              className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20"
-            >
+            <button onClick={increment} className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20">
               <Plus />
             </button>
           </div>
         </div>
       )}
 
-      {/* Price & Date */}
-      <div className="grid md:grid-cols-2 gap-4 mb-6">
+      {/* Prices & Date */}
+      <div className="grid md:grid-cols-3 gap-4 mb-6">
         <input
           type="number"
-          placeholder="Price per unit (₹)"
+          placeholder="Purchase price (₹)"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           className="px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
         />
 
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
-        />
+        <div className="rounded-2xl bg-black/40 border border-white/10 p-4
+          hover:border-emerald-400 transition">
+          <label className="text-xs text-slate-400">
+            Purchase Date
+          </label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="mt-2 w-full bg-transparent text-white text-sm outline-none
+            [color-scheme:dark]"
+          />
+        </div>
       </div>
 
       {/* CTA */}
       <div className="flex justify-between items-center">
         <p className="text-xs text-slate-400">
-          Inventory & cash flow updated instantly
+          Inventory updated instantly
         </p>
 
         <button
@@ -281,6 +329,305 @@ export default function Purchase({ visible }) {
     </section>
   );
 }
+
+
+// "use client";
+
+// import { useUser } from "@clerk/nextjs";
+// import axios from "axios";
+// import { useEffect, useState } from "react";
+// import toast from "react-hot-toast";
+// import { Plus, Minus, Package } from "lucide-react";
+
+// export default function Purchase({ visible }) {
+//   const { user } = useUser();
+//   const email = user?.primaryEmailAddress.emailAddress;
+
+//   const [products, setProducts] = useState([]);
+//   const [selectedProduct, setSelectedProduct] = useState(null);
+//   const [showAddProduct, setShowAddProduct] = useState(false);
+//   const [newProductName, setNewProductName] = useState("");
+//   const [newUnit, setNewUnit] = useState("");
+
+
+//   const [quantity, setQuantity] = useState(1);
+//   const [price, setPrice] = useState("");
+//   const [sellPrice, setSellPrice] = useState("");
+//   const [date, setDate] = useState(
+//     new Date().toISOString().split("T")[0]
+//   );
+
+//   const [loading, setLoading] = useState(false);
+
+//   if (!visible) return null;
+
+//   /* ---------------- Fetch Products ---------------- */
+//   useEffect(() => {
+//     if (!email) return;
+
+//     axios
+//       .get("/api/products", { params: { email } })
+//       .then((res) => {
+//         const list = Array.isArray(res.data)
+//           ? res.data
+//           : Array.isArray(res.data?.products)
+//           ? res.data.products
+//           : [];
+
+//         setProducts(
+//           list.filter(p => p && p.name && p.unit)
+//         );
+//       })
+//       .catch(() => toast.error("Failed to load products"));
+//   }, [email]);
+
+
+//   /* ---------------- Quantity Controls ---------------- */
+//   const increment = () => setQuantity((q) => q + 1);
+//   const decrement = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
+
+//   /* ---------------- Submit ---------------- */
+//   const addStock = async () => {
+//     if (!selectedProduct || price <= 0) {
+//       toast.error("Select product and enter price");
+//       return;
+//     }
+
+//     setLoading(true);
+//     try {
+//       const res = await axios.post("/api/stock", {
+//         email,
+//         name: selectedProduct.name,
+//         quantity,
+//         price,
+//         unit: selectedProduct.unit,
+//         date,
+//         voucher: "Purchase",
+//         sellingPrice: sellPrice,
+//       });
+
+//       if (res.data.success) {
+//         toast.success("Purchase added");
+//         setQuantity(1);
+//         setPrice("");
+//         setSellPrice("");
+//         setSelectedProduct(null);
+//       }
+//     } catch {
+//       toast.error("Failed to add purchase");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <section className="relative bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl backdrop-blur-xl">
+//       {/* Header */}
+//       <h3 className="text-2xl font-bold text-white mb-1">
+//         Quick Purchase
+//       </h3>
+//       <p className="text-sm text-slate-400 mb-6">
+//         Click to restock items instantly
+//       </p>
+
+//       {/* Product Selector */}
+//       <div className="mb-6">
+//         <label className="text-xs text-slate-400">Product</label>
+//         <select
+//           value={selectedProduct?.name || ""}
+//           onChange={(e) => {
+//             if (e.target.value === "__add_new__") {
+//               setShowAddProduct(true);
+//               return;
+//             }
+
+//             const prod = products.find(
+//               (p) => p.name === e.target.value
+//             );
+
+//             setSelectedProduct(prod);
+//             setPrice(prod.purchasePrice);
+//           }}
+//           className="w-full mt-1 px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
+//         >
+//           <option value="">Select product</option>
+
+//           {products.map((p) => (
+//             <option
+//               key={p._id ?? `${p.name}-${p.unit}`}
+//               value={p.name}
+//             >
+//               {p.name} ({p.unit})
+//             </option>
+//           ))}
+
+//           <option key="__add_new__" value="__add_new__">
+//             ➕ Add new product
+//           </option>
+
+//         </select>
+//       </div>
+
+//       {showAddProduct && (
+//         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+//           <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-6">
+//             <h4 className="text-lg font-bold text-white mb-4">
+//               Add New Product
+//             </h4>
+
+//             <div className="space-y-4">
+//               <input
+//                 placeholder="Product name"
+//                 value={newProductName}
+//                 onChange={(e) => setNewProductName(e.target.value)}
+//                 className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
+//               />
+
+//               <input
+//                 placeholder="Unit (kg, pcs, box...)"
+//                 value={newUnit}
+//                 onChange={(e) => setNewUnit(e.target.value)}
+//                 className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
+//               />
+
+//               <input
+//                 type="number"
+//                 placeholder="Selling Price per unit (₹)"
+//                 value={sellPrice}
+//                 onChange={(e) => setSellPrice(e.target.value)}
+//                 className="px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
+//               />
+//             </div>
+
+//             <div className="flex justify-end gap-3 mt-6">
+//               <button
+//                 onClick={() => setShowAddProduct(false)}
+//                 className="px-4 py-2 rounded-lg bg-white/10 text-white"
+//               >
+//                 Cancel
+//               </button>
+
+//               <button
+//                 onClick={async () => {
+//                   if (!newProductName || !newUnit) {
+//                     toast.error("Fill all fields");
+//                     return;
+//                   }
+
+//                   try {
+//                     const res = await axios.post("/api/products", {
+//                       email,
+//                       name: newProductName.toLowerCase(),
+//                       unit: newUnit,
+//                       sellingPrice: sellPrice,
+//                     });
+
+//                     const created = res.data?.product ?? res.data;
+
+//                     if (!created?.name || !created?.unit) {
+//                       toast.error("Invalid product response");
+//                       return;
+//                     }
+
+//                     setProducts((prev) => [...prev, created]);
+//                     setSelectedProduct(created);
+                    
+//                     toast.success("Product added");
+//                     setShowAddProduct(false);
+//                     setNewProductName("");
+//                     setNewUnit("");
+//                     setSellPrice("");
+//                   } catch {
+//                     toast.error("Failed to add product");
+//                   }
+//                 }}
+//                 className="px-5 py-2 rounded-lg bg-emerald-400 text-black font-semibold"
+//               >
+//                 Save
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+
+//       {/* Product Card */}
+//       {selectedProduct && (
+//         <div className="flex items-center justify-between bg-black/40 border border-white/10 rounded-2xl p-5 mb-6">
+//           <div className="flex items-center gap-4">
+//             <div className="h-12 w-12 rounded-xl bg-emerald-400/20 flex items-center justify-center">
+//               <Package className="text-emerald-400" />
+//             </div>
+//             <div>
+//               <p className="text-white font-semibold">
+//                 {selectedProduct.name}
+//               </p>
+//               <p className="text-xs text-slate-400">
+//                 Unit: {selectedProduct.unit}
+//               </p>
+//             </div>
+//           </div>
+
+//           {/* Quantity Controls */}
+//           <div className="flex items-center gap-3">
+//             <button
+//               onClick={decrement}
+//               className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20"
+//             >
+//               <Minus />
+//             </button>
+
+//             <span className="w-8 text-center text-white font-bold">
+//               {quantity}
+//             </span>
+
+//             <button
+//               onClick={increment}
+//               className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20"
+//             >
+//               <Plus />
+//             </button>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Price & Date */}
+//       <div className="grid md:grid-cols-2 gap-4 mb-6">
+//         <input
+//           type="number"
+//           placeholder="Price per unit (₹)"
+//           value={price}
+//           onChange={(e) => setPrice(e.target.value)}
+//           className="px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
+//         />
+
+//         <input
+//           type="date"
+//           value={date}
+//           onChange={(e) => setDate(e.target.value)}
+//           className="px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
+//         />
+//       </div>
+
+//       {/* CTA */}
+//       <div className="flex justify-between items-center">
+//         <p className="text-xs text-slate-400">
+//           Inventory & cash flow updated instantly
+//         </p>
+
+//         <button
+//           onClick={addStock}
+//           disabled={loading}
+//           className="px-6 py-3 rounded-xl font-bold text-black
+//           bg-gradient-to-r from-emerald-400 to-teal-400
+//           disabled:opacity-50"
+//         >
+//           {loading ? "Adding…" : "Add Purchase"}
+//         </button>
+//       </div>
+//     </section>
+//   );
+// }
 
 
 // "use client";
