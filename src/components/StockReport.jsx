@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import toast from "react-hot-toast";
 import { Package, Plus, Minus, AlertTriangle } from "lucide-react";
 
-export default function StockReport({ visible, productSetter ,purchaseSetter ,saleSetter}) {
+export default function StockReport({ visible, productSetter ,purchaseSetter ,saleSetter, reload }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [data, setData] = useState([]);
@@ -36,7 +36,8 @@ export default function StockReport({ visible, productSetter ,purchaseSetter ,sa
     };
 
     fetchStock();
-  }, [email]);
+
+  }, [email, reload]);
 
   /* ---------------- Derived Stats ---------------- */
   const totalValue = data.reduce(

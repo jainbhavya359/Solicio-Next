@@ -5,17 +5,18 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Plus, Minus, Package } from "lucide-react";
+import { UNITS } from "../utils/store";
 
-export default function Purchase({ visible, preSelectedProduct }) {
+export default function Purchase({ visible, preSelectedProduct, reloadSetter, reload }) {
   const { user } = useUser();
   const email = user?.primaryEmailAddress.emailAddress;
-
+  
+  const dropdownRef = useRef(null);
+  
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProducts, setShowProducts] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
-
-  const dropdownRef = useRef(null);
 
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState("");
@@ -24,12 +25,34 @@ export default function Purchase({ visible, preSelectedProduct }) {
     new Date().toISOString().split("T")[0]
   );
 
+const [units, setUnits] = useState(UNITS);
+const [customUnit, setCustomUnit] = useState("");
+
   const [newProductName, setNewProductName] = useState("");
   const [newUnit, setNewUnit] = useState("");
 
   const [loading, setLoading] = useState(false);
 
   if (!visible) return null;
+
+    const handleCustomUnit = () => {
+    const formatted = customUnit.trim();
+
+    if (!formatted) return;
+
+    // Normalize (important)
+    const normalized =
+      formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase();
+
+    // Prevent duplicates
+    if (!units.includes(normalized)) {
+      setUnits((prev) => [...prev.filter(u => u !== "Custom"), normalized, "Custom"]);
+    }
+
+    // Auto-select new unit
+    setNewUnit(normalized);
+    setCustomUnit("");
+  };
 
   /* ---------------- Close dropdown on outside click ---------------- */
   useEffect(() => {
@@ -51,6 +74,10 @@ export default function Purchase({ visible, preSelectedProduct }) {
   useEffect(() => {
     if (!email) return;
 
+    if(preSelectedProduct.length != 0){
+      setSelectedProduct(preSelectedProduct);
+    }
+    
     axios
       .get("/api/products", { params: { email } })
       .then((res) => {
@@ -62,10 +89,7 @@ export default function Purchase({ visible, preSelectedProduct }) {
       })
       .catch(() => toast.error("Failed to load products"));
 
-    if(preSelectedProduct.length != 0){
-      setSelectedProduct(preSelectedProduct);
-    }
-  }, [email]);
+  }, [email, reload]);
 
   /* ---------------- Quantity Controls ---------------- */
   const increment = () => setQuantity(q => q + 1);
@@ -102,6 +126,7 @@ export default function Purchase({ visible, preSelectedProduct }) {
       toast.error("Failed to add purchase");
     } finally {
       setLoading(false);
+      reloadSetter(!reload);
     }
   };
 
@@ -187,12 +212,36 @@ export default function Purchase({ visible, preSelectedProduct }) {
                 className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
               />
 
-              <input
+              {/* <input
                 placeholder="Unit (kg, pcs, box...)"
                 value={newUnit}
                 onChange={(e) => setNewUnit(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
-              />
+              /> */}
+
+              <select
+                value={newUnit}
+                onChange={(e) => setNewUnit(e.target.value)}
+                className="px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none text-slate-200 focus:border-emerald-400"
+              >
+                <option value="">Select unit</option>
+                {units.map((u) => (
+                  <option key={u} value={u} className="bg-slate-900">
+                    {u}
+                  </option>
+                ))}
+              </select>
+
+              {newUnit === "Custom" && (
+                <input
+                  type="text"
+                  placeholder="Custom unit"
+                  value={customUnit}
+                  onChange={(e) => setCustomUnit(e.target.value)}
+                  onBlur={handleCustomUnit}
+                  className="px-4 py-3 rounded-xl bg-black/40 border border-white/10"
+                />
+              )}
 
               <input
                 type="number"
@@ -240,7 +289,7 @@ export default function Purchase({ visible, preSelectedProduct }) {
                     setShowAddProduct(false);
                     setNewProductName("");
                     setNewUnit("");
-                    setSellPrice("");
+                    setSellingPrice("");
                   } catch {
                     toast.error("Failed to add product");
                   }

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Plus, Minus, Package } from "lucide-react";
 
-export default function Sale({ visible, preSelectedProduct }) {
+export default function Sale({ visible, preSelectedProduct, reloadSetter, reload }) {
   const { user } = useUser();
   const email = user?.primaryEmailAddress.emailAddress;
 
@@ -48,6 +48,10 @@ export default function Sale({ visible, preSelectedProduct }) {
   useEffect(() => {
     if (!email) return;
 
+    if(preSelectedProduct.length != 0){
+      setSelectedProduct(preSelectedProduct);
+    }
+
     const fetchRroducts = async () => {
       await axios
       .get("/api/products", { params: { email } })
@@ -68,10 +72,7 @@ export default function Sale({ visible, preSelectedProduct }) {
 
     fetchRroducts();
 
-    if(preSelectedProduct.length != 0){
-      setSelectedProduct(preSelectedProduct);
-    }
-  }, [email]);
+  }, [email, reload]);
 
   /* ---------------- Quantity Controls ---------------- */
     const increment = () => {
@@ -100,7 +101,7 @@ export default function Sale({ visible, preSelectedProduct }) {
         email,
         name: selectedProduct.name,
         quantity,
-        price,
+        sellingPrice: price || selectedProduct.sellingPrice,
         unit: selectedProduct.unit,
         date,
         voucher: "Sale",
@@ -118,6 +119,7 @@ export default function Sale({ visible, preSelectedProduct }) {
       toast.error("Failed to record sale");
     } finally {
       setLoading(false);
+      reloadSetter(!reload);
     }
   };
 

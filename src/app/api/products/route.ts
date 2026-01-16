@@ -15,15 +15,12 @@ export async function GET(request: NextRequest){
 
         const productList = await Products.find({email});
 
-        //console.log(productList);
-
         return NextResponse.json({products: productList});
     }catch(error){
         console.log("Error: ",error);
         return NextResponse.json({error: error}, {status: 500});
     }
 }
-
 
 export async function POST(request: NextRequest) {
   await connect();
@@ -38,17 +35,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existing = await Products.findOne({ email, name, unit });
+    // 🔒 Unit lock check
+    const existing = await Products.findOne({ email, name });
+
     if (existing) {
+      if (existing.unit !== unit) {
+        return NextResponse.json(
+          {
+            error: `Unit locked. Product '${name}' already exists with unit '${existing.unit}'`,
+          },
+          { status: 409 }
+        );
+      }
+
       return NextResponse.json(
         { error: "Product already exists" },
         { status: 409 }
       );
     }
 
+    const normalizedName = name.trim().toLowerCase();
+
     const newProduct = await Products.create({
       email,
-      name,
+      name: normalizedName,
       unit,
       quantity: 0,
       sellingPrice,

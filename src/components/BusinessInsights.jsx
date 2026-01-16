@@ -1,11 +1,13 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Purchase from"@/src/components/Purchase";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import StockReport from "./StockReport";
 import Sale from "./Sale";
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
 
 const PanelMotion = ({ children }) => (
   <motion.div
@@ -24,34 +26,7 @@ export default function BusinessInsights() {
   const [newSale, setNewSale] = useState(false);
   const [ viewStock, setViewStock ] = useState(false);
   const [ product, setProduct ] = useState("");
-
-  // const [data, setData] = useState([]);
-
-  // if (!visible) return null;
-
-  // const {user} = useUser();
-  
-  // const email = user?.primaryEmailAddress.emailAddress;
-
-  // useEffect(() => {
-  //   if(!email) return;
-
-  //   const fetchStock = async () => {
-  //     try {
-  //       const response = await axios.get(`/api/totalStock?email=${email}`);
-  //       if (!response.data) throw new Error("Network error");
-  //       setData(response.data);
-  //       console.log(data);
-  //     } catch(error) {
-  //       setError(true);
-  //       toast(error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStock();
-  // }, [email]);
+  const [ reload, setReload ] = useState(false);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-black text-white py-28">
@@ -205,13 +180,13 @@ export default function BusinessInsights() {
         <AnimatePresence mode="wait">
           {newPurchase && (
             <PanelMotion key="purchase">
-              <Purchase visible={true} preSelectedProduct={product} />
+              <Purchase visible={true} preSelectedProduct={product} reloadSetter={setReload} reload={reload}/>
             </PanelMotion>
           )}
 
           {newSale && (
             <PanelMotion key="sale">
-              <Sale visible={true} preSelectedProduct={product} />
+              <Sale visible={true} preSelectedProduct={product} reloadSetter={setReload} reload={reload}/>
             </PanelMotion>
           )}
 
@@ -222,6 +197,7 @@ export default function BusinessInsights() {
                 productSetter={setProduct}
                 purchaseSetter={setNewPurchase}
                 saleSetter={setNewSale}
+                reload={reload}
               />
             </PanelMotion>
           )}

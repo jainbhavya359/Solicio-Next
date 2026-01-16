@@ -26,8 +26,24 @@ const ProductSchema = new Schema(
             type: Number,
             default: 0
         },
+        costingMethod: {
+            type: String,
+            enum: ["FIFO", "WAVG"],
+            default: "FIFO",
+        },
+        // reorderLevel: {
+        //     type: Number,
+        //     default: 5,
+        // }
+
     },
     { timestamps: true }
 );
+
+ProductSchema.index(
+  { email: 1, name: 1 },
+  { unique: true }
+);
+
 
 export const Products = models.product || model("product", ProductSchema);

@@ -11,6 +11,9 @@ import { useCreditStore } from "../store/useCreditStore";
 import StockHistory from "./StockHistory";
 import { scores_rate } from "../utils/store";
 import StockReport from "./StockReport";
+import LedgerEntries from "./LedgerEntries";
+import ProfitLossReport from "./ProfitLossReoprt";
+import StockValuation from "./StockValuation";
 
 export default function Profile() {
 
@@ -201,7 +204,13 @@ export default function Profile() {
 
         <StockHistory />
         
+        <LedgerEntries />
 
+        <ProfitLossReport />
+
+        <StockValuation />
+
+        
       </div>
     </section>
   );

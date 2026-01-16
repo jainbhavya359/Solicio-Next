@@ -14,10 +14,6 @@ export const StockSchema = new Schema(
             type: String,
             default: "pcs",
         },
-        seq: {
-            type: Number,
-            required:  true
-        },
         entryNo: {
             type: String,
             required: true,

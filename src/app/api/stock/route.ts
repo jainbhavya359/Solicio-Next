@@ -1,78 +1,93 @@
 import connect from "@/src/dbConfig/dbConnection";
 import { EntryCounter } from "@/src/models/EntryCounterModel";
+import { LedgerEntry } from "@/src/models/LedgerEntryModel";
 import { Products } from "@/src/models/ProductModel";
+import { StockLayer } from "@/src/models/StockLayerModel";
 import Stock from "@/src/models/stockModel";
 import { TotalStock } from "@/src/models/totalStockModel";
+import { generateVoucherNo } from "@/src/utils/voucher";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   await connect();
-
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const { email, name, quantity, price, unit, date, voucher, sellingPrice } =
-      await request.json();
+    const {
+      email,
+      name,
+      unit,
+      quantity,
+      price,
+      date,
+      voucher = "Purchase",
+      costing = "FIFO", // FIFO | WAVG
+    } = await req.json();
 
-    if (!email || !name || !quantity || !unit || !voucher || price == null) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+    if (!email || !name || !unit || !quantity || price == null) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const safeDate = date ? new Date(date) : new Date();
-    if (isNaN(safeDate.getTime())) {
-      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
-    }
+    const txDate = date ? new Date(date) : new Date();
 
-    const dateKey = new Date(safeDate)
-      .toISOString()
-      .slice(0, 10)
-      .replace(/-/g, "");
+    /* 🔢 Voucher */
+    const voucherNo = await generateVoucherNo({
+      email,
+      series: "PUR",
+      date: txDate,
+      session,
+    });
 
-    const counter = await EntryCounter.findOneAndUpdate(
-      { email, voucher, dateKey },
-      { $inc: { seq: 1 } },
-      { upsert: true, new: true, session }
-    );
 
-    const seq = counter.seq;
-    const entryNo = `${voucher.slice(0, 3).toUpperCase()}-${dateKey}-${String(
-      seq
-    ).padStart(3, "0")}`;
-
-    const newStock = await Stock.create(
+    await Stock.create(
       [
         {
           name,
           quantity,
           price,
           unit,
-          safeDate,
+          date: txDate,
           email,
-          seq,
-          entryNo,
+          entryNo: voucherNo,
           voucher,
         },
       ],
       { session }
     );
 
-    await TotalStock.findOneAndUpdate(
-      { email, name, unit },
-      {
-        $setOnInsert: { email, name, unit },
-        $inc: {
-          quantity,
-          price: quantity * price,
-        },
-        $set: { updatedAt: safeDate },
-      },
-      { upsert: true, session }
+    /* 📒 Ledger */
+    const ledger = await LedgerEntry.create(
+      [{
+        email,
+        date: txDate,
+        voucherType: "Purchase",
+        voucherNo,
+        itemName: name,
+        unit,
+        debitQty: quantity,
+        creditQty: 0,
+        rate: price,
+        amount: quantity * price,
+      }],
+      { session }
+    );
+
+    /* 📦 Stock Layer */
+    await StockLayer.create(
+      [{
+        email,
+        productName: name,
+        unit,
+        sourceLedgerId: ledger[0]._id,
+        qtyIn: quantity,
+        qtyRemaining: quantity,
+        rate: price,
+        date: txDate,
+      }],
+      { session }
     );
 
     await Products.updateOne(
@@ -88,20 +103,44 @@ export async function POST(request: NextRequest) {
       { session }
     );
 
-    await session.commitTransaction();
+    /* 📊 Total Stock (summary only) */
+    if (costing === "WAVG") {
+      const stock = await TotalStock.findOne({ email, name, unit }, null, { session });
+      const totalQty = (stock?.quantity || 0) + quantity;
+      const totalValue = (stock?.price || 0) + quantity * price;
 
-    return NextResponse.json({
-      success: true,
-      entryNo,
-    });
-  } catch (error) {
+      await TotalStock.findOneAndUpdate(
+        { email, name, unit },
+        {
+          quantity: totalQty,
+          price: totalValue,
+          updatedAt: txDate,
+        },
+        { upsert: true, session }
+      );
+    } else {
+      await TotalStock.findOneAndUpdate(
+        { email, name, unit },
+        {
+          $inc: { quantity, price: quantity * price },
+          $set: { updatedAt: txDate },
+        },
+        { upsert: true, session }
+      );
+    }
+
+    await session.commitTransaction();
+    return NextResponse.json({ success: true, voucherNo });
+
+  } catch (err) {
     await session.abortTransaction();
-    console.error(error);
-    return NextResponse.json({ error: "Stock update failed" }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: "Purchase failed" }, { status: 500 });
   } finally {
     session.endSession();
   }
 }
+
 
 
 export async function GET(request: NextRequest){
