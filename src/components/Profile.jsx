@@ -19,6 +19,11 @@ import CashFlowWatch from "./CashFlow";
 import SlowMovingStock from "./SlowMovingStockAlert";
 import UniversalSearchBox from "./SearchBox";
 import LedgerSearchBox from "./LedgerSearchBox";
+import BusinessHealthCard from "./BusinessHealthCard";
+import StockMovementCard from "./StockMovementCard";
+import SalesTrendCard from "./SalesTrendCard";
+import InventoryBalanceCard from "./InventoryBalanceCard";
+import ActivityRecencyCard from "./ActivityRecencyCard";
 
 export default function Profile() {
   
@@ -213,6 +218,8 @@ export default function Profile() {
         <StockHistory />
         
         <LedgerEntries />
+
+        <BusinessHealthCard email={email} />
 
         <ProfitLossReport />
         

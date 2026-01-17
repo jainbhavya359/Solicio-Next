@@ -55,9 +55,6 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  console.log("Purchases:", purchases);
-  console.log("Sales:", sales);
-
   return NextResponse.json({
     purchases,
     sales,
