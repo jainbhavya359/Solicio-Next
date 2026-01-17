@@ -14,6 +14,7 @@ import StockReport from "./StockReport";
 import LedgerEntries from "./LedgerEntries";
 import ProfitLossReport from "./ProfitLossReoprt";
 import StockValuation from "./StockValuation";
+import StockAlertSmart from "./StockAlert";
 
 export default function Profile() {
 
@@ -207,10 +208,11 @@ export default function Profile() {
         <LedgerEntries />
 
         <ProfitLossReport />
+        
+        <StockAlertSmart />
 
         <StockValuation />
 
-        
       </div>
     </section>
   );

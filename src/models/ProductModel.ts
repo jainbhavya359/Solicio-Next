@@ -31,11 +31,13 @@ const ProductSchema = new Schema(
             enum: ["FIFO", "WAVG"],
             default: "FIFO",
         },
-        // reorderLevel: {
-        //     type: Number,
-        //     default: 5,
-        // }
-
+        lowStockConfig: {
+            minQty: { type: Number, default: 5 },        // hard floor
+            warningQty: { type: Number, default: 10 },   // medium
+            criticalDays: { type: Number, default: 3 },
+            warningDays: { type: Number, default: 7 },
+            lowDays: { type: Number, default: 14 },
+        },
     },
     { timestamps: true }
 );
