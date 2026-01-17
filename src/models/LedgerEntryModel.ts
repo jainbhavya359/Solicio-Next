@@ -13,6 +13,17 @@ const LedgerEntrySchema = new Schema({
 
   voucherNo: { type: String, required: true, unique: true },
 
+  partyName: {
+    type: String,
+    default: "Cash",
+    index: true,
+  },
+  partyType: {
+    type: String,
+    enum: ["Customer", "Supplier", "Cash"],
+    default: "Cash",
+  },
+
   itemName: { type: String, required: true },
   unit: { type: String, required: true },
 

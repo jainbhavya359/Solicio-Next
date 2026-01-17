@@ -26,6 +26,58 @@ interface NoAlertExplanation {
   message: string;
 }
 
+function getProgressMeta(
+  daysLeft: number | null,
+  severity?: Severity
+) {
+  if (daysLeft === null) {
+    return {
+      percent: 100,
+      color: "bg-emerald-500",
+      label: "No sales trend",
+    };
+  }
+
+  const maxDays = 30; // cap visual scale
+  const percent = Math.min((daysLeft / maxDays) * 100, 100);
+
+  if (severity === "CRITICAL")
+    return { percent, color: "bg-red-500", label: "Critical" };
+  if (severity === "MEDIUM")
+    return { percent, color: "bg-yellow-400", label: "Warning" };
+  if (severity === "LOW")
+    return { percent, color: "bg-orange-400", label: "Low" };
+
+  return { percent, color: "bg-emerald-500", label: "Healthy" };
+}
+
+
+function StockDaysProgress({
+  daysLeft,
+  severity,
+}: {
+  daysLeft: number | null;
+  severity?: Severity;
+}) {
+  const { percent, color, label } = getProgressMeta(daysLeft, severity);
+
+  return (
+    <div className="mt-2">
+      <div className="flex justify-between text-xs text-slate-400 mb-1">
+        <span>{label}</span>
+        {daysLeft !== null && <span>{daysLeft} days</span>}
+      </div>
+
+      <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+        <div
+          className={`h-full ${color} transition-all duration-500`}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 
 export default function StockAlertSmart() {
   const { user } = useUser();
@@ -116,7 +168,12 @@ export default function StockAlertSmart() {
                 <div className="text-sm text-slate-300 mt-2 space-y-1">
                   <p>Qty: {a.quantity}</p>
                   <p>Avg Daily Sales: {a.avgDailySales}</p>
-                  {a.daysLeft !== null && <p>{a.daysLeft} days left</p>}
+
+                  <StockDaysProgress
+                    daysLeft={a.daysLeft}
+                    severity={a.severity}
+                  />
+
                   <p className="text-xs text-slate-400 mt-1">
                     {a.reason}
                   </p>

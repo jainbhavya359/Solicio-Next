@@ -16,6 +16,7 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
 
   const dropdownRef = useRef(null);
 
+  const [partyName, setPartyName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState("");
   const [date, setDate] = useState(
@@ -103,6 +104,7 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
         quantity,
         sellingPrice: price || selectedProduct.sellingPrice,
         unit: selectedProduct.unit,
+        partyName,
         date,
         voucher: "Sale",
       });
@@ -255,6 +257,15 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
 
       {/* Price & Date */}
       <div className="grid md:grid-cols-2 gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Customer name (optional)"
+          value={partyName}
+          onChange={(e) => setPartyName(e.target.value)}
+          className="px-4 py-3 rounded-xl bg-black/40 border border-white/10
+          text-white placeholder:text-slate-500"
+        />
+
         <input
           type="number"
           placeholder="Selling price per unit (₹)"

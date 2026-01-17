@@ -175,10 +175,10 @@ export async function GET(req: NextRequest) {
   }
 
 
-  console.log(sales);
-  console.log(stock);
-  console.log(salesMap);
-  console.log(alerts)
+  // console.log(sales);
+  // console.log(stock);
+  // console.log(salesMap);
+  // console.log(alerts)
 
   return NextResponse.json({
     alerts: {

@@ -39,8 +39,17 @@ export async function POST(req: NextRequest) {
 
     const voucherNo = `${prefix}-${dateKey}-${String(counter.seq).padStart(3, "0")}`;
 
-    const debitQty = voucherType === "Purchase" ? quantity : 0;
-    const creditQty = voucherType === "Sale" ? quantity : 0;
+    let debitQty = 0;
+    let creditQty = 0;
+
+    if (voucherType === "Purchase" || voucherType === "SaleReturn") {
+      debitQty = quantity;
+    }
+
+    if (voucherType === "Sale" || voucherType === "PurchaseReturn") {
+      creditQty = quantity;
+    }
+
 
     const entry = await LedgerEntry.create({
       email,
@@ -81,23 +90,30 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // 1️⃣ Fetch oldest → newest
     const rows = await LedgerEntry.find({ email })
       .sort({ date: 1, createdAt: 1 })
       .lean();
 
     let runningBalance = 0;
 
-    const ledger = rows.map((r) => {
-      runningBalance += r.debitQty;
-      runningBalance -= r.creditQty;
+    const computed = rows.map((r) => {
+      // ❗ reversal rows must NOT affect balance
+      if (!r.isReversal) {
+        runningBalance += r.debitQty || 0;
+        runningBalance -= r.creditQty || 0;
+      }
 
       return {
         ...r,
-        runningBalance,
+        balance: runningBalance,
       };
     });
 
-    return NextResponse.json(ledger);
+    // 2️⃣ Reverse only for display
+    computed.reverse();
+
+    return NextResponse.json(computed);
   } catch (err) {
     console.error(err);
     return NextResponse.json(

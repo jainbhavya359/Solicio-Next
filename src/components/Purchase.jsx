@@ -25,10 +25,11 @@ export default function Purchase({ visible, preSelectedProduct, reloadSetter, re
     new Date().toISOString().split("T")[0]
   );
 
-const [units, setUnits] = useState(UNITS);
-const [customUnit, setCustomUnit] = useState("");
+  const [units, setUnits] = useState(UNITS);
+  const [customUnit, setCustomUnit] = useState("");
 
   const [newProductName, setNewProductName] = useState("");
+  const [partyName, setPartyName] = useState("");
   const [newUnit, setNewUnit] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -111,6 +112,7 @@ const [customUnit, setCustomUnit] = useState("");
         quantity,
         price,
         sellingPrice,
+        partyName,
         date,
         voucher: "Purchase",
       });
@@ -211,13 +213,6 @@ const [customUnit, setCustomUnit] = useState("");
                 onChange={(e) => setNewProductName(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
               />
-
-              {/* <input
-                placeholder="Unit (kg, pcs, box...)"
-                value={newUnit}
-                onChange={(e) => setNewUnit(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
-              /> */}
 
               <select
                 value={newUnit}
@@ -336,6 +331,14 @@ const [customUnit, setCustomUnit] = useState("");
 
       {/* Prices & Date */}
       <div className="grid md:grid-cols-3 gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Supplier name (optional)"
+          value={partyName}
+          onChange={(e) => setPartyName(e.target.value)}
+          className="px-4 py-3 rounded-xl bg-black/40 border border-white/10
+          text-white placeholder:text-slate-500"
+        />
         <input
           type="number"
           placeholder="Purchase price (₹)"

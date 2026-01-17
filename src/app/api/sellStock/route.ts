@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       unit,
       quantity,
       sellingPrice,
+      partyName,
       date,
       costing = "FIFO", // FIFO | WAVG
     } = await req.json();
@@ -114,6 +115,8 @@ export async function POST(req: NextRequest) {
         email,
         date: txDate,
         voucherType: "Sale",
+        partyName: partyName || "Cash",
+        partyType: partyName ? "Customer" : "Cash",
         voucherNo,
 
         itemName: name,

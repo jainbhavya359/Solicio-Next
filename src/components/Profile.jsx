@@ -15,9 +15,14 @@ import LedgerEntries from "./LedgerEntries";
 import ProfitLossReport from "./ProfitLossReoprt";
 import StockValuation from "./StockValuation";
 import StockAlertSmart from "./StockAlert";
+import CashFlowWatch from "./CashFlow";
+import SlowMovingStock from "./SlowMovingStockAlert";
+import UniversalSearchBox from "./SearchBox";
+import LedgerSearchBox from "./LedgerSearchBox";
 
 export default function Profile() {
-
+  
+  const [results, setResults] = useState([]);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -94,6 +99,8 @@ export default function Profile() {
             <p className="text-slate-400">{email}</p>
           </div>
         </motion.div>
+
+        <LedgerSearchBox email={email}/>
 
         {show && (
           <motion.div
@@ -212,6 +219,10 @@ export default function Profile() {
         <StockAlertSmart />
 
         <StockValuation />
+
+        <CashFlowWatch />
+
+        <SlowMovingStock />
 
       </div>
     </section>

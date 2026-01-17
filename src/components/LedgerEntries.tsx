@@ -13,6 +13,8 @@ type LedgerRow = {
   _id: string;
   date: string;
   voucherType: string;
+  partyName: string,
+  partyType: string
   voucherNo: string;
   itemName: string;
   unit: string;
@@ -148,12 +150,13 @@ export default function LedgerEntries() {
         <div className="overflow-x-auto">
           {/* HEADER */}
           <div
-            className="grid grid-cols-13 gap-2 text-xs text-slate-400
+            className="grid grid-cols-16 gap-2 text-xs text-slate-400
             bg-black/40 border border-white/10 rounded-t-xl
             px-4 py-3 sticky top-0 z-10"
           >
             <div className="col-span-2">Date</div>
             <div className="col-span-3">Particulars</div>
+            <div className="col-span-3">Party</div>
             <div className="col-span-1">Voucher</div>
             <div className="col-span-1 text-right">Debit</div>
             <div className="col-span-1 text-right">Credit</div>
@@ -166,15 +169,23 @@ export default function LedgerEntries() {
           <div className="border border-white/10 border-t-0 rounded-b-xl overflow-hidden">
             {ledger.map((row, i) => {
               const isAlreadyReversed = reversedMap.has(row._id);
+              const isInactive = row.isReversal || isAlreadyReversed;
 
               return (
                 <div
                   key={row._id}
-                  className={`grid grid-cols-13 gap-2 px-4 py-2 text-sm
+                  className={`grid grid-cols-16 gap-2 px-4 py-2 text-sm
                     border-t border-white/5
-                    ${i % 2 === 0 ? "bg-black/30" : "bg-black/20"}
-                    hover:bg-white/5 transition`}
+                    transition
+                    ${
+                      isInactive
+                        ? "bg-black/10 text-slate-500 opacity-60"
+                        : i % 2 === 0
+                          ? "bg-black/30 hover:bg-white/5"
+                          : "bg-black/20 hover:bg-white/5"
+                    }`}
                 >
+
                   {/* DATE */}
                   <div className="col-span-2 text-slate-300">
                     {new Date(row.date).toISOString().split("T")[0]}
@@ -188,32 +199,53 @@ export default function LedgerEntries() {
                     </div>
                   </div>
 
+                  {/* Party Name */}
+                  <div className="col-span-3 text-white font-medium">
+                    {row.partyName}
+                    <div className="text-xs text-slate-400">
+                      {row.partyType}
+                    </div>
+                  </div>
+
                   {/* VOUCHER */}
                   <div
                     className={`col-span-1 font-semibold
                       ${
                         row.voucherType === "Purchase"
-                          ? "text-emerald-400"
-                          : "text-rose-400"
+                          ? isInactive
+                            ? "text-emerald-400/40"
+                            : "text-emerald-400"
+                          : isInactive
+                            ? "text-rose-400/40"
+                            : "text-rose-400"
                       }`}
                   >
                     {row.voucherType}
                   </div>
 
+
                   {/* DEBIT */}
-                  <div className="col-span-1 text-right text-emerald-400">
+                  <div className={`col-span-1 text-right ${
+                    isInactive ? "text-emerald-400/40" : "text-emerald-400"
+                  }`}>
                     {row.debitQty || ""}
                   </div>
 
                   {/* CREDIT */}
-                  <div className="col-span-1 text-right text-rose-400">
+                  <div className={`col-span-1 text-right ${
+                    isInactive ? "text-rose-400/40" : "text-rose-400"
+                  }`}>
                     {row.creditQty || ""}
                   </div>
 
+
                   {/* BALANCE */}
-                  <div className="col-span-1 text-right font-semibold text-white">
+                  <div className={`col-span-1 text-right font-semibold ${
+                    isInactive ? "text-white/40" : "text-white"
+                  }`}>
                     {row.balance}
                   </div>
+
 
                   {/* ENTRY NO */}
                   <div className="col-span-3 mx-4 text-xs text-slate-400">
