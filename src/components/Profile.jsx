@@ -24,6 +24,8 @@ import StockMovementCard from "./StockMovementCard";
 import SalesTrendCard from "./SalesTrendCard";
 import InventoryBalanceCard from "./InventoryBalanceCard";
 import ActivityRecencyCard from "./ActivityRecencyCard";
+import AlertsFeed from "./AlertsFeed";
+import DailySnapshotCard from "./DailySnapShotCard";
 
 export default function Profile() {
   
@@ -230,6 +232,8 @@ export default function Profile() {
         <CashFlowWatch />
 
         <SlowMovingStock />
+
+        <AlertsFeed email={email} />
 
       </div>
     </section>
