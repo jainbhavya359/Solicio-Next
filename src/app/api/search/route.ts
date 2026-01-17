@@ -90,6 +90,8 @@ export async function POST(req: NextRequest) {
       }))
       .sort((a, b) => b.score - a.score);
 
+    //console.log(finalResults);
+
     return NextResponse.json({
       query,
       results: finalResults,

@@ -30,25 +30,29 @@ function getProgressMeta(
   daysLeft: number | null,
   severity?: Severity
 ) {
+  const MAX_DAYS = 30;
+
   if (daysLeft === null) {
     return {
-      percent: 100,
-      color: "bg-emerald-500",
+      percent: 40,
+      color: "bg-slate-400/40",
       label: "No sales trend",
     };
   }
 
-  const maxDays = 30; // cap visual scale
-  const percent = Math.min((daysLeft / maxDays) * 100, 100);
+  const clamped = Math.min(daysLeft, MAX_DAYS);
+  const percent = Math.max((clamped / MAX_DAYS) * 100, 5);
 
-  if (severity === "CRITICAL")
-    return { percent, color: "bg-red-500", label: "Critical" };
-  if (severity === "MEDIUM")
-    return { percent, color: "bg-yellow-400", label: "Warning" };
-  if (severity === "LOW")
-    return { percent, color: "bg-orange-400", label: "Low" };
-
-  return { percent, color: "bg-emerald-500", label: "Healthy" };
+  switch (severity) {
+    case "CRITICAL":
+      return { percent, color: "bg-red-500", label: "Critical" };
+    case "MEDIUM":
+      return { percent, color: "bg-yellow-400", label: "Warning" };
+    case "LOW":
+      return { percent, color: "bg-orange-400", label: "Low" };
+    default:
+      return { percent, color: "bg-emerald-500", label: "Healthy" };
+  }
 }
 
 
@@ -62,21 +66,22 @@ function StockDaysProgress({
   const { percent, color, label } = getProgressMeta(daysLeft, severity);
 
   return (
-    <div className="mt-2">
+    <div className="mt-3">
       <div className="flex justify-between text-xs text-slate-400 mb-1">
         <span>{label}</span>
-        {daysLeft !== null && <span>{daysLeft} days</span>}
+        {daysLeft !== null && <span>{daysLeft} days left</span>}
       </div>
 
       <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
         <div
-          className={`h-full ${color} transition-all duration-500`}
+          className={`h-full ${color} transition-all duration-500 rounded-full`}
           style={{ width: `${percent}%` }}
         />
       </div>
     </div>
   );
 }
+
 
 
 export default function StockAlertSmart() {

@@ -35,13 +35,15 @@ function evaluateSeverity(
     };
   }
 
-  if (qty <= cfg.warningQty) {
+  if (qty <= cfg.warningQty && avgDailySales > 0) {
+    const daysLeft = qty / avgDailySales;
     return {
       severity: "MEDIUM",
-      reason: `Stock below warning threshold (${cfg.warningQty})`,
-      daysLeft: null,
+      reason: `Low stock (${qty}), ~${daysLeft.toFixed(1)} days left`,
+      daysLeft: Number(daysLeft.toFixed(1)),
     };
   }
+
 
   // 📉 VELOCITY-BASED RULES
   if (avgDailySales > 0) {
