@@ -47,53 +47,91 @@ export default function LedgerSearchBox({ email }: { email: string }) {
 
       {/* 📋 Results */}
       {results.length > 0 && (
-        <div className="rounded-xl border border-white/10 overflow-hidden">
-          {results.map((row) => (
-            <div
-              key={row._id}
-              className="grid grid-cols-6 gap-4 px-4 py-3
-              bg-black/30 border-b border-white/5
-              hover:bg-white/5 transition"
+        <div
+            className="rounded-2xl border border-white/10
+            bg-black/40 backdrop-blur-xl
+            overflow-hidden"
+        >
+            {/* Header */}
+            <div className="px-5 py-3 text-xs text-slate-400
+            border-b border-white/10
+            flex items-center justify-between"
             >
-              <div className="text-slate-300">
-                {row.date?.slice(0, 10)}
-              </div>
-
-              <div className="text-white font-medium">
-                {row.itemName}
-                <div className="text-xs text-slate-400">
-                  {row.unit}
-                </div>
-              </div>
-
-              <div className="text-white">
-                {row.partyName}
-                <div className="text-xs text-slate-400">
-                  {row.partyType}
-                </div>
-              </div>
-
-              <div
-                className={`font-semibold ${
-                  row.voucherType === "Purchase"
-                    ? "text-emerald-400"
-                    : "text-rose-400"
-                }`}
-              >
-                {row.voucherType}
-              </div>
-
-              <div className="text-right text-emerald-400">
-                {row.debitQty || ""}
-              </div>
-
-              <div className="text-right text-rose-400">
-                {row.creditQty || ""}
-              </div>
+            <span>Search Results</span>
+            <span>{results.length} matches</span>
             </div>
-          ))}
+
+            {/* Rows */}
+            <div className="divide-y divide-white/5">
+            {results.map((row) => (
+                <div
+                key={row._id}
+                className="grid grid-cols-12 gap-4 px-5 py-4
+                hover:bg-white/5 transition"
+                >
+                {/* Date */}
+                <div className="col-span-2 text-xs text-slate-400">
+                    {row.date?.slice(0, 10)}
+                </div>
+
+                {/* Item */}
+                <div className="col-span-3">
+                    <div className="text-white font-medium">
+                    {row.itemName}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                    {row.unit}
+                    </div>
+                </div>
+
+                {/* Party */}
+                <div className="col-span-3">
+                    <div className="text-white">
+                    {row.partyName || "—"}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                    {row.partyType}
+                    </div>
+                </div>
+
+                {/* Voucher */}
+                <div className="col-span-2">
+                    <span
+                    className={`inline-flex items-center px-3 py-1
+                    rounded-full text-xs font-medium
+                    ${
+                        row.voucherType === "Purchase"
+                        ? "bg-emerald-500/15 text-emerald-400"
+                        : "bg-rose-500/15 text-rose-400"
+                    }`}
+                    >
+                    {row.voucherType}
+                    </span>
+                </div>
+
+                {/* Qty */}
+                <div className="col-span-1 text-right">
+                    {row.debitQty ? (
+                    <span className="text-emerald-400">
+                        +{row.debitQty}
+                    </span>
+                    ) : (
+                    <span className="text-rose-400">
+                        −{row.creditQty}
+                    </span>
+                    )}
+                </div>
+
+                {/* Score (optional but powerful) */}
+                <div className="col-span-1 text-right text-xs text-slate-500">
+                    {row.score}
+                </div>
+                </div>
+            ))}
+            </div>
         </div>
-      )}
+        )}
+
 
       {/* ❌ No results */}
       {!loading && results.length === 0 && (
