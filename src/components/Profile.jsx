@@ -20,6 +20,7 @@ import CashFlowWatch from "./CashFlow";
 import BusinessHealthCard from "./BusinessHealthCard";
 import AlertsFeed from "./AlertsFeed";
 import SlowMovingStockContainer from "./SlowMovingStockContainer";
+import StockHistory from "./StockHistory";
 
 export default function Profile() {
   const { user } = useUser();

@@ -8,6 +8,11 @@ import StockReport from "./StockReport";
 import Sale from "./Sale";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
+import StockAlertSmart from "./StockAlert";
+import SlowMovingStockContainer from "./SlowMovingStockContainer";
+import SectionCard from "./SectionCard";
+import StockValuation from "./StockValuation";
+import CashFlowWatch from "./CashFlow";
 
 const PanelMotion = ({ children }) => (
   <motion.div
@@ -54,58 +59,17 @@ export default function BusinessInsights() {
         </motion.div>
 
         {/* TODAY'S INSIGHTS */}
-        <div className="space-y-10">
-          <h2 className="text-3xl font-bold">Today at a Glance</h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-
-            {/* Insight Card */}
-            <motion.div
-              whileHover={{ y: -6 }}
-              className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl"
-            >
-              <div className="text-4xl mb-4">📦</div>
-              <h3 className="text-xl font-bold mb-2">Low Stock Alert</h3>
-              <p className="text-slate-300">
-                2 products may run out within the next few days.
-              </p>
-              <button className="mt-4 text-indigo-400 hover:underline">
-                Review inventory →
-              </button>
-            </motion.div>
-
-            {/* Insight Card */}
-            <motion.div
-              whileHover={{ y: -6 }}
-              className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl"
-            >
-              <div className="text-4xl mb-4">💰</div>
-              <h3 className="text-xl font-bold mb-2">Cash Flow Watch</h3>
-              <p className="text-slate-300">
-                Purchases are higher than sales this week.
-              </p>
-              <button className="mt-4 text-pink-400 hover:underline">
-                View transactions →
-              </button>
-            </motion.div>
-
-            {/* Insight Card */}
-            <motion.div
-              whileHover={{ y: -6 }}
-              className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl"
-            >
-              <div className="text-4xl mb-4">📉</div>
-              <h3 className="text-xl font-bold mb-2">Slow-Moving Stock</h3>
-              <p className="text-slate-300">
-                3 items haven’t moved in over 30 days.
-              </p>
-              <button className="mt-4 text-emerald-400 hover:underline">
-                Analyze products →
-              </button>
-            </motion.div>
-
+        <SectionCard
+          title="Today at a Glance"
+          subtitle="Stock, valuation & alerts"
+        >
+          <div className="space-y-10">
+            <SlowMovingStockContainer />
+            <StockAlertSmart />
+            <CashFlowWatch />
+            <StockValuation />
           </div>
-        </div>
+        </SectionCard>
 
         {/* WHY THIS MATTERS */}
         <motion.div
@@ -168,7 +132,7 @@ export default function BusinessInsights() {
               }} 
              className="px-6 py-3 rounded-full font-bold text-black bg-gradient-to-r from-emerald-400 to-emerald-600 hover:opacity-90 transition"
             >
-              View Stock Report
+              View Inventory
             </button>
           </div>
 

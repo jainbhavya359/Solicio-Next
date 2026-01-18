@@ -7,8 +7,8 @@ import { Toaster } from "react-hot-toast";
 import StockReport from "./StockReport";
 import Sale from "./Sale"
 import { useUser } from "@clerk/nextjs";
-import SalesReport from "./SalesReport"
 import { AnimatePresence, motion } from "framer-motion";
+import StockAlertSmart from "./StockAlert";
 
 const PanelMotion = ({ children }) => (
   <motion.div
@@ -25,6 +25,7 @@ export default function Inventory() {
   const [newPurchase, setNewPurchase] = useState(false);
   const [newSale, setNewSale] = useState(false);
   const [ reload, setReload ] = useState(false);
+  const [product, setProduct] = useState("");
 
   const {user} = useUser();
 
@@ -87,23 +88,33 @@ export default function Inventory() {
           </div>
         </div>
 
-        {/* PURCHASE */}
         <AnimatePresence mode="wait">
           {newPurchase && (
             <PanelMotion key="purchase">
-              <Purchase visible={true} preSelectedProduct={""} />
+              <Purchase visible={true} preSelectedProduct={product} reloadSetter={setReload} reload={reload}/>
             </PanelMotion>
           )}
 
           {newSale && (
             <PanelMotion key="sale">
-              <Sale visible={true} preSelectedProduct={""} />
+              <Sale visible={true} preSelectedProduct={product} reloadSetter={setReload} reload={reload}/>
             </PanelMotion>
           )}
+
+          
+          <PanelMotion key="stock">
+            <StockReport
+              visible={true}
+              productSetter={setProduct}
+              purchaseSetter={setNewPurchase}
+              saleSetter={setNewSale}
+              reload={reload}
+            />
+          </PanelMotion>
+          
         </AnimatePresence>
 
-        {/* STOCK REPORT */}
-        <StockReport />
+        <StockAlertSmart />
 
         <StockHistory />
 
