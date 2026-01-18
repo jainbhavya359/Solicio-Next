@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.loan-input {
+  @apply w-full mt-2 px-4 py-3 rounded-xl
+  bg-black/40 border border-white/10
+  outline-none focus:border-emerald-400;
+}

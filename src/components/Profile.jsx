@@ -20,7 +20,36 @@ import CashFlowWatch from "./CashFlow";
 import BusinessHealthCard from "./BusinessHealthCard";
 import AlertsFeed from "./AlertsFeed";
 import SlowMovingStockContainer from "./SlowMovingStockContainer";
-import StockHistory from "./StockHistory";
+import License_Report from "./License_Report"
+
+const formatMoney = (value) => {
+  if (typeof value !== "number") return "—";
+  return `₹${value.toLocaleString()}`;
+};
+
+const daysUntil = (date) => {
+  if (!date) return undefined;
+  const now = new Date();
+  const target = new Date(date);
+  return Math.ceil(
+    (target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
+};
+
+function LoanStatusBadge({ status }) {
+  const styles = {
+    active: "bg-emerald-500/20 text-emerald-400",
+    overdue: "bg-rose-500/20 text-rose-400",
+    closed: "bg-slate-500/20 text-slate-400",
+  };
+
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs ${styles[status]}`}>
+      {status.toUpperCase()}
+    </span>
+  );
+}
+
 
 export default function Profile() {
   const { user } = useUser();
@@ -71,29 +100,104 @@ export default function Profile() {
 
         {/* LOANS */}
         <SectionCard
-          title="Loans & Credit"
+          title="Loans/Credit & Licenses"
           subtitle="Active loans & lending profile"
         >
-          {loadingLoans ? (
-            <p className="text-slate-400">Loading loans...</p>
-          ) : loans.length === 0 ? (
-            <p className="text-slate-400">No active loans</p>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-4">
-              {loans.map(loan => (
-                <div
-                  key={loan._id}
-                  className="rounded-xl bg-black/40 border border-white/10 p-4"
-                >
-                  <p className="font-semibold">{loan.loan}</p>
-                  <p className="text-sm text-slate-400">{loan.lender}</p>
-                  <p className="text-emerald-400 font-bold mt-2">
-                    ₹{loan.amount.toLocaleString()}
+        {loans.map((loan) => {
+          const daysLeft = daysUntil(loan.nextDueDate);
+
+          return (
+            <div
+              key={loan._id}
+              className="rounded-2xl bg-black/40 border border-white/10 p-5
+              hover:border-emerald-400/40 transition"
+            >
+              {/* HEADER */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-white text-lg">
+                    {loan.loanType || "Loan"}
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    {loan.lender || "—"}
                   </p>
                 </div>
-              ))}
+
+                <LoanStatusBadge status={loan.status} />
+              </div>
+
+              {/* EMI */}
+              <div className="mt-4">
+                <p className="text-emerald-400 font-bold text-2xl">
+                  {formatMoney(loan.emiAmount)}
+                </p>
+                <p className="text-xs text-slate-400">Monthly EMI</p>
+              </div>
+
+              {/* META */}
+              <div className="mt-4 text-sm text-slate-300 space-y-1">
+                <p>
+                  Principal:{" "}
+                  <span className="text-white">
+                    {formatMoney(loan.principalAmount)}
+                  </span>
+                </p>
+                <p>
+                  Tenure:{" "}
+                  <span className="text-white">
+                    {loan.tenure} {loan.tenureUnit}
+                  </span>{" "}
+                  @ {loan.interestRate}%
+                </p>
+              </div>
+
+              {/* NEXT DUE */}
+              {loan.status === "active" && daysLeft !== undefined && (
+                <div
+                  className={`mt-4 text-xs px-3 py-2 rounded-lg inline-block
+                  ${
+                    daysLeft <= 0
+                      ? "bg-rose-500/10 text-rose-400"
+                      : daysLeft <= 7
+                      ? "bg-amber-500/10 text-amber-400"
+                      : "bg-emerald-500/10 text-emerald-400"
+                  }`}
+                >
+                  {daysLeft <= 0
+                    ? "EMI due today"
+                    : `Next EMI in ${daysLeft} days`}
+                </div>
+              )}
+
+              {/* ACTIONS */}
+              <div className="mt-5 flex justify-end gap-3">
+                {loan.status !== "closed" && (
+                  <button
+                    onClick={async () => {
+                      const ok = confirm(
+                        "Are you sure you want to remove this loan?"
+                      );
+                      if (!ok) return;
+
+                      await fetch(`/api/loans?id=${loan._id}`, {
+                        method: "DELETE",
+                      });
+
+                      setLoans((prev) =>
+                        prev.filter((l) => l._id !== loan._id)
+                      );
+                    }}
+                    className="text-xs text-rose-400 hover:underline"
+                  >
+                    Remove loan
+                  </button>
+                )}
+              </div>
             </div>
-          )}
+          );
+        })}
+
+        <License_Report />
         </SectionCard>
 
         {/* INVENTORY */}

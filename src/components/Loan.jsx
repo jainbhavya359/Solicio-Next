@@ -7,6 +7,7 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { useCreditStore } from "../store/useCreditStore";
 import { scores_rate } from "../utils/store";
+import { calculateEMI } from "../utils/emiCal";
 
 function AnimatedScore({value}) {
   const score = useMotionValue(0);
@@ -126,6 +127,183 @@ export function CreditGauge({ score }) {
   );
 }
 
+function AddLoanCard({ email, name }) {
+  const [loanType, setLoanType] = useState("");
+  const [lender, setLender] = useState("");
+  const [principal, setPrincipal] = useState("");
+  const [interestRate, setInterestRate] = useState(12);
+  const [tenure, setTenure] = useState(12);
+  const [tenureUnit, setTenureUnit] = useState("months");
+  const [repaymentFrequency, setRepaymentFrequency] =
+    useState("monthly");
+  const [startDate, setStartDate] = useState("");
+
+  const tenureMonths =
+    tenureUnit === "years" ? tenure * 12 : tenure;
+
+  const emi = calculateEMI(principal, interestRate, tenureMonths);
+
+  const submitLoan = async () => {
+    try {
+      await axios.post("/api/loans", {
+        email,
+        name,
+        loanType,
+        lender,
+        principalAmount: principal,
+        interestRate,
+        tenure,
+        tenureUnit,
+        repaymentFrequency,
+        loanStartDate: startDate,
+        firstEmIDate: startDate,
+      });
+
+      toast.success("Loan added successfully");
+    } catch {
+      toast.error("Failed to add loan");
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      viewport={{ once: true }}
+      className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl backdrop-blur-xl"
+    >
+      <h2 className="text-2xl md:text-3xl font-bold mb-6">
+        Add Loan
+      </h2>
+
+      {/* BASIC INFO */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label className="text-sm text-slate-300">Loan Type</label>
+          <input
+            placeholder="Business / Personal"
+            value={loanType}
+            onChange={(e) => setLoanType(e.target.value)}
+            className="loan-input"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-slate-300">Lender Name</label>
+          <input
+            placeholder="Bank / NBFC name"
+            value={lender}
+            onChange={(e) => setLender(e.target.value)}
+            className="loan-input"
+          />
+        </div>
+      </div>
+
+      {/* FINANCIALS */}
+      <div className="grid gap-4 md:grid-cols-2 mt-6">
+        <div>
+          <label className="text-sm text-slate-300">Loan Amount (₹)</label>
+          <input
+            type="number"
+            min={0}
+            placeholder="e.g. 500000"
+            value={principal}
+            onChange={(e) => setPrincipal(+e.target.value)}
+            className="loan-input"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-slate-300">Interest Rate (% p.a.)</label>
+          <input
+            type="number"
+            min={0}
+            step="0.1"
+            placeholder="e.g. 11.5"
+            value={interestRate}
+            onChange={(e) => setInterestRate(+e.target.value)}
+            className="loan-input"
+          />
+        </div>
+      </div>
+
+      {/* TENURE */}
+      <div className="grid grid-cols-3 gap-3 mt-6">
+        <div className="col-span-2">
+          <label className="text-sm text-slate-300">Tenure</label>
+          <input
+            type="number"
+            min={1}
+            placeholder="e.g. 24"
+            value={tenure}
+            onChange={(e) => setTenure(+e.target.value)}
+            className="loan-input"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-slate-300">Unit</label>
+          <select
+            value={tenureUnit}
+            onChange={(e) =>
+              setTenureUnit(e.target.value)
+            }
+            className="loan-input"
+          >
+            <option value="months">Months</option>
+            <option value="years">Years</option>
+          </select>
+        </div>
+      </div>
+
+      {/* EMI PREVIEW */}
+      <div className="mt-6 rounded-2xl bg-black/40 border border-white/10 p-4">
+        <p className="text-xs text-slate-400">Estimated EMI</p>
+
+        {emi.emi > 0 ? (
+          <>
+            <p className="text-3xl font-bold text-emerald-400 mt-1">
+              ₹{emi.emi.toLocaleString()}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              Interest: ₹{emi.totalInterest.toLocaleString()} ·
+              Total: ₹{emi.totalPayable.toLocaleString()}
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-slate-500 mt-2">
+            Enter loan amount, interest rate and tenure to calculate EMI
+          </p>
+        )}
+      </div>
+
+      {/* START DATE */}
+      <div className="mt-6">
+        <label className="text-sm text-slate-300">Loan Start Date</label>
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="loan-input"
+        />
+      </div>
+
+      {/* CTA */}
+      <button
+        onClick={submitLoan}
+        className="mt-8 w-full py-4 rounded-full font-bold text-black
+        bg-gradient-to-r from-emerald-400 to-teal-400
+        hover:opacity-90 transition"
+      >
+        Add Loan →
+      </button>
+    </motion.div>
+
+  );
+}
+
+
 export default function Loan() {
 
   const { user } = useUser();
@@ -138,13 +316,13 @@ export default function Loan() {
       }
   }, []);
 
-  /* Loan form */
-  const [loanName, setLoanName] = useState("");
-  const [lender, setLender] = useState("");
-  const [amount, setAmount] = useState(0);
-  const [panNum, setPanNum] = useState("");
-  const [date, setDate] = useState("");
-  const [tenure, setTenure] = useState("");
+  // /* Loan form */
+  // const [loanName, setLoanName] = useState("");
+  // const [lender, setLender] = useState("");
+  // const [amount, setAmount] = useState(0);
+  // const [panNum, setPanNum] = useState("");
+  // const [date, setDate] = useState("");
+  // const [tenure, setTenure] = useState("");
 
   /* Credit score */
   const [paymentHistory, setPaymentHistory] = useState(95);
@@ -191,36 +369,36 @@ export default function Loan() {
     showResult(true);
   };
 
-  const handleChange = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post(
-        "/api/loans", JSON.stringify({
-            loanName,
-            lender,
-            amount,
-            panNum,
-            date,
-            name,
-            email,
-            tenure
-          }) );
+  // const handleChange = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const res = await axios.post(
+  //       "/api/loans", JSON.stringify({
+  //           loanName,
+  //           lender,
+  //           amount,
+  //           panNum,
+  //           date,
+  //           name,
+  //           email,
+  //           tenure
+  //         }) );
 
-      console.log(res)
-      if (res.data.success) {
-        setLoanName("");
-        setLender("");
-        setAmount(0);
-        setPanNum("");
-        setDate("");
-        setTenure("");
+  //     console.log(res)
+  //     if (res.data.success) {
+  //       setLoanName("");
+  //       setLender("");
+  //       setAmount(0);
+  //       setPanNum("");
+  //       setDate("");
+  //       setTenure("");
 
-        toast("Loan Added")
-      }
-    } catch {
-      toast("Error occurred");
-    }
-  };
+  //       toast("Loan Added")
+  //     }
+  //   } catch {
+  //     toast("Error occurred");
+  //   }
+  // };
 
   return (
   <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white py-28">
@@ -327,8 +505,10 @@ export default function Loan() {
         )}
       </motion.div>
 
+      <AddLoanCard email={email} name={name} />
+
       {/* ADD LOAN (ACTION CARD) */}
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -375,7 +555,9 @@ export default function Loan() {
         >
           Add Loan →
         </button>
-      </motion.div>
+      </motion.div> */}
+
+
 
       {/* LOAN SCHEMES (CARD GRID like StockReport) */}
       <motion.div

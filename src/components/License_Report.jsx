@@ -1,112 +1,175 @@
-import React, { useEffect, useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { motion } from "framer-motion";
+"use client";
 
-export default function License_Report() {
-  const { user } = useAuth0();
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+import { LicenseCard } from "./LicenseCard";
 
-  const [data, setData] = useState([]);
-  const [error, setError] = useState(false);
+export default function LicenseReport() {
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress;
+
+  const [licenses, setLicenses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [reload, setReload] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/api/getlicenses`
-        );
-        if (!response.ok) throw new Error("Network issue");
-        const json = await response.json();
-        setData(json);
-      } catch {
-        setError(true);
-      } finally {
-        setLoading(false);
-        setReload(false);
-      }
-    };
-
-    fetchData();
-  }, [reload]);
-
-  const onHandleClick = async (id) => {
+  const fetchLicenses = async () => {
     try {
-      await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/deletelicense/${id}`,
-        { method: "DELETE" }
-      );
-      setReload(true);
-    } catch (err) {
-      console.error(err);
+      const res = await axios.get(`/api/licenses?email=${email}`);
+      setLicenses(res.data);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const userLicenses = data.filter(
-    (lic) => lic.email === user?.email
-  );
+  useEffect(() => {
+    if (email) fetchLicenses();
+  }, [email]);
+
+  const deleteLicense = async (id) => {
+    await axios.delete(`/api/licenses?id=${id}`);
+    fetchLicenses();
+  };
+
+  if (loading) {
+    return <p className="text-slate-400">Loading licenses…</p>;
+  }
+
+  if (licenses.length === 0) {
+    return (
+      <p className="text-slate-400">
+        No licenses added yet.
+      </p>
+    );
+  }
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      viewport={{ once: true }}
-      className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl"
-    >
-      <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-        Your Licenses
-      </h2>
-
-      {loading ? (
-        <div className="flex justify-center py-10">
-          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : error ? (
-        <p className="text-red-400">Error loading licenses.</p>
-      ) : userLicenses.length === 0 ? (
-        <p className="text-slate-400">
-          No licenses found. Add licenses to track compliance.
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="border-b border-white/10 text-slate-300">
-              <tr>
-                <th className="py-3 text-left">License</th>
-                <th className="py-3 text-left">Authority</th>
-                <th className="py-3 text-left">Date</th>
-                <th className="py-3 text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {userLicenses.map((lic, index) => (
-                <tr
-                  key={lic.id}
-                  className="border-b border-white/5 hover:bg-white/5 transition"
-                >
-                  <td className="py-4">{lic.license_name}</td>
-                  <td className="py-4">{lic.authority}</td>
-                  <td className="py-4 text-slate-400">
-                    {new Date(lic.date).toISOString().split("T")[0]}
-                  </td>
-                  <td className="py-4">
-                    <button
-                      onClick={() => onHandleClick(lic.id)}
-                      className="px-4 py-1 rounded-full border border-red-500 text-red-400 hover:bg-red-500/10 transition"
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </motion.section>
+    <div className="grid md:grid-cols-3 gap-4 my-6">
+      {licenses.map((lic) => (
+        <LicenseCard
+          key={lic._id}
+          license={lic}
+          onDelete={deleteLicense}
+        />
+      ))}
+    </div>
   );
 }
+
+
+// "use client"
+
+// import React, { useEffect, useState } from "react";
+// import { motion } from "framer-motion";
+// import { useUser } from "@clerk/nextjs";
+// import axios from "axios";
+
+// export default function License_Report() {
+//   const { user } = useUser();
+
+//   const [data, setData] = useState([]);
+//   const [error, setError] = useState(false);
+//   const [loading, setLoading] = useState(true);
+//   const [reload, setReload] = useState(false);
+
+//   const email = user?.primaryEmailAddress.emailAddress;
+
+//   useEffect(() => {
+//     if(!email) return;
+
+//     const fetchData = async () => {
+//       try {
+//         const response = await axios.get("/api/licenses");
+//         if (!response) throw new Error("Network issue");
+//         const json = await response.json();
+//         setData(json);
+//       } catch {
+//         setError(true);
+//       } finally {
+//         setLoading(false);
+//         setReload(false);
+//       }
+//     };
+
+//     fetchData();
+//   }, [reload, email]);
+
+//   const onHandleClick = async (id) => {
+//     try {
+//       await fetch(
+//         `${process.env.REACT_APP_BACKEND_URL}/api/deletelicense/${id}`,
+//         { method: "DELETE" }
+//       );
+//       setReload(true);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   const userLicenses = data.filter(
+//     (lic) => lic.email === user?.email
+//   );
+
+//   return (
+//     <motion.section
+//       initial={{ opacity: 0, y: 40 }}
+//       whileInView={{ opacity: 1, y: 0 }}
+//       transition={{ duration: 0.6 }}
+//       viewport={{ once: true }}
+//       className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl"
+//     >
+//       <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+//         Your Licenses
+//       </h2>
+
+//       {loading ? (
+//         <div className="flex justify-center py-10">
+//           <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+//         </div>
+//       ) : error ? (
+//         <p className="text-red-400">Error loading licenses.</p>
+//       ) : userLicenses.length === 0 ? (
+//         <p className="text-slate-400">
+//           No licenses found. Add licenses to track compliance.
+//         </p>
+//       ) : (
+//         <div className="overflow-x-auto">
+//           <table className="min-w-full text-sm">
+//             <thead className="border-b border-white/10 text-slate-300">
+//               <tr>
+//                 <th className="py-3 text-left">License</th>
+//                 <th className="py-3 text-left">Authority</th>
+//                 <th className="py-3 text-left">Date</th>
+//                 <th className="py-3 text-left">Action</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {userLicenses.map((lic, index) => (
+//                 <tr
+//                   key={lic.id}
+//                   className="border-b border-white/5 hover:bg-white/5 transition"
+//                 >
+//                   <td className="py-4">{lic.license_name}</td>
+//                   <td className="py-4">{lic.authority}</td>
+//                   <td className="py-4 text-slate-400">
+//                     {new Date(lic.date).toISOString().split("T")[0]}
+//                   </td>
+//                   <td className="py-4">
+//                     <button
+//                       onClick={() => onHandleClick(lic.id)}
+//                       className="px-4 py-1 rounded-full border border-red-500 text-red-400 hover:bg-red-500/10 transition"
+//                     >
+//                       Remove
+//                     </button>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       )}
+//     </motion.section>
+//   );
+// }
 
 
 

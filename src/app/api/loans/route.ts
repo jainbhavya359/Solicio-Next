@@ -1,53 +1,67 @@
 import connect from "@/src/dbConfig/dbConnection";
 import Loan from "@/src/models/LoanModel";
+import { calculateEMI } from "@/src/utils/emiCal";
 import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
-export async function GET(request: NextRequest){
-    try{
-        const { searchParams } = new URL(request.url);
-        const email = searchParams.get("email");
+export async function GET(req: NextRequest) {
+  const email = req.nextUrl.searchParams.get("email");
+  if (!email) {
+    return NextResponse.json([], { status: 200 });
+  }
 
-        if (!email) {
-            return NextResponse.json(
-                { error: "Email is required" },
-                { status: 400 }
-            );
-        }
+  const loans = await Loan.find({ email }).lean();
+  const today = new Date();
 
-        const loans = await Loan.find({email});
+  const enriched = loans.map((loan) => {
+    let nextDueDate = loan.nextDueDate;
 
-        return NextResponse.json(loans);
-    }catch(error){
-        console.error("Loan API error:", error);
-        return NextResponse.json({error: "Loan api Failed"}, {status: 500});
+    if (!nextDueDate) {
+      nextDueDate = new Date(loan.firstEmIDate);
     }
+
+    const diffDays = Math.ceil(
+      (new Date(nextDueDate).getTime() - today.getTime()) / 86400000
+    );
+
+    let status = loan.status;
+    if (loan.status === "active" && diffDays < 0) {
+      status = "overdue";
+    }
+
+    return {
+      ...loan,
+      nextDueDate,
+      daysLeft: diffDays,
+      emiPreview: loan.emiAmount,
+      status,
+    };
+  });
+
+  return NextResponse.json(enriched);
 }
 
-export async function POST(request: NextRequest) {
-    try{
-        const reqBody = await request.json();
-        console.log(reqBody);
 
-        const newLoan = new Loan({
-            name: reqBody.name,
-            email: reqBody.email,
-            loan: reqBody.loanName,
-            lender: reqBody.lender,
-            amount: reqBody.amount,
-            pan_number: reqBody.panNum,
-            date: reqBody.date,
-        });
+export async function POST(req: NextRequest) {
+  const body = await req.json();
 
-        console.log(newLoan);
+  const tenureMonths =
+    body.tenureUnit === "years" ? body.tenure * 12 : body.tenure;
 
-        const savedLoan = await newLoan.save();
-        console.log(savedLoan);
+  const { emi, totalPayable, totalInterest } = calculateEMI({
+    principal: body.principalAmount,
+    annualRate: body.interestRate,
+    tenureMonths,
+  });
 
-        return NextResponse.json({message: "Loan Added Successfully", success: true});
-    }catch(error){
-        console.error("Loan API error:", error);
-        return NextResponse.json({error: "Loan api Failed"}, {status: 500});
-    }
+  const loan = await Loan.create({
+    ...body,
+    emiAmount: emi,
+    totalPayable,
+    totalInterest,
+    nextDueDate: body.firstEmIDate,
+  });
+
+  return NextResponse.json({ success: true, loan });
 }
