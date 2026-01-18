@@ -6,14 +6,18 @@ export default function ConfirmReversalModal({
   onConfirm,
   voucherNo,
   itemName,
+  loading,
+  error,
 }: {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
   voucherNo: string;
   itemName: string;
-  loading: boolean
+  loading: boolean;
+  error?: string | null;
 }) {
+
   if (!open) return null;
 
   return (
@@ -42,6 +46,14 @@ export default function ConfirmReversalModal({
           Original entry will remain for audit.
         </p>
 
+        {error && (
+          <div className="bg-rose-500/10 border border-rose-500/30
+            text-rose-300 text-sm rounded-lg p-3 mb-4">
+            ⚠ {error}
+          </div>
+        )}
+
+
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
@@ -53,10 +65,12 @@ export default function ConfirmReversalModal({
 
           <button
             onClick={onConfirm}
+            disabled={loading || !!error}
             className="px-4 py-2 rounded-lg
-            bg-rose-500 text-black font-semibold"
+              bg-rose-500 text-black font-semibold
+              disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Reverse Entry
+            {loading ? "Reversing..." : "Reverse Entry"}
           </button>
         </div>
       </motion.div>

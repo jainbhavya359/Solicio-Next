@@ -5,6 +5,7 @@ import { Products } from "@/src/models/ProductModel";
 import { StockLayer } from "@/src/models/StockLayerModel";
 import Stock from "@/src/models/stockModel";
 import { TotalStock } from "@/src/models/totalStockModel";
+import { calculateFIFO } from "@/src/utils/fifo";
 import { generateVoucherNo } from "@/src/utils/voucher";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const txDate = date ? new Date(date) : new Date();
 
-    /* 🔢 Voucher */
+    /* 🔢 Voucher Generation */
     const voucherNo = await generateVoucherNo({
       email,
       series: "SAL",
@@ -40,58 +41,47 @@ export async function POST(req: NextRequest) {
       session,
     });
 
-    let cogs = 0;
+    let cogsTotal = 0;
     const fifoBreakup: any[] = [];
 
     /* 🔻 COST CALCULATION */
     if (costing === "FIFO") {
-      let remaining = quantity;
+        const layers = await StockLayer.find(
+          {
+            email,
+            productName: name,
+            unit,
+            qtyRemaining: { $gt: 0 },
+          },
+          null,
+          { session }
+        ).sort({ date: 1 });
 
-      const layers = await StockLayer.find({
-        email,
-        productName: name,
-        unit,
-        qtyRemaining: { $gt: 0 },
-      })
-        .sort({ date: 1 })
-        .session(session);
+        const { cogs, updates, breakup } = calculateFIFO(layers, quantity);
 
-      for (const layer of layers) {
-        if (remaining <= 0) break;
+        fifoBreakup.push(...breakup);
 
-        const consume = Math.min(layer.qtyRemaining, remaining);
+        /* using bulkWrite instead of save for saving layer at once */
+        await StockLayer.bulkWrite(updates, { session });
 
-        fifoBreakup.push({
-          layerId: layer._id,
-          qty: consume,
-          rate: layer.rate,
-        });
-
-        layer.qtyRemaining -= consume;
-        remaining -= consume;
-        cogs += consume * layer.rate;
-
-        await layer.save({ session });
-      }
-
-      if (remaining > 0) {
-        throw new Error("INSUFFICIENT_STOCK");
-      }
-
-    } else {
-      // ✅ WAVG
+        cogsTotal = cogs;
+      } else {
+      
+        // ✅ WAVG
+      
       const stock = await TotalStock.findOne(
         { email, name, unit },
         null,
         { session }
-      );
+      ).lean();
 
       if (!stock || stock.quantity < quantity) {
         throw new Error("INSUFFICIENT_STOCK");
       }
 
       const avgRate = stock.price / stock.quantity;
-      cogs = quantity * avgRate;
+      cogsTotal = quantity * avgRate;
+
     }
 
     /* 📦 Stock movement record (optional history) */
@@ -128,7 +118,7 @@ export async function POST(req: NextRequest) {
         rate: sellingPrice,
         amount: quantity * sellingPrice,
 
-        costAmount: cogs,
+        costAmount: cogsTotal,
         fifoBreakup,
 
         isReversal: false,
@@ -136,7 +126,7 @@ export async function POST(req: NextRequest) {
       { session }
     );
 
-    /* 📦 Product */
+    /* 📦 Product quantity update*/
     await Products.updateOne(
       { email, name, unit },
       {
@@ -147,17 +137,25 @@ export async function POST(req: NextRequest) {
     );
 
     /* 📊 Total Stock */
-    await TotalStock.findOneAndUpdate(
-      { email, name, unit },
+    const stockUpdate = await TotalStock.updateOne(
       {
-        $inc: {
-          quantity: -quantity,
-          price: -cogs,
-        },
+        email,
+        name,
+        unit,
+        quantity: { $gte: quantity },
+      },
+      {
+        $inc: { quantity: -quantity, price: -cogsTotal },
         $set: { updatedAt: txDate },
       },
       { session }
     );
+
+    /* Preventing OverSelling */
+    if (stockUpdate.matchedCount === 0) {
+      throw new Error("INSUFFICIENT_STOCK");
+    }
+
 
     await session.commitTransaction();
     return NextResponse.json({ success: true, voucherNo });

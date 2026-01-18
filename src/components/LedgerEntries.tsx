@@ -21,6 +21,7 @@ type LedgerRow = {
   debitQty: number;
   creditQty: number;
   rate: number;
+  balance: number;
   amount: number;
   isReversal: boolean;
   reversedEntryId?: string | null;
@@ -35,28 +36,40 @@ export default function LedgerEntries() {
   const [data, setData] = useState<LedgerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+    
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const [hasMore, setHasMore] = useState(false);
 
   const [reverseTarget, setReverseTarget] = useState<LedgerRow | null>(null);
   const [reversing, setReversing] = useState(false);
+  const [reversalError, setReversalError] = useState<string | null>(null);
 
   /* -------------------- FETCH LEDGER -------------------- */
+
+  const fetchLedger = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/api/ledger", {
+        params: { email, page, limit },
+      });
+
+      setData(res.data.rows);
+      setHasMore(res.data.hasMore);
+    } catch {
+      setError("Failed to load ledger");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!email) return;
 
-    const fetchLedger = async () => {
-      try {
-        const res = await axios.get(`/api/ledger?email=${email}`);
-        setData(res.data);
-      } catch {
-        setError("Failed to load ledger");
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchLedger();
-  }, [email]);
+  }, [email, page]);
+
 
   /* -------------------- DERIVED: REVERSED MAP -------------------- */
   /**
@@ -72,22 +85,6 @@ export default function LedgerEntries() {
     return map;
   }, [data]);
 
-  /* -------------------- DERIVED: RUNNING BALANCE -------------------- */
-
-  const ledger = useMemo(() => {
-    let balance = 0;
-
-    return data.map((row) => {
-      balance += row.debitQty || 0;
-      balance -= row.creditQty || 0;
-
-      return {
-        ...row,
-        balance,
-      };
-    });
-  }, [data]);
-
   /* -------------------- REVERSAL HANDLERS -------------------- */
 
   const openReversal = (row: LedgerRow) => {
@@ -99,6 +96,7 @@ export default function LedgerEntries() {
 
     try {
       setReversing(true);
+      setReversalError(null);
 
       await axios.post("/api/ledger/reverse", {
         ledgerId: reverseTarget._id,
@@ -108,17 +106,20 @@ export default function LedgerEntries() {
       toast.success("Ledger entry reversed");
       setReverseTarget(null);
 
-      // reload ledger
-      const res = await axios.get(`/api/ledger?email=${email}`);
-      setData(res.data);
+      await fetchLedger();
+
     } catch (err: any) {
-      toast.error(
-        err?.response?.data?.error || "Failed to reverse entry"
-      );
+      const msg =
+        err?.response?.data?.error ||
+        "This entry cannot be reversed.";
+
+      setReversalError(msg);
+      toast.error(msg);
     } finally {
       setReversing(false);
     }
   };
+
 
   /* -------------------- UI -------------------- */
 
@@ -144,7 +145,7 @@ export default function LedgerEntries() {
         </div>
       ) : error ? (
         <p className="text-red-400">{error}</p>
-      ) : ledger.length === 0 ? (
+      ) : data.length === 0 ? (
         <p className="text-slate-400">No ledger entries found.</p>
       ) : (
         <div className="overflow-x-auto">
@@ -167,7 +168,7 @@ export default function LedgerEntries() {
 
           {/* ROWS */}
           <div className="border border-white/10 border-t-0 rounded-b-xl overflow-hidden">
-            {ledger.map((row, i) => {
+            {data.map((row, i) => {
               const isAlreadyReversed = reversedMap.has(row._id);
               const isInactive = row.isReversal || isAlreadyReversed;
 
@@ -282,17 +283,45 @@ export default function LedgerEntries() {
         </div>
       )}
 
+      <div className="flex justify-between items-center mt-4 text-sm text-slate-400">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(p => p - 1)}
+          className="px-4 py-2 rounded-lg border border-white/10
+            disabled:opacity-40 hover:bg-white/5"
+        >
+          ← Previous
+        </button>
+
+        <span>Page {page}</span>
+
+        <button
+          disabled={!hasMore}
+          onClick={() => setPage(p => p + 1)}
+          className="px-4 py-2 rounded-lg border border-white/10
+            disabled:opacity-40 hover:bg-white/5"
+        >
+          Next →
+        </button>
+      </div>
+
+
       {/* CONFIRM MODAL */}
       {reverseTarget && (
         <ConfirmReversalModal
-            open={true}
-            voucherNo={reverseTarget.voucherNo}
-            itemName={reverseTarget.itemName}
-            onClose={() => setReverseTarget(null)}
-            onConfirm={confirmReversal}
-            loading={reversing}
+          open={true}
+          voucherNo={reverseTarget.voucherNo}
+          itemName={reverseTarget.itemName}
+          onClose={() => {
+            setReverseTarget(null);
+            setReversalError(null);
+          }}
+          onConfirm={confirmReversal}
+          loading={reversing}
+          error={reversalError}
         />
-        )}
+      )}
+
     </motion.section>
   );
 }

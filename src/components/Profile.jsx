@@ -17,9 +17,9 @@ import ProfitLossReport from "./ProfitLossReoprt";
 import StockValuation from "./StockValuation";
 import StockAlertSmart from "./StockAlert";
 import CashFlowWatch from "./CashFlow";
-import SlowMovingStock from "./SlowMovingStockAlert";
 import BusinessHealthCard from "./BusinessHealthCard";
 import AlertsFeed from "./AlertsFeed";
+import SlowMovingStockContainer from "./SlowMovingStockContainer";
 
 export default function Profile() {
   const { user } = useUser();
@@ -133,7 +133,7 @@ export default function Profile() {
           subtitle="System-generated recommendations"
         >
           <div className="space-y-8">
-            <SlowMovingStock />
+            <SlowMovingStockContainer />
             <AlertsFeed email={email} />
           </div>
         </SectionCard>

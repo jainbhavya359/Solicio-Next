@@ -7,6 +7,7 @@ import { StockLayer } from "@/src/models/StockLayerModel";
 import { EntryCounter } from "@/src/models/EntryCounterModel";
 import { generateVoucherNo } from "@/src/utils/voucher";
 import { Products } from "@/src/models/ProductModel";
+import { REVERSAL_VOUCHER_MAP } from "@/src/utils/voucherRules";
 
 export async function POST(req: NextRequest) {
   await connect();
@@ -15,6 +16,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const { ledgerId, reason = "Manual reversal" } = await req.json();
+
     if (!ledgerId) {
       return NextResponse.json({ error: "ledgerId required" }, { status: 400 });
     }
@@ -24,7 +26,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });
     }
 
-    // ❌ Cannot reverse a reversal
     if (original.isReversal) {
       return NextResponse.json(
         { error: "Reversal entries cannot be reversed" },
@@ -32,19 +33,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ❌ Already reversed
-    const alreadyReversed = await LedgerEntry.findOne({
-      reversedEntryId: original._id,
-    }).session(session);
-
-    if (alreadyReversed) {
+    const reversalType = REVERSAL_VOUCHER_MAP[original.voucherType];
+    if (!reversalType) {
       return NextResponse.json(
-        { error: "Entry already reversed" },
-        { status: 409 }
+        { error: "Unsupported voucher type for reversal" },
+        { status: 400 }
       );
     }
 
-    /* 🔢 REV voucher number */
+    if (original.voucherType === "Purchase") {
+      const currentStock = await TotalStock.findOne({
+        email: original.email,
+        name: original.itemName,
+        unit: original.unit,
+      });
+
+      if (!currentStock || currentStock.quantity < original.debitQty) {
+        return NextResponse.json(
+          {
+            error: "Cannot reverse purchase. Stock already consumed.",
+          },
+          { status: 409 }
+        );
+      }
+    }
+
+    // 🔢 Voucher number generation 
     const voucherNo = await generateVoucherNo({
       email: original.email,
       series: "REV",
@@ -52,14 +66,13 @@ export async function POST(req: NextRequest) {
       session,
     });
 
-
-    /* 📒 Reversal Ledger */
-    const reversal = await LedgerEntry.create(
+    // 📒 Ledger reversal entry
+    const [reversal] = await LedgerEntry.create(
       [{
         email: original.email,
         date: new Date(),
 
-        voucherType: `${original.voucherType}Return`,
+        voucherType: reversalType,
         voucherNo,
 
         itemName: original.itemName,
@@ -79,16 +92,17 @@ export async function POST(req: NextRequest) {
       { session }
     );
 
-    /* 📦 STOCK RESTORATION */
+    // 📦 Stock delta calculation
     const qtyDelta =
       original.voucherType === "Sale"
         ? original.creditQty
         : -original.debitQty;
 
-    await TotalStock.findOneAndUpdate(
+    // Updating total Stock
+    const stockUpdate = await TotalStock.findOneAndUpdate(
       {
         email: original.email,
-        name: original.itemName, // ✅ FIXED
+        name: original.itemName,
         unit: original.unit,
       },
       {
@@ -101,31 +115,40 @@ export async function POST(req: NextRequest) {
       { session }
     );
 
-    await Products.findOneAndUpdate(
-      {
-        email: original.email,
-        name: original.itemName, // ✅ FIXED
-        unit: original.unit,
-      },
-      {
-        $inc: { quantity: qtyDelta },
-      },
-      { session }
-    );
-
-    /* 🔁 FIFO layer restore (only for Sale reversal) */
-    if (original.voucherType === "Sale") {
-     for (const f of original.fifoBreakup) {
-        await StockLayer.updateOne(
-          { _id: f.layerId },
-          { $inc: { qtyRemaining: f.qty } },
-          { session }
-        );
-      }
+    if (!stockUpdate) {
+      throw new Error("STOCK_NOT_FOUND");
     }
 
+    // updating product quantity 
+    await Products.updateOne(
+      {
+        email: original.email,
+        name: original.itemName,
+        unit: original.unit,
+      },
+      { $inc: { quantity: qtyDelta } },
+      { session }
+    );
+    
     await session.commitTransaction();
-    return NextResponse.json({ success: true, reversal: reversal[0] });
+
+    // 🔁 FIFO restore (bulk)
+    // I didn't understand this part
+    if (original.voucherType === "Sale" && original.fifoBreakup?.length) {
+      const fifoOps = original.fifoBreakup.map(
+        (f: { layerId: mongoose.Types.ObjectId; qty: number }) => ({
+          updateOne: {
+            filter: { _id: f.layerId },
+            update: { $inc: { qtyRemaining: f.qty } },
+          },
+        })
+      );
+
+
+      await StockLayer.bulkWrite(fifoOps, { session });
+    }
+
+    return NextResponse.json({ success: true, reversal });
 
   } catch (err) {
     await session.abortTransaction();
@@ -135,3 +158,4 @@ export async function POST(req: NextRequest) {
     session.endSession();
   }
 }
+

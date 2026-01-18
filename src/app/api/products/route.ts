@@ -35,14 +35,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 🔒 Unit lock check
-    const existing = await Products.findOne({ email, name });
+    const normalizedName = name.trim().toLowerCase();
 
-    if (existing) {
-      if (existing.unit !== unit) {
+    /* instead of first finding and then creating */
+    const result = await Products.findOneAndUpdate(
+      { email, name: normalizedName },
+      {
+        $setOnInsert: {
+          email,
+          name: normalizedName,
+          unit,
+          quantity: 0,
+          sellingPrice,
+          purchasePrice: 0,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        rawResult: true,
+      }
+    );
+
+    // If product already existed
+    if (!result.lastErrorObject?.upserted) {
+      if (result.value.unit !== unit) {
         return NextResponse.json(
           {
-            error: `Unit locked. Product '${name}' already exists with unit '${existing.unit}'`,
+            error: `Unit locked. Product '${normalizedName}' already exists with unit '${result.value.unit}'`,
           },
           { status: 409 }
         );
@@ -54,23 +74,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const normalizedName = name.trim().toLowerCase();
-
-    const newProduct = await Products.create({
-      email,
-      name: normalizedName,
-      unit,
-      quantity: 0,
-      sellingPrice,
-      purchasePrice: 0,
-    });
-
     return NextResponse.json({
-      message: "Product Added",
       success: true,
-      product: newProduct,
+      message: "Product added",
+      product: result.value,
     });
-  } catch (error) {
+
+  } catch (error: any) {
+    // Duplicate key error (extra safety)
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { error: "Product already exists" },
+        { status: 409 }
+      );
+    }
+
     console.error("Product create error:", error);
     return NextResponse.json(
       { error: "Failed to add product" },
@@ -78,3 +96,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

@@ -105,7 +105,7 @@ export default function LedgerSearchBox({ email }: { email: string }) {
   }, [reload]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-6">
       {/* 🔍 Search */}
       <UniversalSearchBox
         placeholder="Search ledger..."
@@ -116,7 +116,7 @@ export default function LedgerSearchBox({ email }: { email: string }) {
         <p className="text-sm text-slate-400">Searching…</p>
       )}
 
-      {results.length > 0 && (
+      {results.length >= 0 && prevQuery.length > 0 && (
         <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl overflow-hidden">
           {/* Header */}
           <div className="grid grid-cols-13 px-5 py-3 text-xs text-slate-400 border-b border-white/10">
@@ -227,11 +227,11 @@ export default function LedgerSearchBox({ email }: { email: string }) {
         </div>
       )}
 
-      {!loading && results.length === 0 && (
+      {/* {!loading && results.length === 0 && (
         <p className="text-sm text-slate-500">
           No search results
         </p>
-      )}
+      )} */}
     </div>
   );
 }

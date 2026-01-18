@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { useUser } from "@clerk/nextjs";
 import { CheckCircle } from "lucide-react";
 
-interface SlowMovingItem {
+/* -------------------- TYPES -------------------- */
+
+export interface SlowMovingItem {
   product: string;
   unit: string;
   quantity: number;
@@ -13,37 +12,22 @@ interface SlowMovingItem {
   daysSinceMovement: number | null;
 }
 
-export default function SlowMovingStock() {
-  const { user } = useUser();
-  const email = user?.primaryEmailAddress?.emailAddress;
+interface Props {
+  slowMovingCount: number;
+  slowMoving: SlowMovingItem[];
+  open: boolean;
+  onToggle: () => void;
+}
 
-  const [data, setData] = useState<{
-    slowMovingCount: number;
-    slowMoving: SlowMovingItem[];
-  }>({
-    slowMovingCount: 0,
-    slowMoving: [],
-  });
+/* -------------------- COMPONENT -------------------- */
 
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!email) return;
-
-    axios
-      .get("/api/health/stock-movement", { params: { email } })
-      .then(res => {
-        setData({
-          slowMovingCount: res.data?.slowMovingCount ?? 0,
-          slowMoving: res.data?.slowMoving ?? [],
-        });
-      })
-      .catch(() =>
-        setData({ slowMovingCount: 0, slowMoving: [] })
-      );
-  }, [email]);
-
-  const isHealthy = data.slowMovingCount === 0;
+export default function SlowMovingStockView({
+  slowMovingCount,
+  slowMoving,
+  open,
+  onToggle,
+}: Props) {
+  const isHealthy = slowMovingCount === 0;
 
   return (
     <section className="rounded-3xl p-6 bg-white/10 border border-white/15 backdrop-blur-xl">
@@ -64,14 +48,14 @@ export default function SlowMovingStock() {
           <p className="text-sm text-slate-300 mt-1">
             {isHealthy
               ? "All products have moved in the last 30 days."
-              : `${data.slowMovingCount} item${
-                  data.slowMovingCount > 1 ? "s" : ""
+              : `${slowMovingCount} item${
+                  slowMovingCount > 1 ? "s" : ""
                 } haven’t moved in over 30 days.`}
           </p>
 
           {!isHealthy && (
             <button
-              onClick={() => setOpen(v => !v)}
+              onClick={onToggle}
               className="mt-3 text-sm text-emerald-400 hover:underline"
             >
               Analyze products →
@@ -89,9 +73,9 @@ export default function SlowMovingStock() {
       )}
 
       {/* Expanded list */}
-      {!isHealthy && open && data.slowMoving.length > 0 && (
+      {!isHealthy && open && slowMoving.length > 0 && (
         <div className="mt-5 border-t border-white/10 pt-4 space-y-3">
-          {data.slowMoving.map(p => (
+          {slowMoving.map(p => (
             <div
               key={`${p.product}-${p.unit}`}
               className="p-4 border border-white/10 rounded-xl"
@@ -126,5 +110,3 @@ export default function SlowMovingStock() {
     </section>
   );
 }
-
-

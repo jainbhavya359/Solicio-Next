@@ -1,8 +1,9 @@
 "use client";
 
 interface StockMovementItem {
-  itemName: string;
-  daysSinceLastSale: number;
+  product: string;
+  unit: string;
+  daysSinceLastSale: number | null;
   score: number;
 }
 
@@ -32,20 +33,28 @@ export default function StockMovementCard({
 
       {productCount === 0 ? (
         <p className="text-slate-500 text-sm">
-          No sales recorded yet
+          No products with sales yet
         </p>
       ) : (
         <div className="space-y-2">
           {breakdown.map((b) => (
             <div
-              key={b.itemName}
+              key={`${b.product}-${b.unit}`}
               className="flex justify-between text-sm"
             >
               <div>
-                <span className="text-white">{b.itemName}</span>
-                <span className="ml-2 text-xs text-slate-400">
-                  {b.daysSinceLastSale} days ago
+                <span className="text-white">
+                  {b.product}
                 </span>
+                <span className="ml-1 text-xs text-slate-400">
+                  ({b.unit})
+                </span>
+
+                <div className="text-xs text-slate-400">
+                  {b.daysSinceLastSale === null
+                    ? "Never sold"
+                    : `${b.daysSinceLastSale} days ago`}
+                </div>
               </div>
 
               <span

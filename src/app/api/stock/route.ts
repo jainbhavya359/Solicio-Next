@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     const txDate = date ? new Date(date) : new Date();
 
-    /* 🔢 Voucher */
+    /* 🔢 Voucher Creation */
     const voucherNo = await generateVoucherNo({
       email,
       series: "PUR",
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       session,
     });
 
-
+    /* Stock Creation for Stock History */
     await Stock.create(
       [
         {
@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
       { session }
     );
 
+    /* Product Quantity Update */
     await Products.updateOne(
       { email, name, unit },
       {
