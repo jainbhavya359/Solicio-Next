@@ -88,18 +88,21 @@ export default function Inventory() {
           </div>
         </div>
 
+        
         <AnimatePresence mode="wait">
-          {newPurchase && (
-            <PanelMotion key="purchase">
-              <Purchase visible={true} preSelectedProduct={product} reloadSetter={setReload} reload={reload}/>
-            </PanelMotion>
-          )}
+          <div className="z-10">
+            {newPurchase && (
+              <PanelMotion key="purchase">
+                <Purchase visible={true} preSelectedProduct={product} reloadSetter={setReload} reload={reload}/>
+              </PanelMotion>
+            )}
 
-          {newSale && (
-            <PanelMotion key="sale">
-              <Sale visible={true} preSelectedProduct={product} reloadSetter={setReload} reload={reload}/>
-            </PanelMotion>
-          )}
+            {newSale && (
+              <PanelMotion key="sale">
+                <Sale visible={true} preSelectedProduct={product} reloadSetter={setReload} reload={reload}/>
+              </PanelMotion>
+            )}
+          </div>
 
           
           <PanelMotion key="stock">

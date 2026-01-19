@@ -80,10 +80,14 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
     if (!selectedProduct) return;
 
     setQuantity((q) => {
-      if (q >= selectedProduct.quantity) {
+      const maxQty =
+        selectedProduct.availableQty ?? selectedProduct.quantity;
+
+      if (q >= maxQty) {
         toast.error("Not enough stock");
         return q;
       }
+
       return q + 1;
     });
   };
@@ -161,8 +165,9 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
               shadow-2xl max-h-64 overflow-auto">
 
               {products.map((p) => {
-                const outOfStock = p.quantity <= 0;
-                const lowStock = p.quantity > 0 && p.quantity <= 5;
+                const stock = p.availableQty ?? p.quantity;
+                const outOfStock = stock <= 0;
+                const lowStock = stock > 0 && stock <= 5;
 
                 return (
                   <button
@@ -171,7 +176,8 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
                     onClick={() => {
                       setSelectedProduct(p);
                       setShowProducts(false);
-                      setPrice(p.sellingPrice)
+                      setPrice(p.sellingPrice);
+                      setQuantity(1);
                     }}
                     className={`w-full px-5 py-3 text-left flex items-center justify-between
                       transition
@@ -180,7 +186,6 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
                         : "hover:bg-white/10"}
                     `}
                   >
-                    {/* Product Name */}
                     <div>
                       <p className="text-white font-medium">
                         {p.name}
@@ -188,9 +193,14 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
                       <p className="text-xs text-slate-400">
                         Unit: {p.unit}
                       </p>
+
+                      {p.productType === "composite" && (
+                        <p className="text-xs text-indigo-400 mt-1">
+                          Can make up to {stock}
+                        </p>
+                      )}
                     </div>
 
-                    {/* Stock Indicator */}
                     <div className="text-right">
                       {outOfStock ? (
                         <span className="text-xs text-red-400 font-semibold">
@@ -198,11 +208,11 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
                         </span>
                       ) : lowStock ? (
                         <span className="text-xs text-amber-400 font-semibold">
-                          {p.quantity} left
+                          {stock} left
                         </span>
                       ) : (
                         <span className="text-xs text-emerald-400 font-semibold">
-                          {p.quantity} in stock
+                          {stock} in stock
                         </span>
                       )}
                     </div>
@@ -213,6 +223,13 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
           )}
         </div>
       </div>
+
+      {selectedProduct?.productType === "composite" && (
+        <p className="text-xs text-slate-400 mt-1">
+          Made from ingredients · Max {selectedProduct.availableQty}
+        </p>
+      )}
+
 
 
       {/* Product Card */}
@@ -247,7 +264,11 @@ export default function Sale({ visible, preSelectedProduct, reloadSetter, reload
 
             <button
               onClick={increment}
-              className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20"
+              disabled={
+                quantity >=
+                (selectedProduct.availableQty ?? selectedProduct.quantity)
+              }
+              className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-40"
             >
               <Plus />
             </button>

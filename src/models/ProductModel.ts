@@ -1,4 +1,4 @@
-import { Schema, models, model } from "mongoose";
+import { Schema, models, model, Types } from "mongoose";
 
 const ProductSchema = new Schema(
   {
@@ -9,14 +9,40 @@ const ProductSchema = new Schema(
     unit: {
       type: String,
       required: true,
-      immutable: true, // 🔒 unit lock
+      immutable: true,
     },
 
-    quantity: { type: Number, default: 0 },
+    productType: {
+      type: String,
+      enum: ["simple", "composite"],
+      default: "simple",
+      index: true,
+    },
 
+    /* 🔹 Simple product stock */
+    quantity: { type: Number, default: 0 },
     purchasePrice: { type: Number, default: 0 },
     sellingPrice: { type: Number, default: 0 },
 
+    /* 🔹 Composite product recipe (BOM) */
+    recipe: [
+      {
+        productId: {
+          type: Types.ObjectId,
+          ref: "Products",
+          required: true,
+        },
+        productName: String, // denormalized for speed
+        unit: String,        // ingredient unit
+        qtyRequired: {
+          type: Number,
+          required: true,
+          min: 0.0001,
+        },
+      },
+    ],
+
+    /* 🔹 Costing */
     costingMethod: {
       type: String,
       enum: ["FIFO", "WAVG"],
@@ -26,31 +52,13 @@ const ProductSchema = new Schema(
     lowStockConfig: {
       minQty: { type: Number, default: 5 },
       warningQty: { type: Number, default: 10 },
-      criticalDays: { type: Number, default: 3 },
-      warningDays: { type: Number, default: 7 },
-      lowDays: { type: Number, default: 14 },
     },
   },
   { timestamps: true }
 );
 
-/* -------------------- INDEXES -------------------- */
-
-/**
- * Unique product per user per unit
- */
-ProductSchema.index(
-  { email: 1, name: 1, unit: 1 },
-  { unique: true }
-);
-
-/**
- * Fast stock dashboards
- */
-ProductSchema.index({
-  email: 1,
-  quantity: 1,
-});
+ProductSchema.index({ email: 1, name: 1, unit: 1 }, { unique: true });
+ProductSchema.index({ email: 1, productType: 1 });
 
 export const Products =
   models.Products || model("Products", ProductSchema);

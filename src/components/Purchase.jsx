@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Plus, Minus, Package } from "lucide-react";
 import { UNITS } from "../utils/store";
+import RecipeBuilder from "./RecipeBuilder";
+import AddProductModal from "./AddProduct";
 
 export default function Purchase({ visible, preSelectedProduct, reloadSetter, reload }) {
   const { user } = useUser();
@@ -17,6 +19,10 @@ export default function Purchase({ visible, preSelectedProduct, reloadSetter, re
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProducts, setShowProducts] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+
+  const [productType, setProductType] = useState("simple");
+  const [recipe, setRecipe] = useState([]);
+
 
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState("");
@@ -33,6 +39,12 @@ export default function Purchase({ visible, preSelectedProduct, reloadSetter, re
   const [newUnit, setNewUnit] = useState("");
 
   const [loading, setLoading] = useState(false);
+
+  const canSave =
+  newProductName &&
+  newUnit &&
+  (productType === "simple" || recipe.length > 0);
+
 
   if (!visible) return null;
 
@@ -92,6 +104,51 @@ export default function Purchase({ visible, preSelectedProduct, reloadSetter, re
 
   }, [email, reload]);
 
+  /* ---------------- Add new Product ---------------- */
+  const handleSaveProduct = async () => {
+    if (!newProductName || !newUnit) {
+      toast.error("Fill all fields");
+      return;
+    }
+
+    try {
+      if (productType === "composite" && recipe.length === 0) {
+        toast.error("Add at least one ingredient");
+        return;
+      }
+
+      const res = await axios.post(
+        productType === "simple"
+          ? "/api/products"
+          : "/api/composite-product",
+        {
+          email,
+          name: newProductName,
+          unit: newUnit,
+          sellingPrice,
+          recipe,
+        }
+      );
+
+      const created = res.data?.product ?? res.data;
+
+      if (!created?.name || !created?.unit) {
+        toast.error("Invalid product response");
+        return;
+      }
+
+      setProducts((prev) => [...prev, created]);
+      setSelectedProduct(created);
+      
+      toast.success("Product added");
+      setShowAddProduct(false);
+      setNewProductName("");
+      setNewUnit("");
+      setSellingPrice("");
+    } catch {
+      toast.error("Failed to add product");
+    }
+  }
   /* ---------------- Quantity Controls ---------------- */
   const increment = () => setQuantity(q => q + 1);
   const decrement = () => setQuantity(q => (q > 1 ? q - 1 : 1));
@@ -200,103 +257,39 @@ export default function Purchase({ visible, preSelectedProduct, reloadSetter, re
       </div>
 
       {showAddProduct && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
-          <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-6">
-            <h4 className="text-lg font-bold text-white mb-4">
-              Add New Product
-            </h4>
+        <AddProductModal
+          open={showAddProduct}
+          onClose={() => setShowAddProduct(false)}
+          units={units}
+          products={products}
+          onSave={async (payload) => {
+            try {
+              const res = await axios.post(
+                payload.productType === "simple"
+                  ? "/api/products"
+                  : "/api/products/composite",
+                {
+                  email,
+                  name: payload.name,
+                  unit: payload.unit,
+                  sellingPrice: payload.sellingPrice,
+                  recipe: payload.recipe,
+                }
+              );
 
-            <div className="space-y-4">
-              <input
-                placeholder="Product name"
-                value={newProductName}
-                onChange={(e) => setNewProductName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
-              />
+              const created = res.data?.product ?? res.data;
+              setProducts(prev => [...prev, created]);
+              setSelectedProduct(created);
 
-              <select
-                value={newUnit}
-                onChange={(e) => setNewUnit(e.target.value)}
-                className="px-4 py-3 rounded-xl bg-black/40 border border-white/10 outline-none text-slate-200 focus:border-emerald-400"
-              >
-                <option value="">Select unit</option>
-                {units.map((u) => (
-                  <option key={u} value={u} className="bg-slate-900">
-                    {u}
-                  </option>
-                ))}
-              </select>
-
-              {newUnit === "Custom" && (
-                <input
-                  type="text"
-                  placeholder="Custom unit"
-                  value={customUnit}
-                  onChange={(e) => setCustomUnit(e.target.value)}
-                  onBlur={handleCustomUnit}
-                  className="px-4 py-3 rounded-xl bg-black/40 border border-white/10"
-                />
-              )}
-
-              <input
-                type="number"
-                placeholder="Selling Price per unit (Optional)"
-                value={sellingPrice}
-                onChange={(e) => setSellingPrice(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white"
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setShowAddProduct(false)}
-                className="px-4 py-2 rounded-lg bg-white/10 text-white"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={async () => {
-                  if (!newProductName || !newUnit) {
-                    toast.error("Fill all fields");
-                    return;
-                  }
-
-                  try {
-                    const res = await axios.post("/api/products", {
-                      email,
-                      name: newProductName.toLowerCase(),
-                      unit: newUnit,
-                      sellingPrice,
-                    });
-
-                    const created = res.data?.product ?? res.data;
-
-                    if (!created?.name || !created?.unit) {
-                      toast.error("Invalid product response");
-                      return;
-                    }
-
-                    setProducts((prev) => [...prev, created]);
-                    setSelectedProduct(created);
-                    
-                    toast.success("Product added");
-                    setShowAddProduct(false);
-                    setNewProductName("");
-                    setNewUnit("");
-                    setSellingPrice("");
-                  } catch {
-                    toast.error("Failed to add product");
-                  }
-                }}
-                className="px-5 py-2 rounded-lg bg-emerald-400 text-black font-semibold"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
+              toast.success("Product added");
+              setShowAddProduct(false);
+            } catch {
+              toast.error("Failed to add product");
+            }
+          }}
+        />
       )}
+
 
       {/* Product Card */}
       {selectedProduct && (

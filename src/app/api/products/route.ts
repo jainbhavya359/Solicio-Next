@@ -1,5 +1,6 @@
 import connect from "@/src/dbConfig/dbConnection";
 import { Products } from "@/src/models/ProductModel";
+import { calculateCompositeStock } from "@/src/utils/compositeStock";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest){
@@ -13,9 +14,22 @@ export async function GET(request: NextRequest){
             return NextResponse.json({error: "No email Found"},{status: 400});
         }
 
-        const productList = await Products.find({email});
+        const products = await Products.find({ email }).lean();
 
-        return NextResponse.json({products: productList});
+        for (const p of products) {
+          if (p.productType === "composite") {
+            p.availableQty = await calculateCompositeStock(p, null);
+          } else {
+            p.availableQty = p.quantity;
+          }
+        }
+
+        return NextResponse.json(products);
+
+
+        // const productList = await Products.find({email});
+
+        // return NextResponse.json({products: productList});
     }catch(error){
         console.log("Error: ",error);
         return NextResponse.json({error: error}, {status: 500});
