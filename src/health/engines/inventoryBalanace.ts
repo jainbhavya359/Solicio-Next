@@ -12,51 +12,133 @@ function scoreFromRatio(ratio: number): number {
 }
 
 export async function computeInventoryBalance(email: string) {
-  /* --------------------------------------------------
-     1️⃣ Current inventory value
-  -------------------------------------------------- */
-  const stock = await TotalStock.find({ email }).select("price");
+  const DAYS = 30;
+  const today = new Date();
+
+  /* ---------- STOCK VALUE ---------- */
+  const stock = await TotalStock.find({ email }).select("price").lean();
 
   const totalStockValue = stock.reduce(
-    (sum, s) => sum + (s.price || 0),
+    (s, i) => s + (i.price || 0),
     0
   );
 
-  /* --------------------------------------------------
-     2️⃣ Sales value (last 30 days)
-  -------------------------------------------------- */
-  const since = new Date();
-  since.setDate(since.getDate() - 30);
+  /* ---------- SALES ---------- */
+  const since = new Date(today.getTime() - DAYS * 86400000);
 
   const sales = await LedgerEntry.find({
     email,
     voucherType: "Sale",
     isReversal: false,
     date: { $gte: since },
-  }).select("amount");
+  }).select("amount date").lean();
 
   const totalSalesValue = sales.reduce(
-    (sum, s) => sum + (s.amount || 0),
+    (s, e) => s + (e.amount || 0),
     0
   );
 
-  /* --------------------------------------------------
-     3️⃣ Ratio + score
-  -------------------------------------------------- */
-  const stockToSalesRatio =
-    totalSalesValue > 0
-      ? Number((totalStockValue / totalSalesValue).toFixed(2))
+  const avgDailySales =
+    totalSalesValue > 0 ? totalSalesValue / DAYS : 0;
+
+  /* ---------- INVENTORY COVER ---------- */
+  const inventoryCoverDays =
+    avgDailySales > 0
+      ? Number((totalStockValue / avgDailySales).toFixed(1))
       : Infinity;
 
-  const inventoryBalanceScore =
-    totalSalesValue === 0
-      ? 0
-      : scoreFromRatio(stockToSalesRatio);
+  /* ---------- TREND (15 DAYS) ---------- */
+  const since15 = new Date(today.getTime() - 15 * 86400000);
+
+  const purchases15 = await LedgerEntry.find({
+    email,
+    voucherType: "Purchase",
+    isReversal: false,
+    date: { $gte: since15 },
+  }).select("amount").lean();
+
+  const sales15 = await LedgerEntry.find({
+    email,
+    voucherType: "Sale",
+    isReversal: false,
+    date: { $gte: since15 },
+  }).select("amount").lean();
+
+  const purchaseValue15 = purchases15.reduce(
+    (s, p) => s + (p.amount || 0),
+    0
+  );
+
+  const salesValue15 = sales15.reduce(
+    (s, s2) => s + (s2.amount || 0),
+    0
+  );
+
+  const inventoryTrend =
+    purchaseValue15 > salesValue15
+      ? "building"
+      : purchaseValue15 < salesValue15
+      ? "reducing"
+      : "stable";
+
+  /* ---------- CAPITAL LOCK ---------- */
+  const capitalLockedPct =
+    totalStockValue + totalSalesValue > 0
+      ? Number(
+          (
+            (totalStockValue /
+              (totalStockValue + totalSalesValue)) *
+            100
+          ).toFixed(1)
+        )
+      : 0;
+
+  /* ---------- RISK ---------- */
+  const riskLevel =
+    inventoryCoverDays <= 30
+      ? "healthy"
+      : inventoryCoverDays <= 60
+      ? "watch"
+      : "critical";
+
+  /* ---------- SCORE ---------- */
+  let score = 0;
+
+  score += scoreFromRatio(
+    totalSalesValue > 0
+      ? totalStockValue / totalSalesValue
+      : Infinity
+  );
+
+  if (inventoryCoverDays <= 30) score += 25;
+  else if (inventoryCoverDays <= 60) score += 15;
+
+  if (inventoryTrend === "reducing") score += 20;
+  else if (inventoryTrend === "stable") score += 10;
+
+  if (capitalLockedPct < 40) score += 15;
+  else if (capitalLockedPct < 60) score += 8;
+
+  if (totalSalesValue > 0) score += 15;
 
   return {
-    inventoryBalanceScore, // 0–25
+    inventoryHealthScore: Math.min(100, score),
+
+    /* Raw values */
     totalStockValue,
     totalSalesValue,
-    stockToSalesRatio,
+    avgDailySales,
+    inventoryCoverDays,
+
+    /* Intelligence */
+    inventoryTrend,
+    capitalLockedPct,
+    riskLevel,
+
+    /* Legacy */
+    stockToSalesRatio:
+      totalSalesValue > 0
+        ? Number((totalStockValue / totalSalesValue).toFixed(2))
+        : null,
   };
 }

@@ -3,68 +3,43 @@
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 
-interface UniversalSearchBoxProps {
-  placeholder?: string;
-  onChange?: (value: string) => void;
-  onSubmit?: (value: string) => void;
-  debounceMs?: number;
-  autoFocus?: boolean;
-}
-
 export default function UniversalSearchBox({
-  placeholder = "Search...",
-  onChange,
+  placeholder,
   onSubmit,
-  debounceMs = 300,
-  autoFocus = false,
-}: UniversalSearchBoxProps) {
+  autoFocus,
+}: {
+  placeholder?: string;
+  onSubmit?: (value: string) => void;
+  autoFocus?: boolean;
+}) {
   const [value, setValue] = useState("");
 
-  // 🔁 Debounced change emitter
-  useEffect(() => {
-    if (!onChange) return;
-
-    const timer = setTimeout(() => {
-      onChange(value.trim());
-    }, debounceMs);
-
-    return () => clearTimeout(timer);
-  }, [value, debounceMs, onChange]);
-
-  // ⌨️ Enter key submit
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && onSubmit) {
-      onSubmit(value.trim());
-    }
+  const handleSubmit = () => {
+    onSubmit?.(value.trim());
   };
 
   return (
-    <div
-      className="flex items-center gap-3 px-4 py-3
-      rounded-2xl bg-black/40 border border-white/10
-      focus-within:border-indigo-400
-      hover:border-white/20
-      transition"
+    <div className="flex items-center gap-3 px-4 py-3 rounded-xl
+      bg-slate-900 border border-slate-700 shadow-sm
+      focus-within:border-indigo-400 transition"
     >
       <Search className="w-4 h-4 text-slate-400" />
 
       <input
-        type="text"
         value={value}
         autoFocus={autoFocus}
-        placeholder={placeholder}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
+        placeholder={placeholder || "Search…"}
+        onChange={e => setValue(e.target.value)}
+        onKeyDown={e => e.key === "Enter" && handleSubmit()}
         className="flex-1 bg-transparent outline-none
-        text-white placeholder:text-slate-500 text-sm"
+        text-slate-100 placeholder:text-slate-400 text-sm"
       />
 
-      {onSubmit && value && (
+      {value && (
         <button
-          onClick={() => onSubmit(value.trim())}
-          className="text-xs px-3 py-1 rounded-full
-          bg-indigo-500/20 text-indigo-400
-          hover:bg-indigo-500/30 transition"
+          onClick={handleSubmit}
+          className="px-4 py-1.5 rounded-md text-xs
+          bg-indigo-600 text-white hover:bg-indigo-500 transition"
         >
           Search
         </button>

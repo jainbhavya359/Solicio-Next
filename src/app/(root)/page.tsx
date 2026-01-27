@@ -1,9 +1,9 @@
-import Homepage from "@/src/components/Homepage"
+import Homepage from "@/src/components/home/Homepage";
 
-export default async function Home() {
+export default function Home() {
   return (
-    <div className="bg-black text-white relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black py-10">
+    <div className="bg-white text-slate-900 antialiased">
       <Homepage />
     </div>
-  );
+  )
 }

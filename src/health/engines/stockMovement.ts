@@ -14,10 +14,21 @@ function scoreFromDays(days: number | null): number {
   return 0;
 }
 
+
+function categoryFromDays(days: number | null) {
+  if (days === null) return "never-sold";
+  if (days <= 7) return "fast";
+  if (days <= 14) return "warming";
+  if (days <= 30) return "slow";
+  return "dead";
+}
+
 export async function computeStockMovement(email: string) {
-  /* --------------------------------------------------
-     1️⃣ Aggregate LAST movement + LAST sale (single scan)
-  -------------------------------------------------- */
+  const DAYS_SLOW = 30;
+  const DAYS_DEAD = 60;
+  const now = Date.now();
+
+  /* ---------- MOVEMENT AGG ---------- */
   const movements = await LedgerEntry.aggregate([
     {
       $match: {
@@ -30,10 +41,7 @@ export async function computeStockMovement(email: string) {
     },
     {
       $group: {
-        _id: {
-          name: "$itemName",
-          unit: "$unit",
-        },
+        _id: { name: "$itemName", unit: "$unit" },
         lastMovedAt: { $max: "$date" },
         lastSaleAt: {
           $max: {
@@ -48,55 +56,71 @@ export async function computeStockMovement(email: string) {
     },
   ]);
 
-  /* --------------------------------------------------
-     2️⃣ Fetch current stock only
-  -------------------------------------------------- */
+  /* ---------- STOCK ---------- */
   const stock = await TotalStock.find({
     email,
     quantity: { $gt: 0 },
   }).lean();
 
-  const movementMap = new Map<
-    string,
-    { lastMovedAt: Date | null; lastSaleAt: Date | null }
-  >();
-
-  for (const m of movements) {
-    const key = `${m._id.name}|${m._id.unit}`;
-    movementMap.set(key, {
-      lastMovedAt: m.lastMovedAt || null,
-      lastSaleAt: m.lastSaleAt || null,
-    });
-  }
-
-  const now = Date.now();
-  const slowCutoff = new Date(now - DAYS_SLOW_THRESHOLD * 86400000);
+  const movementMap = new Map<string, any>();
+  movements.forEach(m => {
+    movementMap.set(`${m._id.name}|${m._id.unit}`, m);
+  });
 
   let totalScore = 0;
-  let productCount = 0;
+  let scoredProducts = 0;
+
+  let totalStockValue = 0;
+  let slowStockValue = 0;
+  let deadStockValue = 0;
 
   const breakdown = [];
   const slowMoving = [];
+  const deadStock = [];
 
-  /* --------------------------------------------------
-     3️⃣ Derive metrics
-  -------------------------------------------------- */
   for (const s of stock) {
     const key = `${s.name}|${s.unit}`;
     const m = movementMap.get(key);
 
-    const lastMovedAt = m?.lastMovedAt || null;
     const lastSaleAt = m?.lastSaleAt || null;
+    const lastMovedAt = m?.lastMovedAt || null;
 
     const daysSinceSale = lastSaleAt
       ? Math.floor((now - lastSaleAt.getTime()) / 86400000)
       : null;
 
     const score = scoreFromDays(daysSinceSale);
-
     if (daysSinceSale !== null) {
       totalScore += score;
-      productCount++;
+      scoredProducts++;
+    }
+
+    const value = (s.quantity || 0) * (s.price || 0);
+    totalStockValue += value;
+    
+    const category = categoryFromDays(daysSinceSale);
+
+    if (category === "slow" || category === "dead") {
+      slowStockValue += value;
+      slowMoving.push({
+        product: s.name,
+        unit: s.unit,
+        quantity: s.quantity,
+        daysSinceLastSale: daysSinceSale,
+        value,
+        category,
+      });
+    }
+
+    if (category === "dead") {
+      deadStockValue += value;
+      deadStock.push({
+        product: s.name,
+        unit: s.unit,
+        quantity: s.quantity,
+        daysSinceLastSale: daysSinceSale,
+        value,
+      });
     }
 
     breakdown.push({
@@ -104,31 +128,36 @@ export async function computeStockMovement(email: string) {
       unit: s.unit,
       daysSinceLastSale: daysSinceSale,
       score,
+      category,
     });
 
-    if (!lastMovedAt || lastMovedAt < slowCutoff) {
-      slowMoving.push({
-        product: s.name,
-        unit: s.unit,
-        quantity: s.quantity,
-        lastMovedAt,
-        daysSinceMovement: lastMovedAt
-          ? Math.floor((now - lastMovedAt.getTime()) / 86400000)
-          : null,
-      });
-    }
   }
 
   return {
     stockMovementScore:
-      productCount === 0
+      scoredProducts === 0
         ? 0
-        : Math.round(totalScore / productCount),
+        : Math.round(totalScore / scoredProducts),
 
-    productCount,
+    productCount: stock.length,
+
+    /* Portfolio insight */
+    totalStockValue,
+    slowStockValue,
+    deadStockValue,
+    slowStockPct:
+      totalStockValue > 0
+        ? Number(
+            ((slowStockValue / totalStockValue) * 100).toFixed(1)
+          )
+        : 0,
+
+    /* Lists */
     breakdown,
-    slowMovingCount: slowMoving.length,
     slowMoving,
+    deadStock,
+
+    slowMovingCount: slowMoving.length,
+    deadStockCount: deadStock.length,
   };
 }
-

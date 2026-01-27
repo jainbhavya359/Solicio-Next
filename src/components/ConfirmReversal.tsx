@@ -6,7 +6,7 @@ export default function ConfirmReversalModal({
   onConfirm,
   voucherNo,
   itemName,
-  loading,
+  loading = false,
   error,
 }: {
   open: boolean;
@@ -14,7 +14,7 @@ export default function ConfirmReversalModal({
   onConfirm: () => void;
   voucherNo: string;
   itemName: string;
-  loading: boolean;
+  loading?: boolean;
   error?: string | null;
 }) {
 

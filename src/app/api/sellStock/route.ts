@@ -42,26 +42,25 @@ export async function POST(req: NextRequest) {
       session,
     });
 
-    /* 🔍 Fetch product */
+    /* 🔍 Fetch product (EMAIL-SCOPED) */
     const product = await Products.findOne(
       { email, name, unit },
       null,
       { session }
     ).lean();
 
-    if (product.productType === "composite") {
-      const maxQty = await calculateCompositeStock(product, session);
-
-      if (soldQty > maxQty) {
-        throw new Error(
-          `INSUFFICIENT_INGREDIENT_STOCK`
-        );
-      }
-    }
-
-
     if (!product) {
       throw new Error("PRODUCT_NOT_FOUND");
+    }
+
+    const isComposite = product.productType === "composite";
+
+    /* 🧩 Composite stock validation */
+    if (isComposite) {
+      const maxQty = await calculateCompositeStock(product, session);
+      if (soldQty > maxQty) {
+        throw new Error("INSUFFICIENT_INGREDIENT_STOCK");
+      }
     }
 
     let cogsTotal = 0;
@@ -70,10 +69,10 @@ export async function POST(req: NextRequest) {
     /* =====================================================
        🧩 COMPOSITE PRODUCT SALE
     ====================================================== */
-    if (product.isComposite && product.recipe?.length) {
+    if (isComposite && product.recipe?.length) {
       for (const item of product.recipe) {
-        const ingredient = await Products.findById(
-          item.productId,
+        const ingredient = await Products.findOne(
+          { _id: item.productId, email },
           null,
           { session }
         ).lean();
@@ -91,35 +90,17 @@ export async function POST(req: NextRequest) {
         const ingredientCost = ingredient.purchasePrice || 0;
         cogsTotal += usedQty * ingredientCost;
 
-        /* 🔻 Reduce ingredient product stock */
+        /* 🔻 Reduce ingredient stock */
         await Products.updateOne(
-          { _id: ingredient._id },
+          { _id: ingredient._id, email },
           { $inc: { quantity: -usedQty } },
-          { session }
-        );
-
-        /* 🔻 Reduce TotalStock */
-        await TotalStock.updateOne(
-          {
-            email,
-            name: ingredient.name,
-            unit: ingredient.unit,
-            quantity: { $gte: usedQty },
-          },
-          {
-            $inc: {
-              quantity: -usedQty,
-              price: -(usedQty * ingredientCost),
-            },
-            $set: { updatedAt: txDate },
-          },
           { session }
         );
       }
     }
 
     /* =====================================================
-       📦 NORMAL PRODUCT SALE (FIFO / WAVG)
+       📦 SIMPLE PRODUCT SALE
     ====================================================== */
     else {
       if (costing === "FIFO") {
@@ -156,29 +137,27 @@ export async function POST(req: NextRequest) {
         cogsTotal = soldQty * avgRate;
       }
 
-      /* 🔻 Reduce product stock */
+      /* 🔻 Reduce simple product quantity */
       await Products.updateOne(
         { email, name, unit },
         { $inc: { quantity: -soldQty } },
         { session }
       );
-
-      await TotalStock.updateOne(
-        {
-          email,
-          name,
-          unit,
-          quantity: { $gte: soldQty },
-        },
-        {
-          $inc: { quantity: -soldQty, price: -cogsTotal },
-          $set: { updatedAt: txDate },
-        },
-        { session }
-      );
     }
 
-    /* 📦 Stock history (optional UI timeline) */
+    /* 🕒 UPDATE MOVEMENT METADATA (🔥 KEY FIX 🔥) */
+    await Products.updateOne(
+      { email, name, unit },
+      {
+        $set: {
+          lastSaleAt: txDate,
+          lastMovedAt: txDate,
+        },
+      },
+      { session }
+    );
+
+    /* 📦 Stock history */
     await Stock.create(
       [{
         name,
@@ -193,7 +172,7 @@ export async function POST(req: NextRequest) {
       { session }
     );
 
-    /* 📒 SINGLE LEDGER ENTRY (KEY FIX) */
+    /* 📒 Ledger */
     await LedgerEntry.create(
       [{
         email,
@@ -205,7 +184,6 @@ export async function POST(req: NextRequest) {
 
         itemName: name,
         unit,
-
         debitQty: 0,
         creditQty: soldQty,
 
@@ -215,7 +193,7 @@ export async function POST(req: NextRequest) {
         costAmount: cogsTotal,
         fifoBreakup,
 
-        productType: product.isComposite ? "composite" : "simple",
+        productType: isComposite ? "composite" : "simple",
         isReversal: false,
       }],
       { session }
@@ -226,7 +204,7 @@ export async function POST(req: NextRequest) {
 
   } catch (err: any) {
     await session.abortTransaction();
-    console.error(err.message);
+    console.error(err);
     return NextResponse.json(
       { error: err.message || "Sale failed" },
       { status: 500 }

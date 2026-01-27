@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/components/MotionWrapper.jsx"  ],
+, "src/components/visual/MotionWrapper.jsx", "src/components/ServiceCard.jsx", "src/components/Purchase.tsx"  ],
   "exclude": ["node_modules"]
 }

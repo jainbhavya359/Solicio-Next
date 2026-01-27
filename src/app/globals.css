@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-white text-slate-900;
+  }
 }
 
 @theme inline {
@@ -27,6 +32,7 @@ body {
 
 .loan-input {
   @apply w-full mt-2 px-4 py-3 rounded-xl
-  bg-black/40 border border-white/10
-  outline-none focus:border-emerald-400;
+  bg-white border border-slate-200
+  focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500
+  outline-none text-slate-900 placeholder-slate-400;
 }

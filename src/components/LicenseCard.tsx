@@ -10,15 +10,19 @@ export function LicenseCard({ license, onDelete }: any) {
 
   return (
     <div
-      className="rounded-xl bg-black/40 border border-white/10 p-5
-      hover:border-indigo-400/40 transition"
+      className="
+        rounded-2xl bg-white border border-stone-200
+        p-5 shadow-sm hover:shadow-md
+        transition-all duration-200
+      "
     >
-      <div className="flex justify-between items-start">
+      {/* Header */}
+      <div className="flex items-start justify-between">
         <div>
-          <p className="font-semibold text-white">
+          <p className="font-semibold text-stone-900">
             {license.licenseName}
           </p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-stone-500">
             {license.issuingAuthority}
           </p>
         </div>
@@ -26,21 +30,23 @@ export function LicenseCard({ license, onDelete }: any) {
         <LicenseStatusBadge daysLeft={daysLeft} />
       </div>
 
-      <div className="mt-4 text-sm text-slate-300">
+      {/* Expiry */}
+      <div className="mt-4 text-sm text-stone-600">
         Expires on{" "}
-        <span className="font-semibold">
+        <span className="font-medium text-stone-900">
           {expiry.toISOString().split("T")[0]}
         </span>
       </div>
 
+      {/* Warning */}
       {daysLeft <= 30 && (
         <div
-          className={`mt-3 text-xs px-3 py-2 rounded-lg
-          ${
-            daysLeft <= 0
-              ? "bg-rose-500/10 text-rose-400"
-              : "bg-amber-500/10 text-amber-400"
-          }`}
+          className={`mt-3 rounded-lg px-3 py-2 text-xs font-medium
+            ${
+              daysLeft <= 0
+                ? "bg-rose-50 text-rose-600 border border-rose-200"
+                : "bg-amber-50 text-amber-700 border border-amber-200"
+            }`}
         >
           {daysLeft <= 0
             ? "License expired"
@@ -48,12 +54,18 @@ export function LicenseCard({ license, onDelete }: any) {
         </div>
       )}
 
-      <button
-        onClick={() => onDelete(license._id)}
-        className="mt-4 text-xs text-rose-400 hover:underline"
-      >
-        Remove License
-      </button>
+      {/* Divider */}
+      <div className="mt-4 border-t border-stone-100 pt-4 flex justify-end">
+        <button
+          onClick={() => onDelete(license._id)}
+          className="
+            text-xs font-medium text-rose-600
+            hover:text-rose-700 hover:underline
+          "
+        >
+          Remove license
+        </button>
+      </div>
     </div>
   );
 }

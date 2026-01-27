@@ -1,7 +1,20 @@
-// src/app/api/profit-loss/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import connect from "@/src/dbConfig/dbConnection";
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
+import { StockLayer } from "@/src/models/StockLayerModel";
+
+async function stockValueAsOf(email: string, date: Date) {
+  const layers = await StockLayer.find({
+    email,
+    date: { $lte: date },
+    qtyRemaining: { $gt: 0 },
+  }).lean();
+
+  return layers.reduce(
+    (s, l) => s + l.qtyRemaining * l.rate,
+    0
+  );
+}
 
 export async function GET(req: NextRequest) {
   await connect();
@@ -12,54 +25,102 @@ export async function GET(req: NextRequest) {
   const to = searchParams.get("to");
 
   if (!email || !from || !to) {
-    return NextResponse.json({ error: "Missing params" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing params" },
+      { status: 400 }
+    );
   }
 
-  // 🔹 1. Get IDs of reversed originals
-  const reversed = await LedgerEntry.find(
-    { email, isReversal: true },
-    { reversedEntryId: 1 }
-  ).lean();
+  const fromDate = new Date(from);
+  const toDate = new Date(to);
 
-  const reversedIds = reversed
-    .map(r => r.reversedEntryId)
-    .filter(Boolean);
+  /* ---------- STOCK ---------- */
+  const openingStock = await stockValueAsOf(email, fromDate);
+  const closingStock = await stockValueAsOf(email, toDate);
 
-  // 🔹 2. Fetch valid sales only
-  const rows = await LedgerEntry.find({
+  /* ---------- SALES ---------- */
+  const sales = await LedgerEntry.find({
     email,
     voucherType: "Sale",
     isReversal: false,
-    _id: { $nin: reversedIds }, // ⭐ KEY FIX
-    date: { $gte: new Date(from), $lte: new Date(to) },
+    date: { $gte: fromDate, $lte: toDate },
   }).lean();
 
-  const map: Record<string, { product: string; sales: number; cogs: number }> = {};
-  let totalSales = 0;
-  let totalCOGS = 0;
+  const totalSales = sales.reduce(
+    (s, r) => s + (r.amount || 0),
+    0
+  );
 
-  rows.forEach(r => {
-    if (!map[r.itemName]) {
-      map[r.itemName] = {
-        product: r.itemName,
-        sales: 0,
-        cogs: 0,
-      };
-    }
+  /* ---------- PURCHASES ---------- */
+  const purchases = await LedgerEntry.find({
+    email,
+    voucherType: "Purchase",
+    isReversal: false,
+    date: { $gte: fromDate, $lte: toDate },
+  }).lean();
 
-    map[r.itemName].sales += r.amount;
-    map[r.itemName].cogs  += r.costAmount || 0;
+  const totalPurchases = purchases.reduce(
+    (s, r) => s + (r.amount || 0),
+    0
+  );
 
-    totalSales += r.amount;
-    totalCOGS  += r.costAmount || 0;
-  });
+  /* ---------- EXPENSES ---------- */
+  const expenses = await LedgerEntry.find({
+    email,
+    voucherType: "Expense",
+    date: { $gte: fromDate, $lte: toDate },
+  }).lean();
+
+  const totalExpenses = expenses.reduce(
+    (s, r) => s + (r.amount || 0),
+    0
+  );
+
+  /* ---------- WRITE DOWNS ---------- */
+  const writeOffs = await LedgerEntry.find({
+    email,
+    voucherType: "StockWriteOff",
+    date: { $gte: fromDate, $lte: toDate },
+  }).lean();
+
+  const inventoryWriteDowns = writeOffs.reduce(
+    (s, r) => s + (r.amount || 0),
+    0
+  );
+
+  /* ---------- COGS ---------- */
+  const cogs =
+    openingStock +
+    totalPurchases -
+    closingStock;
+
+  const grossProfit = totalSales - cogs;
+
+  const netProfit =
+    grossProfit -
+    totalExpenses -
+    inventoryWriteDowns;
+
+  const grossMarginPct =
+    totalSales === 0
+      ? 0
+      : Number(
+          ((grossProfit / totalSales) * 100).toFixed(2)
+        );
 
   return NextResponse.json({
+    period: { from, to },
     summary: {
+      openingStock,
+      purchases: totalPurchases,
+      closingStock,
+      cogs,
       sales: totalSales,
-      cogs: totalCOGS,
-      profit: totalSales - totalCOGS,
+      grossProfit,
+      grossMarginPct,
+      expenses: totalExpenses,
+      inventoryWriteDowns,
+      netProfit,
     },
-    products: Object.values(map),
   });
 }

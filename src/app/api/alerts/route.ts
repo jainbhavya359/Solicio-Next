@@ -37,14 +37,23 @@ export async function GET(req: NextRequest) {
       fetchAlert(`${baseUrl}/api/alerts/high-margin?email=${email}`),
     ]);
 
-    //console.log(results);
+    const alerts = [];
+    const healthSignals = [];
 
-    /* --------------------------------------------------
-       2️⃣ Extract only triggered alerts
-    -------------------------------------------------- */
-    const alerts = results
-      .filter((r) => r && r.triggered && r.alert)
-      .map((r) => r.alert);
+    for (const r of results) {
+      if (!r) continue;
+
+      if (r.triggered && r.alert) {
+        alerts.push(r.alert);
+      } else {
+        healthSignals.push({
+          domain: r.domain,
+          summary: r.summary,
+          confidence: r.checkedWindow,
+        });
+      }
+    }
+
 
     if (alerts.length === 0) {
       return NextResponse.json({

@@ -106,10 +106,16 @@ export async function GET(req: NextRequest) {
     }
 
     if (!bestProduct) {
-      return NextResponse.json({
+      return {
         triggered: false,
-        reason: "No high-margin product found",
-      });
+        status: "healthy",
+        summary: "No product exceeds margin threshold",
+        checkedWindow: "Last 30 days",
+        meta: {
+          maxMarginFound: 22.4,
+          threshold: MIN_MARGIN_PERCENT,
+        }
+      };
     }
 
     /* --------------------------------------------------

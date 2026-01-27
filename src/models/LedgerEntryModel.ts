@@ -65,7 +65,7 @@ const LedgerEntrySchema = new Schema(
 
     narration: { type: String, default: "" },
   },
-  { timestamps: true }
+  { timestamps: true, bufferCommands: false }
 );
 
 /* -------------------- INDEXES -------------------- */
@@ -111,6 +111,10 @@ LedgerEntrySchema.index(
     },
   }
 );
+
+LedgerEntrySchema.index({ email: 1, date: 1 });
+LedgerEntrySchema.index({ voucherType: 1 });
+
 
 export const LedgerEntry =
   models.LedgerEntry || model("LedgerEntry", LedgerEntrySchema);

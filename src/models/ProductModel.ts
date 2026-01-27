@@ -23,6 +23,8 @@ const ProductSchema = new Schema(
     quantity: { type: Number, default: 0 },
     purchasePrice: { type: Number, default: 0 },
     sellingPrice: { type: Number, default: 0 },
+    lastSaleAt: { type: Date, default: null },
+    lastMovedAt: { type: Date, default: null },
 
     /* 🔹 Composite product recipe (BOM) */
     recipe: [

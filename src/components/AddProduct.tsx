@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import RecipeBuilder from "./RecipeBuilder";
 
 interface AddProductModalProps {
@@ -14,18 +14,19 @@ interface AddProductModalProps {
     recipe?: any[];
   }) => Promise<void>;
 
-  units: string[];
-  products: any[];
+  units?: string[];
+  products?: any[];
 }
 
 export default function AddProductModal({
   open,
   onClose,
   onSave,
-  units,
-  products,
+  units = [],
+  products = [],
 }: AddProductModalProps) {
-  const [productType, setProductType] = useState<"simple" | "composite">("simple");
+  const [productType, setProductType] =
+    useState<"simple" | "composite">("simple");
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("");
   const [customUnit, setCustomUnit] = useState("");
@@ -34,14 +35,23 @@ export default function AddProductModal({
 
   if (!open) return null;
 
+  const safeUnits = Array.isArray(units) ? units : [];
+  const safeProducts = Array.isArray(products) ? products : [];
+
+  const availableIngredients = useMemo(
+    () => safeProducts.filter(p => !p?.isComposite),
+    [safeProducts]
+  );
+
   const canSave =
-    name &&
+    name.trim() &&
     unit &&
     (productType === "simple" || recipe.length > 0);
 
   const handleCustomUnit = () => {
-    if (!customUnit.trim()) return;
-    setUnit(customUnit.trim());
+    const val = customUnit.trim();
+    if (!val) return;
+    setUnit(val);
     setCustomUnit("");
   };
 
@@ -52,70 +62,79 @@ export default function AddProductModal({
       productType,
       name: name.trim(),
       unit,
-      sellingPrice: sellingPrice ? Number(sellingPrice) : undefined,
-      recipe: productType === "composite" ? recipe : undefined,
+      sellingPrice: sellingPrice
+        ? Number(sellingPrice)
+        : undefined,
+      recipe:
+        productType === "composite"
+          ? recipe
+          : undefined,
     });
 
-    // Reset after save
+    // reset state
     setName("");
     setUnit("");
+    setCustomUnit("");
     setSellingPrice("");
     setRecipe([]);
     setProductType("simple");
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
-      <div
-        className="w-full max-w-md bg-slate-900 border border-white/10
-        rounded-2xl p-6 max-h-[85vh] overflow-y-auto"
-      >
-        <h4 className="text-lg font-bold text-white mb-4">
-          Add New Product
-        </h4>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="w-full max-w-lg rounded-xl bg-white shadow-2xl border border-stone-300 overflow-hidden">
 
-        {/* TYPE TOGGLE */}
-        <div className="flex rounded-xl bg-black/40 p-1 mb-6">
-          {[
-            { key: "simple", label: "Simple Product" },
-            { key: "composite", label: "Composite Product" },
-          ].map(t => (
-            <button
-              key={t.key}
-              onClick={() => setProductType(t.key as any)}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition
-                ${
-                  productType === t.key
-                    ? "bg-emerald-400 text-black"
-                    : "text-slate-400 hover:text-white"
-                }`}
-            >
-              {t.label}
-            </button>
-          ))}
+        {/* HEADER */}
+        <div className="px-6 py-4 border-b border-stone-200">
+          <h3 className="text-lg font-semibold text-stone-900">
+            Add New Product
+          </h3>
         </div>
 
-        {/* PRODUCT DETAILS */}
-        <div className="space-y-4 mb-6">
-          <h5 className="text-sm font-semibold text-slate-300">
-            Product Details
-          </h5>
+        {/* BODY */}
+        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
 
+          {/* TYPE TOGGLE */}
+          <div className="flex rounded-lg border border-stone-300 overflow-hidden">
+            {[
+              { key: "simple", label: "Simple" },
+              { key: "composite", label: "Composite" },
+            ].map(t => (
+              <button
+                key={t.key}
+                onClick={() =>
+                  setProductType(t.key as any)
+                }
+                className={`flex-1 py-2 text-sm font-medium transition
+                  ${
+                    productType === t.key
+                      ? "bg-emerald-600 text-white"
+                      : "bg-white text-stone-600 hover:bg-stone-100"
+                  }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* NAME */}
           <input
             placeholder="Product name"
             value={name}
             onChange={e => setName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10"
+            className="h-11 w-full rounded-lg border border-stone-300 px-4 text-sm
+            focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
 
+          {/* UNIT */}
           <select
             value={unit}
             onChange={e => setUnit(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10"
+            className="h-11 w-full rounded-lg border border-stone-300 px-4 text-sm bg-white"
           >
             <option value="">Select unit</option>
-            {units.map(u => (
-              <option key={u} value={u} className="bg-slate-900">
+            {safeUnits.map(u => (
+              <option key={u} value={u}>
                 {u}
               </option>
             ))}
@@ -127,41 +146,36 @@ export default function AddProductModal({
               value={customUnit}
               onChange={e => setCustomUnit(e.target.value)}
               onBlur={handleCustomUnit}
-              className="px-4 py-3 rounded-xl bg-black/40 border border-white/10"
+              className="h-11 w-full rounded-lg border border-stone-300 px-4 text-sm"
             />
           )}
 
+          {/* PRICE */}
           <input
             type="number"
-            placeholder="Selling price per unit (optional)"
+            placeholder="Selling price (optional)"
             value={sellingPrice}
             onChange={e => setSellingPrice(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10"
+            className="h-11 w-full rounded-lg border border-stone-300 px-4 text-sm"
           />
+
+          {/* RECIPE */}
+          {productType === "composite" && (
+            <div className="rounded-lg border border-stone-300 p-4 bg-stone-50">
+              <RecipeBuilder
+                products={availableIngredients}
+                value={recipe}
+                onChange={setRecipe}
+              />
+            </div>
+          )}
         </div>
 
-        {/* RECIPE */}
-        {productType === "composite" && (
-          <div className="border border-white/10 rounded-2xl p-4 bg-black/30 mb-6">
-            <RecipeBuilder
-              products={products.filter(p => !p.isComposite)}
-              value={recipe}
-              onChange={setRecipe}
-            />
-
-            {recipe.length > 0 && (
-              <p className="mt-3 text-xs text-slate-400">
-                {recipe.length} ingredient{recipe.length > 1 && "s"} added
-              </p>
-            )}
-          </div>
-        )}
-
         {/* FOOTER */}
-        <div className="sticky bottom-0 bg-slate-900 pt-4 flex justify-end gap-3">
+        <div className="px-6 py-4 border-t border-stone-200 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-white/10 text-white"
+            className="px-4 py-2 rounded-lg border border-stone-300 text-sm hover:bg-stone-100"
           >
             Cancel
           </button>
@@ -169,8 +183,8 @@ export default function AddProductModal({
           <button
             disabled={!canSave}
             onClick={handleSave}
-            className="px-5 py-2 rounded-lg bg-emerald-400
-            text-black font-semibold disabled:opacity-50"
+            className="px-5 py-2 rounded-lg bg-emerald-600 text-white
+            font-semibold disabled:opacity-50 hover:bg-emerald-700"
           >
             Save Product
           </button>

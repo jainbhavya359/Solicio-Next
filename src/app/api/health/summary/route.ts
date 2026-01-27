@@ -3,8 +3,8 @@ import connect from "@/src/dbConfig/dbConnection";
 
 import { computeStockMovement } from "@/src/health/engines/stockMovement";
 import { computeSalesTrend } from "@/src/health/engines/salesTrend";
-import { computeInventoryBalance } from "@/src/health/engines/inventoryBalanace";
 import { computeActivityRecency } from "@/src/health/engines/activityRecency";
+import { computeInventoryBalance } from "@/src/health/engines/inventoryBalanace";
 
 export async function GET(req: NextRequest) {
   await connect();
@@ -12,7 +12,10 @@ export async function GET(req: NextRequest) {
   try {
     const email = req.nextUrl.searchParams.get("email");
     if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email required" },
+        { status: 400 }
+      );
     }
 
     const [
@@ -27,29 +30,51 @@ export async function GET(req: NextRequest) {
       computeActivityRecency(email),
     ]);
 
-    const healthScore =
-      stockMovement.stockMovementScore +
-      salesTrend.salesTrendScore +
-      inventoryBalance.inventoryBalanceScore +
-      activityRecency.activityRecencyScore;
+    /* ----------------------------
+       NORMALIZE SCORES (0–100)
+    ----------------------------- */
 
+    const salesScore = salesTrend.salesHealthScore ?? 0;            // 0–100
+    const inventoryScore = inventoryBalance.inventoryHealthScore ?? 0; // 0–100
+    const activityScore = activityRecency.activityHealthScore ?? 0;    // 0–100
+    const movementScore =
+      ((stockMovement.stockMovementScore ?? 0) / 30) * 100;         // normalize
+
+    /* ----------------------------
+       WEIGHTED HEALTH SCORE
+    ----------------------------- */
+    const healthScore = Math.round(
+      salesScore * 0.3 +
+      movementScore * 0.25 +
+      inventoryScore * 0.25 +
+      activityScore * 0.2
+    );
+
+    /* ----------------------------
+       STATUS
+    ----------------------------- */
     const status =
-      healthScore >= 80 ? "Excellent" :
-      healthScore >= 60 ? "Stable" :
-      healthScore >= 40 ? "Needs Attention" :
-      "Critical";
+      healthScore >= 80
+        ? "Excellent"
+        : healthScore >= 60
+        ? "Stable"
+        : healthScore >= 40
+        ? "Needs Attention"
+        : "Critical";
 
     return NextResponse.json({
       healthScore,
       status,
+
       breakdown: {
-        stockMovementScore: stockMovement.stockMovementScore,
-        salesTrendScore: salesTrend.salesTrendScore,
-        inventoryBalanceScore: inventoryBalance.inventoryBalanceScore,
-        activityRecencyScore: activityRecency.activityRecencyScore,
+        sales: salesScore,
+        stockMovement: Math.round(movementScore),
+        inventory: inventoryScore,
+        activity: activityScore,
       },
-      stockMovement,
+
       salesTrend,
+      stockMovement,
       inventoryBalance,
       activityRecency,
     });
@@ -57,11 +82,12 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     console.error(err);
     return NextResponse.json(
-      { error: "Failed to compute health summary" },
+      { error: "Failed to compute business health" },
       { status: 500 }
     );
   }
 }
+
 
 
 // import { NextRequest, NextResponse } from "next/server";
