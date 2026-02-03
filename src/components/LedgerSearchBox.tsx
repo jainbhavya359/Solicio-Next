@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import UniversalSearchBox from "./SearchBox";
 import ConfirmReversalModal from "./ConfirmReversal";
 
@@ -120,13 +121,31 @@ export default function LedgerSearchBox({ email }: { email: string }) {
       )}
 
       {loading && (
-        <p className="text-sm text-slate-400">Searching…</p>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center gap-3 p-4 rounded-xl bg-indigo-50/50 border border-indigo-200/60"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-4 h-4 border-2 border-indigo-200 border-t-indigo-600 rounded-full"
+          />
+          <p className="text-sm text-indigo-600 font-medium">Searching ledger...</p>
+        </motion.div>
       )}
 
-      {visibleResults.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          {/* HEADER */}
-          <div className="grid grid-cols-13 px-5 py-3 text-xs font-semibold text-slate-600 bg-slate-50 border-b">
+      <AnimatePresence mode="wait">
+        {visibleResults.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-premium overflow-x-auto"
+          >
+          {/* PREMIUM HEADER */}
+          <div className="min-w-[900px] grid grid-cols-13 px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider bg-gradient-to-r from-slate-50 to-zinc-50 border-b border-slate-200/60">
             <div>Date</div>
             <div className="col-span-2">Product</div>
             <div className="col-span-2">Party</div>
@@ -137,47 +156,52 @@ export default function LedgerSearchBox({ email }: { email: string }) {
             <div className="col-span-2 text-center">Action</div>
           </div>
 
-          {/* ROWS */}
-          {visibleResults.map(row => {
+          {/* PREMIUM ROWS with Stagger Animation */}
+          {visibleResults.map((row, idx) => {
             const inactive =
               row.isReversal || reversedMap.has(row._id);
 
             return (
-              <div
+              <motion.div
                 key={row._id}
-                className={`grid grid-cols-13 px-5 py-3 text-sm border-b
-                  ${inactive ? "bg-slate-50 text-slate-400" : "hover:bg-slate-50"}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                className={`min-w-[900px] grid grid-cols-13 px-6 py-4 text-sm border-b border-slate-100 transition-all duration-200
+                  ${inactive 
+                    ? "bg-slate-50/50 text-slate-400 opacity-60" 
+                    : "hover:bg-indigo-50/30 hover:border-indigo-100"}
                 `}
               >
-                <div className="font-medium tabular-nums">
+                <div className="font-semibold tabular-nums text-slate-700">
                   {row.date.slice(0, 10)}
                 </div>
 
                 <div className="col-span-2">
-                  <div className="font-semibold">
+                  <div className="font-bold text-slate-900">
                     {row.itemName}
                   </div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-slate-500 font-medium">
                     {row.unit}
                   </div>
                 </div>
 
                 <div className="col-span-2">
-                  <div className="font-medium">
+                  <div className="font-bold text-slate-900">
                     {row.partyName || "Cash"}
                   </div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-slate-500 font-medium">
                     {row.partyType || "Cash"}
                   </div>
                 </div>
 
                 <div>
                   <span
-                    className={`px-2 py-0.5 rounded-md text-xs font-semibold
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm border
                       ${
                         row.voucherType === "Purchase"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-rose-100 text-rose-700"
+                          ? "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 border-emerald-200/60"
+                          : "bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 border-rose-200/60"
                       }
                     `}
                   >
@@ -185,15 +209,15 @@ export default function LedgerSearchBox({ email }: { email: string }) {
                   </span>
                 </div>
 
-                <div className="text-right text-emerald-600">
+                <div className="text-right text-emerald-600 font-bold tabular-nums">
                   {row.debitQty || "—"}
                 </div>
 
-                <div className="text-right text-rose-600">
+                <div className="text-right text-rose-600 font-bold tabular-nums">
                   {row.creditQty || "—"}
                 </div>
 
-                <div className="col-span-3 text-center font-mono text-xs text-slate-500">
+                <div className="col-span-3 text-center font-mono text-xs text-slate-500 font-semibold">
                   {row.voucherNo}
                 </div>
 
@@ -201,44 +225,45 @@ export default function LedgerSearchBox({ email }: { email: string }) {
                   {!inactive ? (
                     <button
                       onClick={() => setReverseTarget(row)}
-                      className="text-xs text-rose-600 hover:underline"
+                      className="text-xs text-rose-600 hover:text-rose-700 font-bold hover:bg-rose-50 px-3 py-1.5 rounded-lg transition-all duration-200 border border-transparent hover:border-rose-200"
                     >
                       Reverse
                     </button>
                   ) : (
-                    <span className="text-xs italic">
+                    <span className="text-xs italic font-medium text-slate-400">
                       Reversed
                     </span>
                   )}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
 
-          {/* PAGINATION */}
-          <div className="flex items-center justify-between px-5 py-3 border-t text-sm">
+          {/* PREMIUM PAGINATION */}
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200/60 bg-gradient-to-r from-slate-50 to-zinc-50">
             <button
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
-              className="px-3 py-1 rounded border disabled:opacity-40"
+              className="px-4 py-2 rounded-xl border border-slate-200/60 bg-white font-semibold text-sm text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
             >
               ← Previous
             </button>
 
-            <span className="text-slate-500">
+            <span className="text-slate-600 font-semibold text-sm">
               Page {page} of {totalPages}
             </span>
 
             <button
               disabled={page >= totalPages}
               onClick={() => setPage(p => p + 1)}
-              className="px-3 py-1 rounded border disabled:opacity-40"
+              className="px-4 py-2 rounded-xl border border-slate-200/60 bg-white font-semibold text-sm text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
             >
               Next →
             </button>
           </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* MODAL */}
       {reverseTarget && (
