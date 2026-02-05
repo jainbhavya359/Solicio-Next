@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Plus, Minus, Package } from "lucide-react";
 import AddProductModal from "./AddProduct";
 import { UNITS } from "../utils/store";
+import { useRouter } from "next/navigation";
 
 export default function Purchase({
   visible,
@@ -18,11 +19,22 @@ export default function Purchase({
   const email = user?.primaryEmailAddress?.emailAddress;
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
   const [products, setProducts] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showProducts, setShowProducts] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+
+  const [partyCategory, setPartyCategory] =
+    useState<"Individual" | "Company">("Individual");
+
+  const [taxId, setTaxId] = useState("");
+  const [paymentTerms, setPaymentTerms] = useState("");
+  const [notes, setNotes] = useState("");
+  const [partyState, setPartyState] = useState("");
+  const [gstRate, setGstRate] = useState(0);
+
 
   const [units, setUnits] = useState(UNITS);
 
@@ -34,6 +46,22 @@ export default function Purchase({
     new Date().toISOString().split("T")[0]
   );
   const [loading, setLoading] = useState(false);
+
+  const GST_RATES = [
+    { label: "No GST", value: 0 },
+    { label: "GST 5%", value: 5 },
+    { label: "GST 12%", value: 12 },
+    { label: "GST 18%", value: 18 },
+    { label: "GST 28%", value: 28 },
+  ];
+
+  const PAYMENT_TERMS = [
+    { label: "Immediate", value: "IMMEDIATE" },
+    { label: "Net 7", value: "NET_7" },
+    { label: "Net 15", value: "NET_15" },
+    { label: "Net 30", value: "NET_30" },
+  ];
+
 
   if (!visible) return null;
 
@@ -74,31 +102,65 @@ export default function Purchase({
       return;
     }
 
-    setLoading(true);
-    try {
-      await axios.post("/api/stock", {
-        email,
+    const payload = {
+      email,
+
+      transaction: {
+        type: "Purchase",
+        date,
+      },
+
+      product: {
         name: selectedProduct.name,
         unit: selectedProduct.unit,
         quantity,
-        price,
-        partyName,
-        date,
-        voucher: "Purchase",
-      });
+        rate: Number(price),
+      },
 
-      toast.success("Purchase added");
-      setQuantity(1);
-      setPrice("");
-      setPartyName("");
-      setSelectedProduct(null);
-      reloadSetter(!reload);
-    } catch {
+      party: {
+        type: "Supplier",
+        category: partyCategory,
+        name: partyName || "Cash",
+        taxId: partyCategory === "Company" ? taxId : undefined,
+        state: partyCategory === "Company" ? partyState : undefined,
+        paymentTerms:
+          partyCategory === "Company" ? paymentTerms : undefined,
+      },
+
+      meta: {
+        notes,
+        gstRate,
+      },
+    };
+
+
+    setLoading(true);
+    try {
+      const res = await axios.post("/api/stock", payload);
+      
+      if(res.data?.success){
+        toast.success("Purchase added");
+        setQuantity(1);
+        setPrice("");
+        setPartyName("");
+        setTaxId("");
+        setPaymentTerms("");
+        setNotes("");
+        setSelectedProduct(null);
+        reloadSetter(!reload);
+
+        console.log(res.data);
+        
+        router.push(`/bill/${res.data.voucherNo}`);
+      }
+    } catch(error) {
       toast.error("Failed to add purchase");
+      console.log(error);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="rounded-xl border border-stone-300 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
@@ -221,13 +283,76 @@ export default function Purchase({
         )}
 
         {/* Inputs */}
+        {/* Party Details */}
+        <div className="grid md:grid-cols-3 gap-4">
+        <select
+          value={partyCategory}
+          onChange={e => setPartyCategory(e.target.value as any)}
+          className="h-11 px-3 rounded-lg border border-stone-300"
+        >
+          <option value="Individual">Individual</option>
+          <option value="Company">Company</option>
+        </select>
+
+        <input
+          placeholder="Supplier name"
+          value={partyName}
+          onChange={e => setPartyName(e.target.value)}
+          className="h-11 px-4 rounded-lg border border-stone-300"
+        />
+
+        {partyCategory === "Company" && (
+          <>
+            <input
+              placeholder="GSTIN"
+              value={taxId}
+              onChange={e => setTaxId(e.target.value.toUpperCase())}
+              className="h-11 px-4 rounded-lg border border-stone-300"
+            />
+
+            <input
+              placeholder="State"
+              value={partyState}
+              onChange={e => setPartyState(e.target.value)}
+              className="h-11 px-4 rounded-lg border border-stone-300"
+            />
+
+            <select
+              value={gstRate}
+              onChange={e => setGstRate(Number(e.target.value))}
+              className="h-11 px-3 rounded-lg border border-stone-300"
+            >
+              {GST_RATES.map(r => (
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={paymentTerms}
+              onChange={e => setPaymentTerms(e.target.value)}
+              className="h-11 px-3 rounded-lg border border-stone-300"
+            >
+              <option value="">Payment terms</option>
+              {PAYMENT_TERMS.map(p => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+
+        <textarea
+          placeholder="Notes (optional)"
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          className="md:col-span-3 h-20 px-4 py-2 rounded-lg border border-stone-300"
+        />
+      </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            placeholder="Supplier name (optional)"
-            value={partyName}
-            onChange={(e) => setPartyName(e.target.value)}
-            className="h-11 px-4 rounded-lg border border-stone-300 text-sm"
-          />
           <input
             type="number"
             placeholder="Purchase price (₹)"

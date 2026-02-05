@@ -1,15 +1,19 @@
 import connect from "@/src/dbConfig/dbConnection";
-import { EntryCounter } from "@/src/models/EntryCounterModel";
-import { LedgerEntry } from "@/src/models/LedgerEntryModel";
+import mongoose from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
+
 import { Products } from "@/src/models/ProductModel";
 import { StockLayer } from "@/src/models/StockLayerModel";
+import { LedgerEntry } from "@/src/models/LedgerEntryModel";
 import Stock from "@/src/models/stockModel";
 import { TotalStock } from "@/src/models/totalStockModel";
+import { Document } from "@/src/models/DocumentModel";
+import { CompanyProfile } from "@/src/models/CompanyProfileModel";
+
 import { calculateCompositeStock } from "@/src/utils/compositeStock";
 import { calculateFIFO } from "@/src/utils/fifo";
 import { generateVoucherNo } from "@/src/utils/voucher";
-import mongoose from "mongoose";
-import { NextRequest, NextResponse } from "next/server";
+import { computeGST } from "@/src/utils/gst";
 
 export async function POST(req: NextRequest) {
   await connect();
@@ -17,22 +21,22 @@ export async function POST(req: NextRequest) {
   session.startTransaction();
 
   try {
-    const {
-      email,
-      name,
-      unit,
-      quantity: soldQty,
-      sellingPrice,
-      partyName,
-      date,
-      costing = "FIFO",
-    } = await req.json();
+    const { email, transaction, product, party, meta } = await req.json();
 
-    if (!email || !name || !unit || !soldQty || sellingPrice == null) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    if (
+      !email ||
+      !transaction?.date ||
+      !product?.name ||
+      !product?.unit ||
+      !product?.quantity ||
+      product.rate == null
+    ) {
+      throw new Error("INVALID_PAYLOAD");
     }
 
-    const txDate = date ? new Date(date) : new Date();
+    const txDate = new Date(transaction.date);
+    const soldQty = product.quantity;
+    const amount = soldQty * product.rate;
 
     /* 🔢 Voucher */
     const voucherNo = await generateVoucherNo({
@@ -42,130 +46,66 @@ export async function POST(req: NextRequest) {
       session,
     });
 
-    /* 🔍 Fetch product (EMAIL-SCOPED) */
-    const product = await Products.findOne(
-      { email, name, unit },
+    /* 🏢 Company snapshot */
+    const company = await CompanyProfile.findOne({ email }).lean();
+
+    /* 🔍 Product */
+    const dbProduct = await Products.findOne(
+      { email, name: product.name, unit: product.unit },
       null,
       { session }
     ).lean();
 
-    if (!product) {
-      throw new Error("PRODUCT_NOT_FOUND");
+    if (!dbProduct) throw new Error("PRODUCT_NOT_FOUND");
+
+    /* 🧩 Composite validation */
+    if (dbProduct.productType === "composite") {
+      const maxQty = await calculateCompositeStock(dbProduct, session);
+      if (soldQty > maxQty) throw new Error("INSUFFICIENT_INGREDIENT_STOCK");
     }
 
-    const isComposite = product.productType === "composite";
-
-    /* 🧩 Composite stock validation */
-    if (isComposite) {
-      const maxQty = await calculateCompositeStock(product, session);
-      if (soldQty > maxQty) {
-        throw new Error("INSUFFICIENT_INGREDIENT_STOCK");
-      }
-    }
-
+    /* 📦 FIFO / COGS */
     let cogsTotal = 0;
     let fifoBreakup: any[] = [];
 
-    /* =====================================================
-       🧩 COMPOSITE PRODUCT SALE
-    ====================================================== */
-    if (isComposite && product.recipe?.length) {
-      for (const item of product.recipe) {
-        const ingredient = await Products.findOne(
-          { _id: item.productId, email },
-          null,
-          { session }
-        ).lean();
+    const layers = await StockLayer.find(
+      { email, productName: product.name, unit: product.unit, qtyRemaining: { $gt: 0 } },
+      null,
+      { session }
+    ).sort({ date: 1 });
 
-        if (!ingredient) {
-          throw new Error("INGREDIENT_NOT_FOUND");
-        }
+    const fifo = calculateFIFO(layers, soldQty);
+    cogsTotal = fifo.cogs;
+    fifoBreakup = fifo.breakup;
 
-        const usedQty = item.qtyRequired * soldQty;
+    await StockLayer.bulkWrite(fifo.updates, { session });
 
-        if (ingredient.quantity < usedQty) {
-          throw new Error("INSUFFICIENT_INGREDIENT_STOCK");
-        }
-
-        const ingredientCost = ingredient.purchasePrice || 0;
-        cogsTotal += usedQty * ingredientCost;
-
-        /* 🔻 Reduce ingredient stock */
-        await Products.updateOne(
-          { _id: ingredient._id, email },
-          { $inc: { quantity: -usedQty } },
-          { session }
-        );
-      }
-    }
-
-    /* =====================================================
-       📦 SIMPLE PRODUCT SALE
-    ====================================================== */
-    else {
-      if (costing === "FIFO") {
-        const layers = await StockLayer.find(
-          {
-            email,
-            productName: name,
-            unit,
-            qtyRemaining: { $gt: 0 },
-          },
-          null,
-          { session }
-        ).sort({ date: 1 });
-
-        const { cogs, updates, breakup } =
-          calculateFIFO(layers, soldQty);
-
-        fifoBreakup = breakup;
-        cogsTotal = cogs;
-
-        await StockLayer.bulkWrite(updates, { session });
-      } else {
-        const stock = await TotalStock.findOne(
-          { email, name, unit },
-          null,
-          { session }
-        ).lean();
-
-        if (!stock || stock.quantity < soldQty) {
-          throw new Error("INSUFFICIENT_STOCK");
-        }
-
-        const avgRate = stock.price / stock.quantity;
-        cogsTotal = soldQty * avgRate;
-      }
-
-      /* 🔻 Reduce simple product quantity */
-      await Products.updateOne(
-        { email, name, unit },
-        { $inc: { quantity: -soldQty } },
-        { session }
-      );
-    }
-
-    /* 🕒 UPDATE MOVEMENT METADATA (🔥 KEY FIX 🔥) */
     await Products.updateOne(
-      { email, name, unit },
-      {
-        $set: {
-          lastSaleAt: txDate,
-          lastMovedAt: txDate,
-        },
-      },
+      { email, name: product.name, unit: product.unit },
+      { $inc: { quantity: -soldQty }, $set: { lastSaleAt: txDate, lastMovedAt: txDate } },
       { session }
     );
+
+    /* 🧾 GST */
+    const gst = computeGST({
+      amount: soldQty * product.rate,
+      rate: meta?.gstRate || 0,
+      companyState: company?.state,
+      companyGSTIN: company?.gstin,
+      partyState: party?.state,
+      partyGSTIN: party?.taxId,
+    });
+
 
     /* 📦 Stock history */
     await Stock.create(
       [{
-        name,
-        quantity: soldQty,
-        price: sellingPrice,
-        unit,
-        date: txDate,
         email,
+        name: product.name,
+        unit: product.unit,
+        quantity: soldQty,
+        price: product.rate,
+        date: txDate,
         entryNo: voucherNo,
         voucher: "Sale",
       }],
@@ -178,23 +118,63 @@ export async function POST(req: NextRequest) {
         email,
         date: txDate,
         voucherType: "Sale",
-        partyName: partyName || "Cash",
-        partyType: partyName ? "Customer" : "Cash",
         voucherNo,
 
-        itemName: name,
-        unit,
+        partyName: party?.name || "Cash",
+        partyType: "Customer",
+
+        itemName: product.name,
+        unit: product.unit,
+
         debitQty: 0,
         creditQty: soldQty,
 
-        rate: sellingPrice,
-        amount: soldQty * sellingPrice,
-
+        rate: product.rate,
+        amount,
         costAmount: cogsTotal,
         fifoBreakup,
+        narration: meta?.notes || "",
+      }],
+      { session }
+    );
 
-        productType: isComposite ? "composite" : "simple",
-        isReversal: false,
+    /* 📄 INVOICE DOCUMENT */
+    await Document.create(
+      [{
+        email,
+        type: "Invoice",
+        voucherNo,
+        date: txDate,
+
+        party: {
+          type: "Customer",
+          category: party.category,
+          name: party.name || "Cash",
+          taxId: party.taxId,
+          address: party.address,
+          paymentTerms: party.paymentTerms,
+        },
+
+        item: {
+          name: product.name,
+          unit: product.unit,
+          quantity: soldQty,
+          rate: product.rate,
+          amount: soldQty * product.rate,
+          gstRate: meta?.gstRate || 0,
+        },
+
+        subtotal: soldQty * product.rate,
+        tax: gst.tax,
+        taxBreakup: gst.type === "NONE"
+        ? { type: "NONE" }
+        : {
+            type: gst.type,
+            ...gst.breakup,
+          },
+        total: gst.total,
+
+        sourceVoucher: "Sale",
       }],
       { session }
     );
@@ -203,8 +183,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, voucherNo });
 
   } catch (err: any) {
-    await session.abortTransaction();
-    console.error(err);
+    if (session.inTransaction()) await session.abortTransaction();
+    console.error("Sale error:", err);
     return NextResponse.json(
       { error: err.message || "Sale failed" },
       { status: 500 }
@@ -231,168 +211,3 @@ export async function GET(request: NextRequest){
         return NextResponse.json({error: error}, {status: 500});
     }
 }
-
-
-
-
-// export async function POST(req: NextRequest) {
-//   await connect();
-//   const session = await mongoose.startSession();
-//   session.startTransaction();
-
-//   try {
-//     const {
-//       email,
-//       name,
-//       unit,
-//       quantity,
-//       sellingPrice,
-//       partyName,
-//       date,
-//       costing = "FIFO", // FIFO | WAVG
-//     } = await req.json();
-
-//     if (!email || !name || !unit || !quantity || sellingPrice == null) {
-//       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-//     }
-
-//     const txDate = date ? new Date(date) : new Date();
-
-//     /* 🔢 Voucher Generation */
-//     const voucherNo = await generateVoucherNo({
-//       email,
-//       series: "SAL",
-//       date: txDate,
-//       session,
-//     });
-
-//     let cogsTotal = 0;
-//     const fifoBreakup: any[] = [];
-
-//     /* 🔻 COST CALCULATION */
-//     if (costing === "FIFO") {
-//         const layers = await StockLayer.find(
-//           {
-//             email,
-//             productName: name,
-//             unit,
-//             qtyRemaining: { $gt: 0 },
-//           },
-//           null,
-//           { session }
-//         ).sort({ date: 1 });
-
-//         const { cogs, updates, breakup } = calculateFIFO(layers, quantity);
-
-//         fifoBreakup.push(...breakup);
-
-//         /* using bulkWrite instead of save for saving layer at once */
-//         await StockLayer.bulkWrite(updates, { session });
-
-//         cogsTotal = cogs;
-//       } else {
-      
-//         // ✅ WAVG
-      
-//       const stock = await TotalStock.findOne(
-//         { email, name, unit },
-//         null,
-//         { session }
-//       ).lean();
-
-//       if (!stock || stock.quantity < quantity) {
-//         throw new Error("INSUFFICIENT_STOCK");
-//       }
-
-//       const avgRate = stock.price / stock.quantity;
-//       cogsTotal = quantity * avgRate;
-
-//     }
-
-//     /* 📦 Stock movement record (optional history) */
-//     await Stock.create(
-//       [{
-//         name,
-//         quantity,
-//         price: sellingPrice,
-//         unit,
-//         date: txDate,
-//         email,
-//         entryNo: voucherNo,
-//         voucher: "Sale",
-//       }],
-//       { session }
-//     );
-
-//     /* 📒 Ledger — SALE */
-//     await LedgerEntry.create(
-//       [{
-//         email,
-//         date: txDate,
-//         voucherType: "Sale",
-//         partyName: partyName || "Cash",
-//         partyType: partyName ? "Customer" : "Cash",
-//         voucherNo,
-
-//         itemName: name,
-//         unit,
-
-//         debitQty: 0,
-//         creditQty: quantity,
-
-//         rate: sellingPrice,
-//         amount: quantity * sellingPrice,
-
-//         costAmount: cogsTotal,
-//         fifoBreakup,
-
-//         isReversal: false,
-//       }],
-//       { session }
-//     );
-
-//     /* 📦 Product quantity update*/
-//     await Products.updateOne(
-//       { email, name, unit },
-//       {
-//         $inc: { quantity: -quantity },
-//         $set: { sellingPrice },
-//       },
-//       { session }
-//     );
-
-//     /* 📊 Total Stock */
-//     const stockUpdate = await TotalStock.updateOne(
-//       {
-//         email,
-//         name,
-//         unit,
-//         quantity: { $gte: quantity },
-//       },
-//       {
-//         $inc: { quantity: -quantity, price: -cogsTotal },
-//         $set: { updatedAt: txDate },
-//       },
-//       { session }
-//     );
-
-//     /* Preventing OverSelling */
-//     if (stockUpdate.matchedCount === 0) {
-//       throw new Error("INSUFFICIENT_STOCK");
-//     }
-
-
-//     await session.commitTransaction();
-//     return NextResponse.json({ success: true, voucherNo });
-
-//   } catch (err) {
-//     await session.abortTransaction();
-//     console.error(err);
-//     return NextResponse.json({ error: "Sale failed" }, { status: 500 });
-//   } finally {
-//     session.endSession();
-//   }
-// }
-
-
-

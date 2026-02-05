@@ -6,6 +6,7 @@ import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import toast from "react-hot-toast";
 import ConfirmReversalModal from "./ConfirmReversal";
+import Link from "next/link";
 
 /* -------------------- TYPES -------------------- */
 type LedgerRow = {
@@ -119,14 +120,14 @@ export default function StockLedger() {
       <div className="overflow-x-auto">
         <div className="min-w-[1100px]">
           {/* HEAD */}
-          <div className="grid grid-cols-9 px-6 py-3 text-sm font-semibold text-slate-700 bg-slate-50 border-b">
+          <div className="grid grid-cols-10 px-6 py-3 text-sm font-semibold text-slate-700 bg-slate-50 border-b">
             <div>Date</div>
             <div>Product</div>
             <div>Party</div>
             <div>Type</div>
             <div className="text-right">Dr</div>
             <div className="text-right">Cr</div>
-            <div className="text-right">Balance</div>
+            <div className="text-center">Balance</div>
             <div className="text-center">Entry No</div>
             <div className="text-center">Action</div>
           </div>
@@ -144,7 +145,7 @@ export default function StockLedger() {
               return (
                 <div
                   key={row._id}
-                  className={`grid grid-cols-9 px-6 py-3 text-sm border-b border-slate-100
+                  className={`grid grid-cols-10 px-6 py-3 text-sm border-b border-slate-100
                     ${
                       inactive
                         ? "bg-slate-50 text-slate-400"
@@ -196,13 +197,34 @@ export default function StockLedger() {
                     {row.creditQty || "—"}
                   </div>
 
-                  <div className="text-right font-bold">
+                  <div className="text-center font-bold">
                     {row.balance}
                   </div>
 
                   <div className="text-center text-xs font-mono text-slate-500">
                     {row.voucherNo}
                   </div>
+
+                  <div className="text-center">
+                    {row.voucherType === "Sale" && (
+                      <Link
+                        href={`/invoice/${row.voucherNo}`}
+                        className="text-blue-600 hover:underline text-sm"
+                      >
+                        View Invoice
+                      </Link>
+                    )}
+
+                    {row.voucherType === "Purchase" && (
+                      <Link
+                        href={`/bill/${row.voucherNo}`}
+                        className="text-emerald-600 hover:underline text-sm"
+                      >
+                        View Bill
+                      </Link>
+                    )}
+                  </div>
+
 
                   <div className="text-center">
                     {!inactive ? (

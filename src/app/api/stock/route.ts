@@ -1,14 +1,17 @@
 import connect from "@/src/dbConfig/dbConnection";
-import { EntryCounter } from "@/src/models/EntryCounterModel";
-import { LedgerEntry } from "@/src/models/LedgerEntryModel";
+import mongoose from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
+
 import { Products } from "@/src/models/ProductModel";
 import { StockLayer } from "@/src/models/StockLayerModel";
+import { LedgerEntry } from "@/src/models/LedgerEntryModel";
 import Stock from "@/src/models/stockModel";
 import { TotalStock } from "@/src/models/totalStockModel";
+import { Document } from "@/src/models/DocumentModel";
+import { CompanyProfile } from "@/src/models/CompanyProfileModel";
+
 import { generateVoucherNo } from "@/src/utils/voucher";
-import mongoose from "mongoose";
-import { revalidatePath } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { computeGST } from "@/src/utils/gst";
 
 export async function POST(req: NextRequest) {
   await connect();
@@ -16,136 +19,165 @@ export async function POST(req: NextRequest) {
   session.startTransaction();
 
   try {
-    const {
-      email,
-      name,
-      unit,
-      quantity,
-      price,
-      date,
-      partyName,
-      voucher = "Purchase",
-      costing = "FIFO", // FIFO | WAVG
-    } = await req.json();
+    const { email, transaction, product, party, meta } = await req.json();
 
-    if (!email || !name || !unit || !quantity || price == null) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    if (
+      !email ||
+      !transaction?.date ||
+      !product?.name ||
+      !product?.unit ||
+      !product?.quantity ||
+      product.rate == null
+    ) {
+      throw new Error("INVALID_PAYLOAD");
     }
 
-    const txDate = date ? new Date(date) : new Date();
+    const txDate = new Date(transaction.date);
+    const amount = product.quantity * product.rate;
 
-    /* 🔢 Voucher Creation */
+    /* 🔢 Voucher */
     const voucherNo = await generateVoucherNo({
       email,
       series: "PUR",
       date: txDate,
       session,
     });
-
-    /* Stock Creation for Stock History */
+    
+    /* 📦 Stock history */
     await Stock.create(
-      [
-        {
-          name,
-          quantity,
-          price,
-          unit,
-          date: txDate,
-          email,
-          entryNo: voucherNo,
-          voucher,
-        },
-      ],
+      [{
+        email,
+        name: product.name,
+        unit: product.unit,
+        quantity: product.quantity,
+        price: product.rate,
+        date: txDate,
+        entryNo: voucherNo,
+        voucher: "Purchase",
+      }],
       { session }
     );
-
+    
     /* 📒 Ledger */
-    const ledger = await LedgerEntry.create(
+    const [ledger] = await LedgerEntry.create(
       [{
         email,
         date: txDate,
         voucherType: "Purchase",
-        partyName: partyName || "Cash",
-        partyType: partyName ? "Supplier" : "Cash",
         voucherNo,
-        itemName: name,
-        unit,
-        debitQty: quantity,
+        
+        partyName: party?.name || "Cash",
+        partyType: "Supplier",
+
+        itemName: product.name,
+        unit: product.unit,
+        
+        debitQty: product.quantity,
         creditQty: 0,
-        rate: price,
-        amount: quantity * price,
+        
+        rate: product.rate,
+        amount,
+        narration: meta?.notes || "",
       }],
       { session }
     );
-
-    /* 📦 Stock Layer */
+    
+    /* 📦 FIFO Layer */
     await StockLayer.create(
       [{
         email,
-        productName: name,
-        unit,
-        sourceLedgerId: ledger[0]._id,
-        qtyIn: quantity,
-        qtyRemaining: quantity,
-        rate: price,
+        productName: product.name,
+        unit: product.unit,
+        sourceLedgerId: ledger._id,
+        qtyIn: product.quantity,
+        qtyRemaining: product.quantity,
+        rate: product.rate,
         date: txDate,
       }],
       { session }
     );
-
-    /* Product Quantity Update */
+    
+    /* 📦 Product quantity */
     await Products.updateOne(
-      { email, name, unit },
-      {
-        $inc: {
-          quantity,
-        },
-        $set: {
-          purchasePrice: price,
-        },
-      },
+      { email, name: product.name, unit: product.unit },
+      { $inc: { quantity: product.quantity }, $set: { purchasePrice: product.rate } },
       { session }
     );
+    
+    /* 📊 TotalStock */
+    await TotalStock.findOneAndUpdate(
+      { email, name: product.name, unit: product.unit },
+      {
+        $inc: { quantity: product.quantity, price: amount },
+        $set: { updatedAt: txDate },
+      },
+      { upsert: true, session }
+    );
 
-    /* 📊 Total Stock (summary only) */
-    if (costing === "WAVG") {
-      const stock = await TotalStock.findOne({ email, name, unit }, null, { session });
-      const totalQty = (stock?.quantity || 0) + quantity;
-      const totalValue = (stock?.price || 0) + quantity * price;
+    /* 🏢 Company snapshot */
+    const company = await CompanyProfile.findOne({ email }).lean();
+    
+    /* 📄 BILL DOCUMENT */
+    const gst = computeGST({
+      amount: product.quantity * product.rate,
+      rate: meta?.gstRate || 0,
+      companyState: company?.state,
+      companyGSTIN: company?.gstin,
+      partyState: party?.state,
+      partyGSTIN: party?.taxId,
+    });
 
-      await TotalStock.findOneAndUpdate(
-        { email, name, unit },
-        {
-          quantity: totalQty,
-          price: totalValue,
-          updatedAt: txDate,
+    await Document.create(
+      [{
+        email,
+        type: "Bill",
+        voucherNo,
+        date: txDate,
+
+        party: {
+          type: "Supplier",
+          category: party.category,
+          name: party.name || "Cash",
+          taxId: party.taxId,
+          address: party.address,
+          paymentTerms: party.paymentTerms,
         },
-        { upsert: true, session }
-      );
-    } else {
-      await TotalStock.findOneAndUpdate(
-        { email, name, unit },
-        {
-          $inc: { quantity, price: quantity * price },
-          $set: { updatedAt: txDate },
+
+        item: {
+          name: product.name,
+          unit: product.unit,
+          quantity: product.quantity,
+          rate: product.rate,
+          amount: product.quantity * product.rate,
+          gstRate: meta?.gstRate || 0,
         },
-        { upsert: true, session }
-      );
-    }
+
+        subtotal: product.quantity * product.rate,
+        tax: gst.tax,
+        taxBreakup: gst.type === "NONE"
+        ? { type: "NONE" }
+        : {
+            type: gst.type,
+            ...gst.breakup,
+          },
+        total: gst.total,
+
+        sourceVoucher: "Purchase",
+      }],
+      { session }
+    );
 
     await session.commitTransaction();
     return NextResponse.json({ success: true, voucherNo });
 
   } catch (err) {
-    await session.abortTransaction();
-    console.error(err);
+    if (session.inTransaction()) await session.abortTransaction();
+    console.error("Purchase error:", err);
     return NextResponse.json({ error: "Purchase failed" }, { status: 500 });
   } finally {
     session.endSession();
   }
 }
-
-
 
 export async function GET(request: NextRequest){
     try{

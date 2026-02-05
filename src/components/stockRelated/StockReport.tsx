@@ -259,12 +259,6 @@ function DaysLeft({ days }: { days: number | null }) {
       <div className="flex justify-between text-xs text-slate-500 mb-1">
         <span>{days}d</span>
       </div>
-      <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-        <div
-          className={`h-full ${color}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
     </div>
   );
 }

@@ -36,3 +36,13 @@ body {
   focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500
   outline-none text-slate-900 placeholder-slate-400;
 }
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .print {
+    display: none;
+  }
+}

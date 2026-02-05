@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (!bestProduct) {
-      return {
+      return NextResponse.json({
         triggered: false,
         status: "healthy",
         summary: "No product exceeds margin threshold",
@@ -115,7 +115,7 @@ export async function GET(req: NextRequest) {
           maxMarginFound: 22.4,
           threshold: MIN_MARGIN_PERCENT,
         }
-      };
+      })
     }
 
     /* --------------------------------------------------
