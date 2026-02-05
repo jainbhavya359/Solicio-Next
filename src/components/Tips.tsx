@@ -1,31 +1,41 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 
+/** ✅ API response typing */
+type TipResponse = {
+  data: {
+    tip: string;
+  }[];
+};
+
 export default function Tips() {
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
-  const [visible, setVisible] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<string | null>(null);
+  const [visible, setVisible] = useState<boolean>(true);
 
   const { isSignedIn } = useUser();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("/api/tips");
-        const json = response.data.data[0].tip;
-        setData(json);
+        const response = await axios.get<TipResponse>("/api/tips");
+
+        const tip = response.data.data?.[0]?.tip ?? null;
+
+        setData(tip);
       } catch (err) {
-        setError(err);
-        console.log(err);
+        console.error(err);
+        setError("Failed to load tip");
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
@@ -53,10 +63,8 @@ export default function Tips() {
             {/* Glow */}
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-500/30 via-pink-500/30 to-amber-400/30 blur-lg -z-10" />
 
-            {/* Icon */}
             <span className="text-xl">💡</span>
 
-            {/* Text */}
             <p className="text-sm text-slate-200 leading-snug">
               <span className="font-semibold text-white">
                 Did you know?
@@ -64,7 +72,6 @@ export default function Tips() {
               {data}
             </p>
 
-            {/* Close */}
             <button
               onClick={() => setVisible(false)}
               className="ml-2 text-slate-400 hover:text-white transition"
