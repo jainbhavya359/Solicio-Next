@@ -121,9 +121,10 @@ export function CreditGauge({ score }: { score: number }) {
 function AddLoanCard({ email, name }: any) {
   const [loanType, setLoanType] = useState("");
   const [lender, setLender] = useState("");
-  const [principal, setPrincipal] = useState("");
-  const [interestRate, setInterestRate] = useState(12);
-  const [tenure, setTenure] = useState(12);
+  const [principal, setPrincipal] = useState<number>(0);
+const [interestRate, setInterestRate] = useState<number>(12);
+const [tenure, setTenure] = useState<number>(12);
+
   const [tenureUnit, setTenureUnit] = useState("months");
   const [repaymentFrequency] = useState("monthly");
   const [startDate, setStartDate] = useState("");
@@ -131,7 +132,12 @@ function AddLoanCard({ email, name }: any) {
   const tenureMonths =
     tenureUnit === "years" ? tenure * 12 : tenure;
 
-  const emi = calculateEMI(principal, interestRate, tenureMonths);
+  const emi = calculateEMI({
+  principal: Number(principal),
+  annualRate: Number(interestRate),
+  tenureMonths,
+});
+
 
   const submitLoan = async () => {
     try {
@@ -297,7 +303,7 @@ function AddLoanCard({ email, name }: any) {
 
 export default function Loan() {
   const { user } = useUser();
-  const email = user?.primaryEmailAddress.emailAddress;
+  const email = user?.primaryEmailAddress?.emailAddress ?? "";
   const name = user?.fullName;
 
   const [paymentHistory, setPaymentHistory] = useState(95);
