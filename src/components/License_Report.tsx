@@ -1,33 +1,56 @@
-"use client"
+"use client";
 
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { LicenseCard } from "./LicenseCard";
 
+/* ✅ TYPE — fixes your entire error */
+type License = {
+  _id: string;
+  licName: string;
+  authority: string;
+  date?: string;
+  email?: string;
+};
+
 export default function LicenseReport() {
   const { user } = useUser();
-  const email = user?.primaryEmailAddress?.emailAddress;
 
-  const [licenses, setLicenses] = useState([]);
+  const email = user?.primaryEmailAddress?.emailAddress ?? "";
+
+  /* ✅ Typed state — NO MORE never[] */
+  const [licenses, setLicenses] = useState<License[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchLicenses = async () => {
+    if (!email) return;
+
     try {
-      const res = await axios.get(`/api/licenses?email=${email}`);
+      /* ✅ Typed axios response */
+      const res = await axios.get<License[]>(
+        `/api/licenses?email=${email}`
+      );
+
       setLicenses(res.data);
+    } catch (err) {
+      console.error("Failed to fetch licenses:", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (email) fetchLicenses();
+    fetchLicenses();
   }, [email]);
 
   const deleteLicense = async (id: string) => {
-    await axios.delete(`/api/licenses?id=${id}`);
-    fetchLicenses();
+    try {
+      await axios.delete(`/api/licenses?id=${id}`);
+      fetchLicenses();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
   };
 
   if (loading) {
@@ -58,6 +81,7 @@ export default function LicenseReport() {
     </div>
   );
 }
+
 
 
 
