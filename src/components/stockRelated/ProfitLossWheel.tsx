@@ -15,7 +15,20 @@ const COLORS = [
   "#10B981", // Net profit - green
 ];
 
-export default function ProfitLossWheel({ summary }: any) {
+
+type ProfitSummary = {
+  cogs: number;
+  expenses: number;
+  inventoryWriteDowns: number;
+  netProfit: number;
+  sales: number;
+};
+
+export default function ProfitLossWheel({
+  summary,
+}: {
+  summary: ProfitSummary;
+}){
   const data = [
     {
       name: "COGS",
@@ -59,8 +72,8 @@ export default function ProfitLossWheel({ summary }: any) {
             </Pie>
 
             <Tooltip
-              formatter={(v: number) =>
-                `₹${v.toLocaleString()}`
+              formatter={(v) =>
+                `₹${Number(v ?? 0).toLocaleString()}`
               }
             />
           </PieChart>
