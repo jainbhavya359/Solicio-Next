@@ -5,7 +5,7 @@ interface StockMovementItem {
   unit: string;
   daysSinceLastSale: number | null;
   score: number;
-  category: "fast" | "warming" | "slow" | "dead" | "never-sold";
+  category?: "fast" | "warming" | "slow" | "dead" | "never-sold";
 }
 
 interface Props {
