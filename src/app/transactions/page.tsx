@@ -1,4 +1,4 @@
-import StockHistory from "@/src/components/stockRelated/StockHistory";
+import StockHistory from "@/src/features/stock/StockHistory";
 
 
 export default function TransactionsPage(){

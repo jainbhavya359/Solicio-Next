@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Header from "@/src/components/Header"
-import Footer from "@/src/components/Footer"
+import Header from "@/src/components/layout/Header"
+import Footer from "@/src/components/layout/Footer"
 import { ClerkProvider } from "@clerk/nextjs"
 
 import "./globals.css";

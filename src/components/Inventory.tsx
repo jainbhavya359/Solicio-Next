@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { fetchInventorySnapshot } from "@/src/lib/api/inventory";
 import { AnimatePresence, motion } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
 
-import Purchase from "./Purchase";
-import Sale from "./Sale";
-import StockReport from "./stockRelated/StockReport";
-import StockAlertSmart from "./Insights/StockAlert";
-import StockHistory from "./stockRelated/StockHistory";
-import ProfitLossReport from "./stockRelated/ProfitLossReoprt";
+import Purchase from "../features/stock/Purchase";
+import Sale from "../features/stock/Sale";
+import StockReport from "../features/stock/StockReport";
+import StockAlertSmart from "../features/Insights/StockAlert";
+import StockHistory from "../features/stock/StockHistory";
+import ProfitLossReport from "../features/stock/ProfitLossReoprt";
 
 const PanelMotion = ({ children }: { children: React.ReactNode }) => (
   <motion.div
@@ -29,8 +30,31 @@ export default function Inventory() {
   const [reload, setReload] = useState(false);
   const [product, setProduct] = useState("");
 
+  const [snapshot, setSnapshot] = useState<any>(null);
+  const [loadingSnapshot, setLoadingSnapshot] = useState(true);
+
+
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
+
+  useEffect(() => {
+    if (!email) return;
+
+    const load = async () => {
+      setLoadingSnapshot(true);
+      try {
+        const data = await fetchInventorySnapshot(email);
+        setSnapshot(data);
+      } catch (err) {
+        console.error("Inventory snapshot failed", err);
+      } finally {
+        setLoadingSnapshot(false);
+      }
+    };
+
+    load();
+  }, [email, reload]);
+
 
   return (
     <section className="bg-stone-50 py-24">
@@ -128,17 +152,17 @@ export default function Inventory() {
         <PanelMotion>
           <StockReport
             visible={true}
+            data={snapshot?.inventory}
             productSetter={setProduct}
             purchaseSetter={setNewPurchase}
             saleSetter={setNewSale}
-            reload={reload}
           />
         </PanelMotion>
 
         {/* INSIGHTS */}
         <section className="space-y-16">
-          <StockAlertSmart />
-          <StockHistory />
+          <StockAlertSmart data={snapshot?.lowStock} />
+          <StockHistory data={snapshot?.stockHistory} />
           <ProfitLossReport />
         </section>
 

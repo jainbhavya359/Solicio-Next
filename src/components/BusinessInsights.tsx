@@ -1,16 +1,19 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import { useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
+import { useUser } from "@clerk/nextjs";
 
-import Purchase from "@/src/components/Purchase";
-import Sale from "./Sale";
-import StockReport from "./stockRelated/StockReport";
-import StockAlertSmart from "./Insights/StockAlert";
-import StockValuation from "./stockRelated/StockValuation";
-import CashFlowWatch from "./Insights/CashFlow";
-import SlowMovingStockContainer from "./Insights/SlowMovingStockContainer";
+import { fetchBusinessInsights } from "@/src/lib/api/businessInsights";
+
+import Purchase from "../features/stock/Purchase";
+import Sale from "../features/stock/Sale";
+import StockReport from "../features/stock/StockReport";
+import StockAlertSmart from "../features/Insights/StockAlert";
+import StockValuation from "../features/stock/StockValuation";
+import CashFlowWatch from "../features/Insights/CashFlow";
+import SlowMovingStockContainer from "../features/Insights/SlowMovingStockContainer";
 
 const PanelMotion = ({ children }: { children: React.ReactNode }) => (
   <motion.div
@@ -24,11 +27,39 @@ const PanelMotion = ({ children }: { children: React.ReactNode }) => (
 );
 
 export default function BusinessInsights() {
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress;
+
   const [newPurchase, setNewPurchase] = useState(false);
   const [newSale, setNewSale] = useState(false);
   const [viewStock, setViewStock] = useState(false);
   const [product, setProduct] = useState("");
-  const [reload, setReload] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const [snapshot, setSnapshot] = useState<any>(null);
+  const [loadingSnapshot, setLoadingSnapshot] = useState(true);
+
+  /* ---------------- FETCH SNAPSHOT ---------------- */
+
+  useEffect(() => {
+    if (!email) return;
+
+    const load = async () => {
+      setLoadingSnapshot(true);
+      try {
+        const data = await fetchBusinessInsights(email);
+        setSnapshot(data);
+      } catch (err) {
+        console.error("Business insights failed", err);
+      } finally {
+        setLoadingSnapshot(false);
+      }
+    };
+
+    load();
+  }, [email, reloadKey]);
+
+  /* ---------------- UI ---------------- */
 
   return (
     <section className="bg-[#F7FAF9] my-4 min-h-screen py-20">
@@ -40,50 +71,42 @@ export default function BusinessInsights() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
         >
           <h1 className="text-3xl md:text-4xl font-bold text-stone-900">
             Business Insights
           </h1>
           <p className="mt-2 text-stone-600 max-w-2xl">
-            A real-time view of your stock, cash flow, risks, and opportunities — all in one place.
+            Real-time view of risks, stock health, and cash exposure.
           </p>
         </motion.div>
 
         {/* INSIGHTS GRID */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        {!loadingSnapshot && snapshot && (
+          <div className="grid gap-6 lg:grid-cols-2">
 
-          <InsightCard title="Stock Alerts">
-            <StockAlertSmart />
-          </InsightCard>
+            <InsightCard title="Stock Alerts">
+              <StockAlertSmart data={snapshot.lowStock} />
+            </InsightCard>
 
-          <InsightCard title="Stock Valuation">
-            <StockValuation />
-          </InsightCard>
-          
-          <InsightCard title="Cash Flow">
-            <CashFlowWatch />
-          </InsightCard>
-          
-          <InsightCard title="Slow Moving Stock">
-            <SlowMovingStockContainer />
-          </InsightCard>
-        </div>
+            <InsightCard title="Stock Valuation">
+              <StockValuation />
+            </InsightCard>
+
+            <InsightCard title="Cash Flow">
+              <CashFlowWatch data={snapshot.cashFlow} />
+            </InsightCard>
+
+            <InsightCard title="Slow Moving Stock">
+              <SlowMovingStockContainer
+                data={snapshot.slowMoving}
+              />
+            </InsightCard>
+
+          </div>
+        )}
 
         {/* ACTION BAR */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="
-            bg-white border border-stone-200 rounded-2xl
-            p-6 shadow-sm flex flex-wrap items-center gap-4
-          "
-        >
-          <span className="text-sm font-medium text-stone-600 mr-4">
-            Quick actions
-          </span>
-
+        <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm flex flex-wrap gap-4">
           <ActionButton
             onClick={() => {
               setNewPurchase(true);
@@ -114,7 +137,7 @@ export default function BusinessInsights() {
           >
             View Inventory
           </ActionButton>
-        </motion.div>
+        </div>
 
         {/* PANELS */}
         <AnimatePresence mode="wait">
@@ -123,8 +146,8 @@ export default function BusinessInsights() {
               <Purchase
                 visible
                 preSelectedProduct={product}
-                reloadSetter={setReload}
-                reload={reload}
+                reloadSetter={() => setReloadKey(k => k + 1)}
+                reload={reloadKey}
               />
             </PanelMotion>
           )}
@@ -134,8 +157,8 @@ export default function BusinessInsights() {
               <Sale
                 visible
                 preSelectedProduct={product}
-                reloadSetter={setReload}
-                reload={reload}
+                reloadSetter={() => setReloadKey(k => k + 1)}
+                reload={reloadKey}
               />
             </PanelMotion>
           )}
@@ -144,20 +167,21 @@ export default function BusinessInsights() {
             <PanelMotion key="stock">
               <StockReport
                 visible
+                data={snapshot?.stockReport}
                 productSetter={setProduct}
                 purchaseSetter={setNewPurchase}
                 saleSetter={setNewSale}
-                reload={reload}
+                reloadKey={reloadKey}
               />
             </PanelMotion>
           )}
-
-          
         </AnimatePresence>
+
       </div>
     </section>
   );
 }
+
 
 /* ---------- helpers ---------- */
 

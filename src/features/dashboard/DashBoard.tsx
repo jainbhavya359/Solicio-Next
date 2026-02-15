@@ -7,25 +7,27 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 import { UserButton, useUser, SignOutButton, UserProfile } from "@clerk/nextjs";
 
 // Existing components - keeping for functionality
-import { CreditGauge } from "../Loan";
+import { CreditGauge } from "../../components/Loan";
 import { useCreditStore } from "../../store/useCreditStore";
-import LedgerSearchBox from "../LedgerSearchBox";
-import StockReport from "../stockRelated/StockReport";
-import LedgerEntries from "../LedgerEntries";
-import ProfitLossReport from "../stockRelated/ProfitLossReoprt";
-import StockValuation from "../stockRelated/StockValuation";
+import LedgerSearchBox from "../ledger/LedgerSearchBox";
+import StockReport from "../stock/StockReport";
+import LedgerEntries from "../ledger/LedgerEntries";
+import ProfitLossReport from "../stock/ProfitLossReoprt";
+import StockValuation from "../stock/StockValuation";
 import StockAlertSmart from "../Insights/StockAlert";
 import CashFlowWatch from "../Insights/CashFlow";
 import AlertsFeed from "../alerts/AlertsFeed";
-import License_Report from "../License_Report";
+import License_Report from "../loan_licenses/License_Report";
 import BusinessHealthCard from "../health/BusinessHealthCard";
 import SlowMovingStockContainer from "../Insights/SlowMovingStockContainer";
 import { ActionSuggestionCard, ForecastSummaryCard, MarginTrendGraph, SalesTrendGraphCard, TopProductDonut } from "../Insights/SalesTrendInsightsCard";
 import KPICards from "./KPICards";
 import TopProductsCard from "../Insights/TopProductCard";
-import Purchase from "../Purchase";
-import Sale from "../Sale";
+import Purchase from "../stock/Purchase";
+import Sale from "../stock/Sale";
 import { Toaster } from "react-hot-toast";
+import { fetchDashboardData } from "@/src/lib/api/dashboard";
+
 
 // Icons as inline SVGs
 const Icons = {
@@ -143,6 +145,7 @@ interface Loan {
   nextDueDate?: string;
 }
 
+
 // Animation variants
 const fadeInUp: Variants = {
   hidden: {
@@ -208,37 +211,34 @@ export default function Dashboard() {
   const [product, setProduct] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+
+
   const [data, setData] = useState<any | null>(null);
   const [loadingInsights, setLoadingInsights] = useState(true);
 
 
   useEffect(() => {
     if (!email) return;
-    axios
-      .get("/api/loans", { params: { email } })
-      .then((res) => setLoans(res.data))
-      .finally(() => setLoadingLoans(false));
 
-    const FetchData = async () => {
+    const load = async () => {
+      setLoadingDashboard(true);
       try {
-        setLoadingInsights(true);
-        const res = await axios.get("/api/insights/sales-trend", {
-          params: { email, days: 7 },
-        });
-
-        if (res.status === 200) {
-          setData(res.data);
-        }
-      } catch (error) {
-        console.error(error);
+        const data = await fetchDashboardData(email);
+        setDashboardData(data);
+        setLoans(data.loans);
+        setData(data.salesTrend7);
+      } catch (err) {
+        console.error(err);
       } finally {
-        setLoadingInsights(false);
+        setLoadingDashboard(false);
       }
     };
 
-
-    FetchData();
+    load();
   }, [email, reload]);
+
 
   const scrollToSection = (id: string) => {
     setActiveSection(id);
@@ -431,9 +431,9 @@ export default function Dashboard() {
                 {/* Business Health Card */}
                 <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
                   <div className="pb-6">
-                    <KPICards />
+                    <KPICards data={dashboardData?.kpis}/>
                   </div>
-                  {email && <BusinessHealthCard email={email} />}
+                  {email && <BusinessHealthCard data={dashboardData?.healthSummary} />}
                 </motion.div>
 
                 {/* Two Column Layout */}
@@ -444,7 +444,7 @@ export default function Dashboard() {
                     </motion.div>
                   )}
                   <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                    <CashFlowWatch />
+                    <CashFlowWatch data={dashboardData?.cashFlow}/>
                   </motion.div>
                 </div>
                 {loadingInsights ? (
@@ -495,7 +495,13 @@ export default function Dashboard() {
                 className="space-y-6"
               >
                 <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                  <StockReport visible={true} reload={reload} productSetter={setProduct} saleSetter={setNewSale} purchaseSetter={setNewPurchase}/>
+                  <StockReport
+                    visible={true}
+                    data={dashboardData?.inventory}
+                    productSetter={setProduct}
+                    saleSetter={setNewSale}
+                    purchaseSetter={setNewPurchase}
+                  />
                 </motion.div>
                 {/* FORMS */}
                 <AnimatePresence mode="wait">
@@ -522,10 +528,10 @@ export default function Dashboard() {
                   )}
                 </AnimatePresence>
                 <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                  <TopProductsCard />
+                  <TopProductsCard data={dashboardData?.salesTrend7} />
                 </motion.div>
                 <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                  <StockAlertSmart />
+                  <StockAlertSmart data={dashboardData?.lowStock} />
                 </motion.div>
                 <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
                   <StockValuation />
@@ -548,7 +554,7 @@ export default function Dashboard() {
                   <ProfitLossReport />
                 </motion.div>
                 <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                  <CashFlowWatch />
+                  <CashFlowWatch data={dashboardData?.cashFlow}/>
                 </motion.div>
               </motion.div>
             </section>
@@ -700,7 +706,7 @@ export default function Dashboard() {
                 className="space-y-6"
               >
                 <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                  <SlowMovingStockContainer />
+                  <SlowMovingStockContainer data={dashboardData?.slowMoving}/>
                 </motion.div>
                 <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
                   {email && <AlertsFeed email={email} />}

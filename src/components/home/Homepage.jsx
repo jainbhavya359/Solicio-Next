@@ -11,18 +11,6 @@ import { PricingSection } from "./PricingSection";
 import { ProblemsSection } from "./ProblemSection";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { ActionSuggestionCard, ForecastSummaryCard, KpiCard, MarginTrendGraph, SalesHealthCards, SalesTrendGraphCard, TopProductDonut } from "../Insights/SalesTrendInsightsCard";
-import BusinessHealthCard from "../health/BusinessHealthCard";
-import StockReport from "../stockRelated/StockReport";
-import StockAlertSmart from "../Insights/StockAlert";
-import StockHistory from "../stockRelated/StockHistory";
-import CashFlowWatch from "../Insights/CashFlow";
-import AlertsFeed from "../alerts/AlertsFeed";
-import SlowMovingStockContainer from "../Insights/SlowMovingStockContainer";
-import StockValuation from "../stockRelated/StockValuation";
-import ProfitLossReport from "../stockRelated/ProfitLossReoprt";
-import LedgerEntries from "../LedgerEntries";
-import LedgerSearchBox from "../LedgerSearchBox";
 
 
 export default function HomePage() {

@@ -1,8 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { useUser } from "@clerk/nextjs";
 import { ArrowRight, CheckCircle, AlertTriangle } from "lucide-react";
 
 interface CashFlowData {
@@ -11,24 +6,8 @@ interface CashFlowData {
   period: string;
 }
 
-export default function CashFlowWatch() {
-  const { user } = useUser();
-  const email = user?.primaryEmailAddress?.emailAddress;
-
-  const [data, setData] = useState<CashFlowData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!email) return;
-
-    axios
-      .get(`/api/cash-flow?email=${email}`)
-      .then(res => setData(res.data))
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
-  }, [email]);
-
-  if (loading || !data) return null;
+export default function CashFlowWatch({ data }: { data: CashFlowData }) {
+  if (!data) return null;
 
   const isHealthy = data.sales >= data.purchases;
   const net = data.sales - data.purchases;

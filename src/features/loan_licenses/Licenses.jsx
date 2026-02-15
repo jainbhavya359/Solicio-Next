@@ -2,8 +2,8 @@
 
 import { useUser } from "@clerk/nextjs";
 import React, { useEffect, useState } from "react";
-import { LicenseCard } from "./LicenseCard";
-import { AddLicenseCard } from "./AddLicenseCard";
+import { LicenseCard } from "./ui/LicenseCard";
+import { AddLicenseCard } from "./ui/AddLicenseCard";
 
 export default function Licenses() {
   const [licName, setLicName] = useState("");

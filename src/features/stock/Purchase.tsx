@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Plus, Minus, Package } from "lucide-react";
 import AddProductModal from "./AddProduct";
-import { UNITS } from "../utils/store";
+import { UNITS } from "../../utils/store";
 import { useRouter } from "next/navigation";
 
 export default function Purchase({

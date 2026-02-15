@@ -51,27 +51,9 @@ const severityMap: Record<
 
 /* ================= MAIN ================= */
 
-export default function StockAlertSmart() {
-  const { user } = useUser();
-  const email = user?.primaryEmailAddress?.emailAddress;
-
-  const [data, setData] = useState<{
-    alerts: { count: number; products: StockAlert[] };
-    noAlerts: NoAlertExplanation[];
-  } | null>(null);
+export default function StockAlertSmart({ data }: { data : { alerts: { count: number; products: StockAlert[] }, noAlerts: NoAlertExplanation[],} | null }) {
 
   const [open, setOpen] = useState(true);
-
-  useEffect(() => {
-    if (!email) return;
-
-    axios
-      .get(`/api/low-stock?email=${email}`)
-      .then(res => setData(res.data))
-      .catch(() =>
-        setData({ alerts: { count: 0, products: [] }, noAlerts: [] })
-      );
-  }, [email]);
 
   if (!data || data.alerts.count === 0) return null;
 

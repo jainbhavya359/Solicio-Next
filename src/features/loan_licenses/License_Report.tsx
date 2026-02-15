@@ -3,7 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { LicenseCard } from "./LicenseCard";
+import { LicenseCard } from "../../components/ui/LicenseCard";
 
 /* ✅ TYPE — fixes your entire error */
 type License = {

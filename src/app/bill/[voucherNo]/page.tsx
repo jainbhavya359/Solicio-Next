@@ -1,8 +1,8 @@
-import PrintableDocument from "@/src/components/PrintableDocument";
+import PrintableDocument from "@/src/features/documents/PrintableDocument";
 import connect from "@/src/dbConfig/dbConnection";
 import { Document } from "@/src/models/DocumentModel";
 import { auth } from "@clerk/nextjs/server";
-import PrintButton from "@/src/components/PrintButton";
+import PrintButton from "@/src/components/ui/PrintButton";
 
 export default async function BillPage(props: {
   params: Promise<{ voucherNo: string }>;
