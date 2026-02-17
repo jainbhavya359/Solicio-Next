@@ -122,8 +122,8 @@ function AddLoanCard({ email, name }: any) {
   const [loanType, setLoanType] = useState("");
   const [lender, setLender] = useState("");
   const [principal, setPrincipal] = useState<number>(0);
-const [interestRate, setInterestRate] = useState<number>(12);
-const [tenure, setTenure] = useState<number>(12);
+  const [interestRate, setInterestRate] = useState<number>(12);
+  const [tenure, setTenure] = useState<number>(12);
 
   const [tenureUnit, setTenureUnit] = useState("months");
   const [repaymentFrequency] = useState("monthly");
@@ -133,10 +133,10 @@ const [tenure, setTenure] = useState<number>(12);
     tenureUnit === "years" ? tenure * 12 : tenure;
 
   const emi = calculateEMI({
-  principal: Number(principal),
-  annualRate: Number(interestRate),
-  tenureMonths,
-});
+    principal: Number(principal),
+    annualRate: Number(interestRate),
+    tenureMonths,
+  });
 
 
   const submitLoan = async () => {
@@ -185,6 +185,7 @@ const [tenure, setTenure] = useState<number>(12);
             onChange={(e) => setLoanType(e.target.value)}
             placeholder="Business / Personal"
             className={inputClass}
+            maxLength={20}
           />
         </div>
 
@@ -197,6 +198,7 @@ const [tenure, setTenure] = useState<number>(12);
             onChange={(e) => setLender(e.target.value)}
             placeholder="Bank / NBFC"
             className={inputClass}
+            maxLength={30}
           />
         </div>
       </div>
@@ -211,6 +213,7 @@ const [tenure, setTenure] = useState<number>(12);
             value={principal}
             onChange={(e) => setPrincipal(+e.target.value)}
             className={inputClass}
+            min={0}
           />
         </div>
 
@@ -223,6 +226,9 @@ const [tenure, setTenure] = useState<number>(12);
             value={interestRate}
             onChange={(e) => setInterestRate(+e.target.value)}
             className={inputClass}
+            min={0}
+            max={100}
+            step={0.1}
           />
         </div>
       </div>
@@ -237,6 +243,7 @@ const [tenure, setTenure] = useState<number>(12);
             value={tenure}
             onChange={(e) => setTenure(+e.target.value)}
             className={inputClass}
+            min={1}
           />
         </div>
 
@@ -370,8 +377,8 @@ export default function Loan() {
               index <= 1
                 ? "text-red-600"
                 : index === 2
-                ? "text-amber-600"
-                : "text-emerald-600",
+                  ? "text-amber-600"
+                  : "text-emerald-600",
             ],
           ].map(([label, value, color], i) => (
             <div
@@ -406,6 +413,8 @@ export default function Loan() {
                   value={value}
                   onChange={(e) => setter(+e.target.value)}
                   className="w-full mt-2 px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500"
+                  min={0}
+                  max={i === 0 || i === 1 ? 100 : undefined}
                 />
               </div>
             ))}

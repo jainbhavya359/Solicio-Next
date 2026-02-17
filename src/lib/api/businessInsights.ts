@@ -6,7 +6,7 @@ export async function fetchBusinessInsights(email: string) {
       axios.get("/api/low-stock", { params: { email } }),
       axios.get("/api/cash-flow", { params: { email } }),
       axios.get("/api/health/stock-movement", { params: { email } }),
-      axios.get("/api/stock-report", { params: { email } }), 
+      axios.get("/api/totalStock", { params: { email } }),
     ]);
 
   return {

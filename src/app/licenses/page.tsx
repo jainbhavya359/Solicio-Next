@@ -1,6 +1,6 @@
-import Licenses from "@/src/components/Licenses"
+import Licenses from "@/src/features/loan_licenses/Licenses"
 
-export default function LicensesPage(){
+export default function LicensesPage() {
     return (
         <Licenses />
     )

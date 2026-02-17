@@ -79,9 +79,22 @@ export async function GET(req: NextRequest) {
     }
 
     /* ---------------- DATE RANGE ---------------- */
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - days);
+    const fromParam = searchParams.get("from");
+    const toParam = searchParams.get("to");
+
+    let startDate: Date;
+    let endDate: Date;
+
+    if (fromParam && toParam) {
+      startDate = new Date(fromParam);
+      endDate = new Date(toParam);
+      // Ensure end date includes the full day
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      endDate = new Date();
+      startDate = new Date();
+      startDate.setDate(endDate.getDate() - days);
+    }
 
     /* ---------------- DAILY SALES AGGREGATION ---------------- */
     const rawDaily = await LedgerEntry.aggregate([
@@ -156,8 +169,8 @@ export async function GET(req: NextRequest) {
     }
 
     const forecast = generateSalesForecast(
-        timeline.map(d => ({ date: d.date, sales: d.sales })),
-        7 // forecast days
+      timeline.map(d => ({ date: d.date, sales: d.sales })),
+      7 // forecast days
     );
 
 
@@ -181,11 +194,11 @@ export async function GET(req: NextRequest) {
     const growthPct =
       firstHalfSales > 0
         ? ((secondHalfSales - firstHalfSales) /
-            firstHalfSales) *
-          100
+          firstHalfSales) *
+        100
         : secondHalfSales > 0
-        ? 100
-        : 0;
+          ? 100
+          : 0;
 
     /* ---------------- CONSISTENCY ---------------- */
     const salesValues = timeline.map(d => d.sales);
@@ -290,8 +303,8 @@ export async function GET(req: NextRequest) {
           growthPct > 0
             ? "up"
             : growthPct < 0
-            ? "down"
-            : "flat",
+              ? "down"
+              : "flat",
       },
       profitability: {
         grossMargin: Number(grossMargin.toFixed(2)),

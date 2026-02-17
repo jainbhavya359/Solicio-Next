@@ -51,11 +51,11 @@ const severityMap: Record<
 
 /* ================= MAIN ================= */
 
-export default function StockAlertSmart({ data }: { data : { alerts: { count: number; products: StockAlert[] }, noAlerts: NoAlertExplanation[],} | null }) {
+export default function StockAlertSmart({ data }: { data: { alerts: { count: number; products: StockAlert[] }, noAlerts: NoAlertExplanation[], } | null }) {
 
   const [open, setOpen] = useState(true);
 
-  if (!data || data.alerts.count === 0) return null;
+  if (!data) return null;
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6">

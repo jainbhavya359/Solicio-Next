@@ -2,8 +2,8 @@
 
 import { useUser } from "@clerk/nextjs";
 import React, { useEffect, useState } from "react";
-import { LicenseCard } from "./ui/LicenseCard";
-import { AddLicenseCard } from "./ui/AddLicenseCard";
+import { LicenseCard } from "../../components/ui/LicenseCard";
+import { AddLicenseCard } from "../../components/ui/AddLicenseCard";
 
 export default function Licenses() {
   const [licName, setLicName] = useState("");
@@ -13,12 +13,12 @@ export default function Licenses() {
 
   const { user } = useUser();
 
-  useEffect(()=>{
-    if(!email){
+  useEffect(() => {
+    if (!email) {
       setEmail(user?.primaryEmailAddress.emailAddress);
       return;
     }
-  },[email]);
+  }, [email]);
 
   const onHandleClick = async (event) => {
     event.preventDefault();
@@ -75,8 +75,8 @@ export default function Licenses() {
             and organized.
           </p>
 
-          <AddLicenseCard email={email}/>
-          
+          <AddLicenseCard email={email} />
+
         </div>
 
 

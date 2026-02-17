@@ -96,5 +96,6 @@ export async function fetchDashboardData(email: string) {
     healthSummary: healthSummary.data,
     lowStock: lowStock.data,
     slowMoving: slowMoving.data,
+    inventory: inventoryNow.data,
   };
 }
