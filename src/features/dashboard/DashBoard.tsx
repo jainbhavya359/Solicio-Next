@@ -181,6 +181,16 @@ export default function Dashboard() {
   const [product, setProduct] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Date filters
+  const [fromDate, setFromDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().split("T")[0];
+  });
+  const [toDate, setToDate] = useState(() => {
+    return new Date().toISOString().split("T")[0];
+  });
+
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
 
@@ -195,7 +205,7 @@ export default function Dashboard() {
     const load = async () => {
       setLoadingDashboard(true);
       try {
-        const data = await fetchDashboardData(email);
+        const data = await fetchDashboardData(email, fromDate, toDate);
         setDashboardData(data);
         setLoans(data.loans);
         setData(data.salesTrend7);
@@ -209,7 +219,7 @@ export default function Dashboard() {
     };
 
     load();
-  }, [email, reload]);
+  }, [email, reload, fromDate, toDate]);
 
 
   const scrollToSection = (id: string) => {
@@ -271,76 +281,78 @@ export default function Dashboard() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-[280px] ${card} flex flex-col
+        className={`fixed top-0 left-0 z-50 h-full w-[280px] bg-white border-r border-slate-200 flex flex-col
           transform transition-transform duration-300 ease-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:translate-x-0 lg:z-30`}
+          lg:translate-x-0 lg:z-30 shadow-2xl lg:shadow-none`}
       >
         {/* Sidebar Header */}
-        <div className="p-6">
+        <div className="p-8">
           <div className="flex items-center gap-3">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
+              className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-200"
             >
               {Icons.logo}
             </motion.div>
             <div>
-              <h1 className="font-bold text-stone-900 text-lg">Solicio</h1>
-              <p className="text-xs text-stone-500">Business Dashboard</p>
+              <h1 className="font-extrabold text-slate-900 text-xl tracking-tight">Solicio</h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Command Center</p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4">
-          <p className="px-3 mb-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Menu</p>
-          <div className="space-y-1">
+        <nav className="flex-1 px-4 mt-2">
+          <p className="px-4 mb-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Menu Navigation</p>
+          <div className="space-y-1.5">
             <motion.a
               href="/"
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 text-stone-600 hover:bg-stone-100"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-100 hover:text-emerald-600"
               whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center gap-3">
-                <span className="text-stone-500">🏚️</span>
-                <span className="font-medium text-sm">Home</span>
+                <span className="text-lg">🏚️</span>
+                <span className="font-bold text-sm">Main Landing</span>
               </div>
             </motion.a>
             <motion.a
               href="/features"
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 text-stone-600 hover:bg-stone-100"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-100"
               whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center gap-3">
-                <span className="text-stone-500">{Icons.features}</span>
-                <span className="font-medium text-sm">Features</span>
+                <span className="text-slate-500">{Icons.features}</span>
+                <span className="font-bold text-sm">Product Features</span>
               </div>
             </motion.a>
+
+            <div className="h-4" />
+            <p className="px-4 mb-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Insights & Control</p>
+
             {navItems.map((item) => (
               <motion.button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
                 whileHover={{ x: activeSection === item.id ? 0 : 2 }}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-200
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-left transition-all duration-200
                   ${activeSection === item.id
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "text-stone-600 hover:bg-stone-100"
+                    ? "bg-slate-900 text-white shadow-xl shadow-slate-200"
+                    : "text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-100"
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className={activeSection === item.id ? "text-white" : "text-stone-500"}>
+                  <span className={activeSection === item.id ? "text-emerald-400" : "text-slate-400"}>
                     {item.icon}
                   </span>
-                  <span className="font-medium text-sm">{item.label}</span>
+                  <span className="font-bold text-sm">{item.label}</span>
                 </div>
                 {activeSection === item.id && (
                   <motion.span
                     initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="text-white"
+                    className="text-white/40"
                   >
                     {Icons.chevronRight}
                   </motion.span>
@@ -351,31 +363,33 @@ export default function Dashboard() {
         </nav>
 
         {/* User Section */}
-        <div className={`p-4 ${card}`}>
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-50">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold">
-              {user?.firstName?.charAt(0) || "U"}
+        <div className="p-4">
+          <div className="bg-slate-50 rounded-3xl p-2 border border-slate-100">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                {user?.firstName?.charAt(0) || "U"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-slate-900 truncate">
+                  {user?.fullName || "User"}
+                </p>
+                <p className="text-[10px] font-medium text-slate-400 truncate tracking-tight">{email}</p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-stone-900 truncate">
-                {user?.fullName || "User"}
-              </p>
-              <p className="text-xs text-stone-500 truncate">{email}</p>
-            </div>
+            <SignOutButton>
+              <button className="w-full mt-2 flex items-center gap-3 px-4 py-2.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all">
+                {Icons.signOut}
+                <span className="text-xs font-bold uppercase tracking-widest">Sign out</span>
+              </button>
+            </SignOutButton>
           </div>
-          <SignOutButton>
-            <button className="w-full mt-3 flex items-center gap-3 px-4 py-2.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors">
-              {Icons.signOut}
-              <span className="text-sm font-medium">Sign out</span>
-            </button>
-          </SignOutButton>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 lg:ml-[280px] min-h-screen pt-16 lg:pt-0">
         {/* Top Header Bar */}
-        <div className="p-6 w-13/14 place-self-center">
+        <div className="p-6 w-full max-w-full overflow-hidden">
           {email && <LedgerSearchBox key={activeSection} email={email} />}
         </div>
 
@@ -406,22 +420,50 @@ export default function Dashboard() {
                   animate="visible"
                   className="space-y-6"
                 >
-                  {/* Business Health Card */}
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                    <div className="pb-6">
-                      <KPICards data={dashboardData?.kpis} />
+                  {/* Date Filter Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                        {Icons.calendar}
+                      </div>
+                      <h2 className="text-sm font-semibold text-stone-700">Filter Range</h2>
                     </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-stone-400">From</span>
+                        <input
+                          type="date"
+                          value={fromDate}
+                          onChange={(e) => setFromDate(e.target.value)}
+                          className="px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-stone-400">To</span>
+                        <input
+                          type="date"
+                          value={toDate}
+                          onChange={(e) => setToDate(e.target.value)}
+                          className="px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Business Health & KPIs */}
+                  <div className="space-y-8">
+                    <KPICards data={dashboardData?.kpis} />
                     {email && <BusinessHealthCard data={dashboardData?.healthSummary} />}
-                  </motion.div>
+                  </div>
 
                   {/* Two Column Layout */}
                   <div className="grid md:grid-cols-2 gap-6">
-                    {(
-                      <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                        <CreditGauge score={score} />
-                      </motion.div>
-                    )}
-                    <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                    <motion.div variants={fadeInUp} className="h-full">
+                      <CreditGauge score={score} />
+                    </motion.div>
+
+                    <motion.div variants={fadeInUp} className="h-full">
                       <CashFlowWatch data={dashboardData?.cashFlow} />
                     </motion.div>
                   </div>
@@ -449,7 +491,7 @@ export default function Dashboard() {
 
                       {/* 4️⃣ Context */}
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <TopProductDonut data={data} />
+                        <TopProductDonut data={data} onViewInventory={() => scrollToSection("inventory")} />
                         <MarginTrendGraph data={data} />
                       </div>
 

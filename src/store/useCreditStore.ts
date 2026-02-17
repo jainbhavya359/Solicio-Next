@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 type CreditState = {
   score: number;
@@ -7,15 +8,22 @@ type CreditState = {
 
   setScore: (score: number) => void;
   setIndex: (index: number) => void;
-  showResult: (value: boolean) => void;
+  showResult: (show: boolean) => void;
 };
 
-export const useCreditStore = create<CreditState>((set) => ({
-  score: 0,
-  index: 0,
-  show: false,
+export const useCreditStore = create<CreditState>()(
+  persist(
+    (set) => ({
+      score: 0,
+      index: 0,
+      show: false,
 
-  setScore: (score) => set({ score }),
-  setIndex: (index) => set({ index }),
-  showResult: (value) => set({ show: value }),
-}));
+      setScore: (score) => set({ score }),
+      setIndex: (index) => set({ index }),
+      showResult: (show) => set({ show }),
+    }),
+    {
+      name: "credit-store", // unique name for localStorage key
+    }
+  )
+);

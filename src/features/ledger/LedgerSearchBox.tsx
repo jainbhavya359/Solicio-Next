@@ -5,6 +5,22 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import UniversalSearchBox from "./SearchBox";
 import ConfirmReversalModal from "./ConfirmReversal";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Search,
+  History,
+  Package,
+  User,
+  Eye,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  Hash,
+  ShoppingBag,
+  TrendingUp,
+  TrendingDown
+} from "lucide-react";
+import Link from "next/link";
 
 type LedgerRow = {
   _id: string;
@@ -102,155 +118,222 @@ export default function LedgerSearchBox({ email }: { email: string }) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* SEARCH */}
-      <UniversalSearchBox
-        placeholder="Search ledger by party, product, voucher…"
-        onSubmit={handleSearch}
-        autoFocus
-      />
+    <div className="space-y-8">
+      {/* SEARCH HEADER */}
+      <div className="bg-white rounded-3xl border border-slate-200 p-2 shadow-sm focus-within:ring-4 focus-within:ring-emerald-500/5 transition-all">
+        <UniversalSearchBox
+          placeholder="Search items, parties, or voucher numbers…"
+          onSubmit={handleSearch}
+          autoFocus
+        />
+      </div>
 
-      {query && (
-        <p className="text-xs text-slate-500">
-          Showing results for{" "}
-          <span className="font-semibold text-slate-700">
-            “{query}”
-          </span>
-        </p>
-      )}
+      <AnimatePresence mode="wait">
+        {query && !loading && (
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 px-4"
+          >
+            <div className="p-1 px-3 rounded-full bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
+              Results
+            </div>
+            <p className="text-sm font-bold text-slate-500">
+              Found <span className="text-slate-900">{allResults.length}</span> matches for <span className="text-emerald-600">“{query}”</span>
+            </p>
+          </motion.div>
+        )}
 
-      {loading && (
-        <p className="text-sm text-slate-400">Searching…</p>
-      )}
-
-      {visibleResults.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          {/* HEADER */}
-          <div className="grid grid-cols-13 px-5 py-3 text-xs font-semibold text-slate-600 bg-slate-50 border-b">
-            <div>Date</div>
-            <div className="col-span-2">Product</div>
-            <div className="col-span-2">Party</div>
-            <div>Type</div>
-            <div className="text-right">Dr</div>
-            <div className="text-right">Cr</div>
-            <div className="col-span-3 text-center">Entry No</div>
-            <div className="col-span-2 text-center">Action</div>
-          </div>
-
-          {/* ROWS */}
-          {visibleResults.map(row => {
-            const inactive =
-              row.isReversal || reversedMap.has(row._id);
-
-            return (
-              <div
-                key={row._id}
-                className={`grid grid-cols-13 px-5 py-3 text-sm border-b
-                  ${inactive ? "bg-slate-50 text-slate-400" : "hover:bg-slate-50"}
-                `}
-              >
-                <div className="font-medium tabular-nums">
-                  {row.date.slice(0, 10)}
-                </div>
-
-                <div className="col-span-2">
-                  <div className="font-semibold">
-                    {row.itemName}
+        {loading ? (
+          <motion.div
+            key="searching"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="py-24 flex flex-col items-center justify-center bg-white rounded-[2rem] border border-slate-100 shadow-sm"
+          >
+            <div className="relative w-12 h-12">
+              <div className="absolute inset-0 border-4 border-emerald-100 rounded-full" />
+              <div className="absolute inset-0 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+            <p className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Scanning ledger...</p>
+          </motion.div>
+        ) : query && visibleResults.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="py-24 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-slate-100 shadow-sm"
+          >
+            <div className="w-20 h-20 rounded-[2.5rem] bg-emerald-50 text-emerald-300 flex items-center justify-center mb-6">
+              <Search size={40} />
+            </div>
+            <p className="text-slate-900 font-bold text-xl tracking-tight">No records found</p>
+            <p className="text-sm text-slate-400 mt-2 max-w-xs">We couldn't find any ledger entries matching your search criteria.</p>
+          </motion.div>
+        ) : visibleResults.length > 0 ? (
+          <motion.div
+            key="results"
+            className="space-y-6"
+          >
+            <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[1200px] p-6">
+                  {/* HEAD */}
+                  <div className="grid grid-cols-12 gap-4 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50 mb-4">
+                    <div className="col-span-1">Date</div>
+                    <div className="col-span-3">Product Information</div>
+                    <div className="col-span-2">Party Details</div>
+                    <div className="col-span-1">Type</div>
+                    <div className="col-span-1 text-right">Debit</div>
+                    <div className="col-span-1 text-right">Credit</div>
+                    <div className="col-span-2 text-center">Reference</div>
+                    <div className="col-span-1 text-right">Actions</div>
                   </div>
-                  <div className="text-xs text-slate-500">
-                    {row.unit}
-                  </div>
-                </div>
 
-                <div className="col-span-2">
-                  <div className="font-medium">
-                    {row.partyName || "Cash"}
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    {row.partyType || "Cash"}
-                  </div>
-                </div>
-
-                <div>
-                  <span
-                    className={`px-2 py-0.5 rounded-md text-xs font-semibold
-                      ${
-                        row.voucherType === "Purchase"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-rose-100 text-rose-700"
-                      }
-                    `}
+                  {/* ROWS */}
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      visible: { transition: { staggerChildren: 0.05 } }
+                    }}
+                    className="space-y-3"
                   >
-                    {row.voucherType}
-                  </span>
-                </div>
+                    {visibleResults.map(row => {
+                      const inactive = row.isReversal || reversedMap.has(row._id);
 
-                <div className="text-right text-emerald-600">
-                  {row.debitQty || "—"}
-                </div>
+                      return (
+                        <motion.div
+                          key={row._id}
+                          variants={{
+                            hidden: { opacity: 0, x: -10 },
+                            visible: { opacity: 1, x: 0 }
+                          }}
+                          className={`grid grid-cols-12 items-center gap-4 px-6 py-4 rounded-2xl border transition-all
+                          ${inactive ? "bg-slate-50 opacity-60 grayscale grayscale-[0.8]" : "bg-white border-slate-100 hover:border-emerald-100 hover:shadow-md group"}
+                        `}
+                        >
+                          <div className="col-span-1 font-bold text-xs text-slate-900 uppercase">
+                            {row.date.slice(0, 10)}
+                          </div>
 
-                <div className="text-right text-rose-600">
-                  {row.creditQty || "—"}
-                </div>
+                          <div className="col-span-3">
+                            <div className="flex items-center gap-4">
+                              <div className={`p-2 rounded-xl bg-slate-50 text-slate-400 ${!inactive && "group-hover:bg-emerald-50 group-hover:text-emerald-600"} transition-colors`}>
+                                <Package size={18} />
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-900 leading-none">{row.itemName}</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{row.unit}</p>
+                              </div>
+                            </div>
+                          </div>
 
-                <div className="col-span-3 text-center font-mono text-xs text-slate-500">
-                  {row.voucherNo}
-                </div>
+                          <div className="col-span-2 text-sm">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
+                              <p className="font-bold text-slate-700">{row.partyName || "General Store"}</p>
+                            </div>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-3.5 mt-0.5">{row.partyType || "Customer"}</p>
+                          </div>
 
-                <div className="col-span-2 text-center">
-                  {!inactive ? (
+                          <div className="col-span-1">
+                            <div className={`inline-flex px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
+                            ${row.voucherType === "Purchase" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}
+                          `}>
+                              {row.voucherType}
+                            </div>
+                          </div>
+
+                          <div className="col-span-1 text-right font-black text-sm text-emerald-600">
+                            {row.debitQty ? `+${row.debitQty}` : "—"}
+                          </div>
+
+                          <div className="col-span-1 text-right font-black text-sm text-rose-600">
+                            {row.creditQty ? `-${row.creditQty}` : "—"}
+                          </div>
+
+                          <div className="col-span-2 text-center">
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-mono font-bold text-slate-500 uppercase">
+                              <Hash size={10} />
+                              {row.voucherNo}
+                            </div>
+                          </div>
+
+                          <div className="col-span-1 text-right flex items-center justify-end gap-2">
+                            <Link
+                              href={row.voucherType === "Sale" ? `/invoice/${row.voucherNo}` : `/bill/${row.voucherNo}`}
+                              className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+                              title="View Document"
+                            >
+                              <Eye size={16} />
+                            </Link>
+
+                            {!inactive ? (
+                              <button
+                                onClick={() => setReverseTarget(row)}
+                                className="p-2 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                                title="Reverse Transaction"
+                              >
+                                <RotateCcw size={16} />
+                              </button>
+                            ) : (
+                              <div className="p-2 text-slate-300 italic text-[10px] font-bold">
+                                REV
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </motion.div>
+
+                  {/* PAGINATION */}
+                  <div className="px-8 py-6 border-t border-slate-50 bg-slate-50/50 flex items-center justify-between">
                     <button
-                      onClick={() => setReverseTarget(row)}
-                      className="text-xs text-rose-600 hover:underline"
+                      disabled={page === 1}
+                      onClick={() => setPage(p => p - 1)}
+                      className="flex items-center gap-2 px-6 py-2 rounded-xl bg-white border border-slate-200 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 hover:border-emerald-600 hover:text-emerald-600 disabled:opacity-30 transition-all active:scale-95 shadow-sm"
                     >
-                      Reverse
+                      <ChevronLeft size={14} />
+                      Prev
                     </button>
-                  ) : (
-                    <span className="text-xs italic">
-                      Reversed
-                    </span>
-                  )}
+
+                    <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-white border border-slate-100 shadow-sm text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                      Page <span className="text-slate-900">{page}</span> of <span className="text-slate-900">{totalPages}</span>
+                    </div>
+
+                    <button
+                      disabled={page >= totalPages}
+                      onClick={() => setPage(p => p + 1)}
+                      className="flex items-center gap-2 px-6 py-2 rounded-xl bg-white border border-slate-200 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 hover:border-emerald-600 hover:text-emerald-600 disabled:opacity-30 transition-all active:scale-95 shadow-sm"
+                    >
+                      Next
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
-          {/* PAGINATION */}
-          <div className="flex items-center justify-between px-5 py-3 border-t text-sm">
-            <button
-              disabled={page === 1}
-              onClick={() => setPage(p => p - 1)}
-              className="px-3 py-1 rounded border disabled:opacity-40"
-            >
-              ← Previous
-            </button>
-
-            <span className="text-slate-500">
-              Page {page} of {totalPages}
-            </span>
-
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage(p => p + 1)}
-              className="px-3 py-1 rounded border disabled:opacity-40"
-            >
-              Next →
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL */}
-      {reverseTarget && (
-        <ConfirmReversalModal
-          open
-          voucherNo={reverseTarget.voucherNo}
-          itemName={reverseTarget.itemName}
-          loading={reversing}
-          onClose={() => setReverseTarget(null)}
-          onConfirm={confirmReversal}
-        />
-      )}
+      {/* REVERSAL MODAL */}
+      <AnimatePresence>
+        {reverseTarget && (
+          <ConfirmReversalModal
+            open
+            voucherNo={reverseTarget.voucherNo}
+            itemName={reverseTarget.itemName}
+            loading={reversing}
+            onClose={() => setReverseTarget(null)}
+            onConfirm={confirmReversal}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

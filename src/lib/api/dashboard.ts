@@ -10,19 +10,24 @@ function percentChange(current: number, previous: number) {
   return Number((((current - previous) / previous) * 100).toFixed(1));
 }
 
-export async function fetchDashboardData(email: string) {
+export async function fetchDashboardData(email: string, from?: string, to?: string) {
   const now = new Date();
 
-  const w1Start = new Date();
-  w1Start.setDate(now.getDate() - 7);
+  // If dates are provided, use them; otherwise default to last 7 days
+  const startDate = from ? new Date(from) : new Date();
+  if (!from) startDate.setDate(now.getDate() - 7);
 
-  const w2Start = new Date();
-  w2Start.setDate(now.getDate() - 14);
+  const endDate = to ? new Date(to) : now;
+
+  // For comparison periods (previous 7/14 days logic, or double the range)
+  const rangeMs = endDate.getTime() - startDate.getTime();
+  const prevStartDate = new Date(startDate.getTime() - rangeMs);
+  const prevEndDate = new Date(startDate);
 
   const [
     loans,
-    sales7,
-    sales14,
+    salesCurrent,
+    salesPrevious,
     profitNow,
     profitPrev,
     inventoryNow,
@@ -33,16 +38,16 @@ export async function fetchDashboardData(email: string) {
   ] = await Promise.all([
     axios.get("/api/loans", { params: { email } }),
     axios.get("/api/insights/sales-trend", {
-      params: { email, days: 7 },
+      params: { email, from: iso(startDate), to: iso(endDate) },
     }),
     axios.get("/api/insights/sales-trend", {
-      params: { email, days: 14 },
+      params: { email, from: iso(prevStartDate), to: iso(prevEndDate) },
     }),
     axios.get("/api/profit-loss", {
-      params: { email, from: iso(w1Start), to: iso(now) },
+      params: { email, from: iso(startDate), to: iso(endDate) },
     }),
     axios.get("/api/profit-loss", {
-      params: { email, from: iso(w2Start), to: iso(w1Start) },
+      params: { email, from: iso(prevStartDate), to: iso(prevEndDate) },
     }),
     axios.get("/api/totalStock", { params: { email } }),
     axios.get("/api/cash-flow", { params: { email } }),
@@ -53,20 +58,19 @@ export async function fetchDashboardData(email: string) {
 
   /* ---------------- KPI CALCULATIONS ---------------- */
 
-  const currentSales = sales7.data.summary.totalSales;
-  const prevSales =
-    sales14.data.summary.totalSales - currentSales;
+  const currentSales = salesCurrent.data.summary.totalSales;
+  const prevSales = salesPrevious.data.summary.totalSales;
 
   const currentProfit = profitNow.data.summary.netProfit;
   const prevProfit = profitPrev.data.summary.netProfit;
 
-  const currentOrders = sales7.data.timeline.filter(
+  const currentOrders = salesCurrent.data.timeline.filter(
     (d: any) => d.sales > 0
   ).length;
 
-  const prevOrders =
-    sales14.data.timeline.filter((d: any) => d.sales > 0).length -
-    currentOrders;
+  const prevOrders = salesPrevious.data.timeline.filter(
+    (d: any) => d.sales > 0
+  ).length;
 
   const kpis = {
     revenue: {
@@ -89,8 +93,8 @@ export async function fetchDashboardData(email: string) {
 
   return {
     loans: loans.data,
-    salesTrend7: sales7.data,
-    salesTrend14: sales14.data,
+    salesTrend7: salesCurrent.data, // Keeping key names for compatibility
+    salesTrend14: salesPrevious.data,
     kpis,
     cashFlow: cashFlow.data,
     healthSummary: healthSummary.data,

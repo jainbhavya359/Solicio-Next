@@ -15,6 +15,8 @@ import StockValuation from "../features/stock/StockValuation";
 import CashFlowWatch from "../features/Insights/CashFlow";
 import SlowMovingStockContainer from "../features/Insights/SlowMovingStockContainer";
 
+import { Megaphone, Activity, Sparkles, Layout, ChevronRight, Zap } from "lucide-react";
+
 const PanelMotion = ({ children }: { children: React.ReactNode }) => (
   <motion.div
     initial={{ opacity: 0, y: 24 }}
@@ -62,41 +64,51 @@ export default function BusinessInsights() {
   /* ---------------- UI ---------------- */
 
   return (
-    <section className="bg-[#F7FAF9] my-4 min-h-screen py-20">
+    <section className="bg-white my-4 min-h-screen relative overflow-hidden flex flex-col items-center">
+      {/* Background radial grid */}
+      <div className="absolute inset-0 z-0 opacity-[0.4] pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" />
+      </div>
+
       <Toaster />
 
-      <div className="max-w-7xl mx-auto px-6 space-y-12">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 space-y-20">
 
-        {/* HEADER */}
+        {/* HERO HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
+          className="max-w-3xl"
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-stone-900">
-            Business Insights
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest mb-6 border border-emerald-100/50">
+            <Activity className="w-3 h-3" />
+            Neural Analysis Center
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tightest leading-none">
+            Business <span className="text-emerald-600">Insights</span>
           </h1>
-          <p className="mt-2 text-stone-600 max-w-2xl">
-            Real-time view of risks, stock health, and cash exposure.
+          <p className="mt-6 text-xl text-slate-600 leading-relaxed font-medium">
+            Strategic real-time view of operation risks, inventory health, and neural cash exposure forecasting.
           </p>
         </motion.div>
 
         {/* INSIGHTS GRID */}
         {!loadingSnapshot && snapshot && (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-12 grid-cols-1">
 
-            <InsightCard title="Stock Alerts">
+            <InsightCard title="Dynamic Stock Alerts" icon={<Activity className="w-4 h-4" />}>
               <StockAlertSmart data={snapshot.lowStock} />
             </InsightCard>
 
-            <InsightCard title="Stock Valuation">
+            <InsightCard title="Inventory Valuation" icon={<Layout className="w-4 h-4" />}>
               <StockValuation />
             </InsightCard>
 
-            <InsightCard title="Cash Flow">
+            <InsightCard title="Cash Stream Analysis" icon={<Sparkles className="w-4 h-4" />}>
               <CashFlowWatch data={snapshot.cashFlow} />
             </InsightCard>
 
-            <InsightCard title="Slow Moving Stock">
+            <InsightCard title="Stagnation Analysis" icon={<Zap className="w-4 h-4" />}>
               <SlowMovingStockContainer
                 data={snapshot.slowMoving}
               />
@@ -105,38 +117,49 @@ export default function BusinessInsights() {
           </div>
         )}
 
-        {/* ACTION BAR */}
-        <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm flex flex-wrap gap-4">
-          <ActionButton
-            onClick={() => {
-              setNewPurchase(true);
-              setNewSale(false);
-              setViewStock(false);
-            }}
+        {/* STRATEGIC ACTION BAR */}
+        <div className="sticky bottom-8 z-30 flex justify-center w-full pointer-events-none">
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-2.5 shadow-2xl flex items-center gap-2 pointer-events-auto"
           >
-            Add Purchase
-          </ActionButton>
+            <ActionButton
+              icon={<Sparkles className="w-4 h-4" />}
+              onClick={() => {
+                setNewPurchase(true);
+                setNewSale(false);
+                setViewStock(false);
+              }}
+            >
+              Add Purchase
+            </ActionButton>
 
-          <ActionButton
-            onClick={() => {
-              setNewSale(true);
-              setNewPurchase(false);
-              setViewStock(false);
-            }}
-          >
-            Record Sale
-          </ActionButton>
+            <ActionButton
+              icon={<Zap className="w-4 h-4" />}
+              onClick={() => {
+                setNewSale(true);
+                setNewPurchase(false);
+                setViewStock(false);
+              }}
+            >
+              Record Sale
+            </ActionButton>
 
-          <ActionButton
-            variant="secondary"
-            onClick={() => {
-              setViewStock(true);
-              setNewPurchase(false);
-              setNewSale(false);
-            }}
-          >
-            View Inventory
-          </ActionButton>
+            <div className="w-px h-8 bg-white/10 mx-1" />
+
+            <ActionButton
+              variant="secondary"
+              icon={<Layout className="w-4 h-4" />}
+              onClick={() => {
+                setViewStock(true);
+                setNewPurchase(false);
+                setNewSale(false);
+              }}
+            >
+              Inventory Map
+            </ActionButton>
+          </motion.div>
         </div>
 
         {/* PANELS */}
@@ -187,25 +210,42 @@ export default function BusinessInsights() {
 
 function InsightCard({
   title,
+  icon,
   children,
 }: {
   title: string;
+  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className="
-        bg-white border border-stone-200 rounded-2xl
-        p-6 shadow-sm hover:shadow-md transition
+        bg-white border border-slate-100 rounded-[2rem]
+        p-8 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group relative overflow-hidden
       "
     >
-      <h3 className="font-semibold text-stone-900 mb-4">
-        {title}
-      </h3>
-      {children}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700" />
+
+      <div className="relative flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/50">
+            {icon}
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 tracking-tight">
+              {title}
+            </h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Neural Insights active</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10">
+        {children}
+      </div>
     </motion.div>
   );
 }
@@ -213,24 +253,26 @@ function InsightCard({
 function ActionButton({
   children,
   onClick,
+  icon,
   variant = "primary",
 }: {
   children: React.ReactNode;
   onClick: () => void;
+  icon?: React.ReactNode;
   variant?: "primary" | "secondary";
 }) {
   return (
     <button
       onClick={onClick}
       className={`
-        px-5 py-2.5 rounded-xl text-sm font-semibold transition
-        ${
-          variant === "primary"
-            ? "bg-emerald-600 text-white hover:bg-emerald-700"
-            : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+        flex items-center gap-2.5 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-200
+        ${variant === "primary"
+          ? "bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-900/40"
+          : "bg-white/10 text-white hover:bg-white/20"
         }
       `}
     >
+      {icon}
       {children}
     </button>
   );

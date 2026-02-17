@@ -13,7 +13,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-outfit);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -27,14 +27,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 .loan-input {
-  @apply w-full mt-2 px-4 py-3 rounded-xl
-  bg-white border border-slate-200
-  focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500
-  outline-none text-slate-900 placeholder-slate-400;
+  @apply w-full mt-2 px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-slate-900 placeholder-slate-400;
 }
 
 @media print {

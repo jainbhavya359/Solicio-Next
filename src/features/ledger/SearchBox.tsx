@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Search } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function UniversalSearchBox({
   placeholder,
@@ -15,35 +16,42 @@ export default function UniversalSearchBox({
   const [value, setValue] = useState("");
 
   const handleSubmit = () => {
-    onSubmit?.(value.trim());
+    if (value.trim()) {
+      onSubmit?.(value.trim());
+    }
   };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 rounded-xl
-      bg-slate-900 border border-slate-700 shadow-sm
-      focus-within:border-indigo-400 transition"
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-center gap-4 px-5 py-4 rounded-2xl
+        bg-slate-50 border border-slate-200 shadow-2xl
+        focus-within:border-emerald-500/50 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all duration-300"
     >
-      <Search className="w-4 h-4 text-slate-400" />
+      <Search className="w-5 h-5 text-slate-500" />
 
       <input
         value={value}
         autoFocus={autoFocus}
-        placeholder={placeholder || "Search…"}
+        placeholder={placeholder || "Search ledger records…"}
         onChange={e => setValue(e.target.value)}
         onKeyDown={e => e.key === "Enter" && handleSubmit()}
         className="flex-1 bg-transparent outline-none
-        text-slate-100 placeholder:text-slate-400 text-sm"
+        text-black placeholder:text-slate-500 text-base font-medium"
       />
 
       {value && (
-        <button
+        <motion.button
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
           onClick={handleSubmit}
-          className="px-4 py-1.5 rounded-md text-xs
-          bg-indigo-600 text-white hover:bg-indigo-500 transition"
+          className="px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest
+          bg-emerald-600 text-white hover:bg-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all active:scale-95"
         >
           Search
-        </button>
+        </motion.button>
       )}
-    </div>
+    </motion.div>
   );
 }

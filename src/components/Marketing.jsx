@@ -1,298 +1,249 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Megaphone, Search, TrendingUp, Users, Target, Rocket, ArrowRight, Wallet, HelpCircle, ChevronRight, Zap, Sparkles, Layout } from "lucide-react";
+import { Toaster } from "react-hot-toast";
+
 export default function MarketingPage() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-black text-white py-28">
+    <section className="bg-white min-h-screen relative overflow-hidden flex flex-col items-center font-outfit">
+      {/* Background radial grid */}
+      <div className="absolute inset-0 z-0 opacity-[0.4] pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" />
+      </div>
 
-      {/* Brighter blobs for liveliness */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-fuchsia-500/30 blur-3xl rounded-full" />
-      <div className="absolute top-1/2 -right-32 w-96 h-96 bg-indigo-500/30 blur-3xl rounded-full" />
+      <Toaster />
 
-      <div className="relative max-w-7xl mx-auto px-6 space-y-28">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 space-y-24">
 
-        {/* HERO */}
-        <div className="max-w-4xl">
-          <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-            Simple Marketing for Small Businesses
+        {/* HERO HEADER - Solicio Standards */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-widest mb-6 border border-slate-200/50">
+            <Megaphone className="w-3 h-3 text-emerald-600" />
+            Neural Growth Engine
+          </div>
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tightest leading-none">
+            Tactical Marketing <span className="text-emerald-600">for Growth</span>
           </h1>
-          <p className="mt-6 text-xl text-slate-300">
-            No jargon. No big budgets. Just clear steps to help customers find
-            you and trust your business.
+          <p className="mt-8 text-xl md:text-2xl text-slate-500 leading-relaxed font-medium max-w-2xl">
+            Streamlined brand positioning protocols. Zero jargon. Maximum operational impact to accelerate customer acquisition and trust.
           </p>
-        </div>
+        </motion.div>
 
-        {/* STEP-BASED MARKETING */}
-        <div className="space-y-12">
-          <h2 className="text-4xl font-extrabold">
-            Start Marketing in 3 Simple Steps
-          </h2>
+        {/* STEP-BASED MARKETING - Premium Tactical Steps */}
+        <div className="space-y-16">
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] whitespace-nowrap px-1">Iterative Growth Framework</span>
+            <div className="h-px w-full bg-slate-100" />
+          </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-12">
             {[
               {
-                step: "STEP 1",
-                title: "Be Discoverable",
-                text:
-                  "List your business on Google, WhatsApp Business, and online marketplaces so customers can find you easily.",
+                step: "STEP 01",
+                title: "Neural Discovery",
+                text: "Optimize visibility across high-yield digital layers: Google, WhatsApp Business, and regional supply chain hubs.",
+                icon: Search,
+                accent: "text-emerald-600",
+                bg: "bg-emerald-50"
               },
               {
-                step: "STEP 2",
-                title: "Build Trust",
-                text:
-                  "Use real photos, customer reviews, and consistent pricing to make buyers feel confident choosing you.",
+                step: "STEP 02",
+                title: "Trust Architecture",
+                text: "Implement high-fidelity social proof, verified documentation, and transparent capital modeling to normalize buyer confidence.",
+                icon: Users,
+                accent: "text-blue-600",
+                bg: "bg-blue-50"
               },
               {
-                step: "STEP 3",
-                title: "Grow Slowly",
-                text:
-                  "Start with small promotions, local ads, or offers. Scale only what works.",
+                step: "STEP 03",
+                title: "Velocity Scaling",
+                text: "Initialize controlled promotional experiments. Synchronize ad-spend only after validating high-conversion tactical channels.",
+                icon: TrendingUp,
+                accent: "text-amber-600",
+                bg: "bg-amber-50"
               },
             ].map((item, i) => (
-              <div
+              <motion.div
                 key={i}
-                className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="group bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 hover:shadow-2xl transition-all duration-500 relative overflow-hidden"
               >
-                <span className="text-sm text-pink-400 font-bold">
+                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none">
+                  <item.icon className="w-48 h-48 rotate-12" />
+                </div>
+
+                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black tracking-widest mb-6 ${item.bg} ${item.accent} border border-current opacity-70`}>
                   {item.step}
                 </span>
-                <h3 className="text-xl font-bold mt-2 mb-3">
+                <h3 className="text-2xl font-extrabold text-slate-900 mb-4 tracking-tightest group-hover:text-emerald-700 transition-colors">
                   {item.title}
                 </h3>
-                <p className="text-slate-300 leading-relaxed">
+                <p className="text-slate-500 leading-relaxed font-medium relative z-10 group-hover:text-slate-600 transition-colors">
                   {item.text}
                 </p>
-              </div>
+
+                <div className="mt-8 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-900 group-hover:gap-3 transition-all">
+                  Initialize Protocol <ChevronRight className="w-4 h-4 text-emerald-600" />
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
 
-        {/* PRACTICAL ADVICE */}
-        <div className="grid md:grid-cols-2 gap-10">
-          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-xl">
-            <h3 className="text-2xl font-bold mb-4">
-              How much should I spend?
-            </h3>
-            <p className="text-slate-300">
-              Start with ₹3,000–₹5,000 per month. Test one channel. If it brings
-              customers, increase slowly. Marketing is not an expense—it’s an
-              experiment.
-            </p>
-          </div>
+        {/* PRACTICAL ADVICE - Strategic Panels */}
+        <div className="grid md:grid-cols-2 gap-12">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-emerald-50/50 border border-emerald-100/50 rounded-[3rem] p-12 shadow-xl shadow-emerald-900/5 relative overflow-hidden group"
+          >
+            <div className="absolute -top-12 -left-12 w-48 h-48 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-emerald-600 mb-8 shadow-sm group-hover:scale-110 transition-transform">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-600 mb-3">Capital Allocation</h3>
+              <h3 className="text-4xl font-extrabold text-slate-900 mb-6 tracking-tightest">
+                Optimized <span className="text-emerald-600 text-3xl font-black italic md:text-4xl">Burn Rate</span>
+              </h3>
+              <p className="text-slate-600 leading-relaxed text-lg font-medium italic">
+                "Initialize with <span className="text-emerald-700 font-extrabold">₹3k–₹5k monthly</span>. Treat marketing as a capital experiment—synchronizing spend only with validated resonance."
+              </p>
+            </div>
+          </motion.div>
 
-          <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-xl">
-            <h3 className="text-2xl font-bold mb-4">
-              What works best for MSMEs?
-            </h3>
-            <p className="text-slate-300">
-              Local visibility, WhatsApp follow-ups, repeat customers, and
-              word-of-mouth beat expensive ads for most small businesses.
-            </p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-slate-50 border border-slate-100 rounded-[3rem] p-12 shadow-xl shadow-slate-200/40 relative overflow-hidden group"
+          >
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-slate-200/50 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-14 h-14 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 mb-8 shadow-sm group-hover:scale-110 transition-transform">
+                <Target className="w-6 h-6" />
+              </div>
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">Resonance Framework</h3>
+              <h3 className="text-4xl font-extrabold text-slate-900 mb-6 tracking-tightest">
+                MSME <span className="text-emerald-600">Dominance</span>
+              </h3>
+              <p className="text-slate-500 leading-relaxed text-lg font-medium">
+                Local visibility graphs, high-frequency WhatsApp engagement, and loyalty-driven retention programs outperform global legacy ad networks.
+              </p>
+            </div>
+          </motion.div>
         </div>
 
-        {/* GOVERNMENT SUPPORT (KEEP, BUT SIMPLIFY) */}
-        <div className="space-y-8">
-          <h2 className="text-4xl font-extrabold">
-            Government Support for Marketing
-          </h2>
+        {/* GOVERNMENT ASSISTANCE - Tactical Cards */}
+        <div className="space-y-12">
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] whitespace-nowrap px-1">Institutional Support Layers</span>
+            <div className="h-px w-full bg-slate-100" />
+          </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-12">
             {[
               {
                 title: "MSME Marketing Assistance",
-                text:
-                  "Support for trade fairs, exhibitions, branding, and packaging to help small businesses reach new markets.",
+                subtitle: "Supply Chain Expansion",
+                text: "Synchronization with federal trade exhibitions, global branding architecture, and high-tier inventory packaging support.",
+                icon: Rocket,
+                tag: "Market Access"
               },
               {
                 title: "Digital MSME Scheme",
-                text:
-                  "Helps businesses adopt digital tools to improve visibility and competitiveness.",
+                subtitle: "Technological Parity",
+                text: "Support for adopting neural digital tools to improve competitive indices and SUPPLY chains in domestic/global grids.",
+                icon: Layout,
+                tag: "Digital Core"
               },
             ].map((scheme, i) => (
-              <div
+              <motion.div
                 key={i}
-                className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="group bg-white border border-slate-100 rounded-[2.5rem] p-10 hover:border-emerald-200 hover:shadow-2xl transition-all duration-500 shadow-xl shadow-slate-200/30 relative overflow-hidden"
               >
-                <h3 className="text-xl font-bold mb-2">{scheme.title}</h3>
-                <p className="text-slate-300">{scheme.text}</p>
-              </div>
+                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none">
+                  <scheme.icon className="w-48 h-48 rotate-12" />
+                </div>
+
+                <div className="flex items-center justify-between mb-8">
+                  <div className="px-3 py-1 rounded-full bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-slate-100 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    {scheme.tag}
+                  </div>
+                  <div className="p-3 bg-slate-50 text-slate-900 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
+                    <scheme.icon className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-600 mb-2">{scheme.subtitle}</h3>
+                <h2 className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tightest group-hover:text-emerald-700 transition-colors">{scheme.title}</h2>
+                <p className="text-slate-500 mb-8 leading-relaxed font-medium">{scheme.text}</p>
+
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-900 group-hover:text-emerald-600 transition-all">
+                  Access Platform <ChevronRight className="w-4 h-4" />
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
 
-        {/* FUTURE AI CTA */}
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl max-w-3xl">
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-indigo-400 bg-clip-text text-transparent">
-            Marketing Help, Simplified
-          </h2>
-          <p className="text-slate-300 mb-6">
-            Soon, Solicio will analyze your business and suggest exactly what
-            marketing step you should take next.
-          </p>
+        {/* NEURAL CTA - Future AI */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="bg-slate-900 rounded-[3rem] p-12 md:p-16 shadow-2xl shadow-slate-900/40 relative overflow-hidden text-white"
+        >
+          {/* Decorative background neural patterns */}
+          <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-emerald-600/10 rounded-full blur-[100px] -mr-48 -mt-48 pointer-events-none opacity-50" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-900/20 rounded-full blur-[80px] -ml-24 -mb-24 pointer-events-none" />
 
-          <button
-            className="px-8 py-4 rounded-full font-bold text-black
-            bg-gradient-to-r from-pink-400 to-indigo-500
-            hover:opacity-90 transition shadow-lg"
-          >
-            Get Notified →
-          </button>
+          <div className="relative z-10 max-w-3xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-400 tracking-widest">Neural Projection Module</p>
+            </div>
+
+            <h2 className="text-4xl md:text-6xl font-extrabold text-white tracking-tightest mb-6 leading-none">
+              Marketing Hub, <span className="text-emerald-500">Autonomous</span>
+            </h2>
+            <p className="text-slate-400 mb-12 text-lg md:text-xl font-medium leading-relaxed max-w-2xl">
+              Soon, Solicio's neural backend will analyze your operational graphs to synthesize target-specific growth maneuvers. Automated traction, zero friction.
+            </p>
+
+            <button
+              className="px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-white bg-emerald-600 hover:bg-emerald-500 shadow-xl shadow-emerald-900/40 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3"
+            >
+              Get Signal Priority <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </motion.div>
+
+        {/* FOOTER STRIP */}
+        <div className="pt-20 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 opacity-40">
+          <div className="flex items-center gap-3">
+            <Zap className="w-5 h-5 text-emerald-600" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Growth Engine: Synchronized</span>
+          </div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Solicio Tactical Edge v2.0</p>
         </div>
 
       </div>
     </section>
   );
 }
-
-
-
-// export default function MarketingPage() {
-//   return (
-//     <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white py-28">
-
-//       {/* Ambient blobs */}
-//       <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-600/30 blur-3xl rounded-full" />
-//       <div className="absolute top-1/2 -right-32 w-96 h-96 bg-pink-600/30 blur-3xl rounded-full" />
-
-//       <div className="relative max-w-7xl mx-auto px-6 space-y-24">
-
-//         {/* HERO */}
-//         <div className="max-w-3xl">
-//           <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-400 via-pink-400 to-amber-400 bg-clip-text text-transparent">
-//             Marketing & Brand Growth
-//           </h1>
-//           <p className="mt-6 text-lg text-slate-300">
-//             Learn how to promote your business, connect with customers, and
-//             scale your brand using proven strategies and government-backed
-//             support.
-//           </p>
-//         </div>
-
-//         {/* MARKETING STRATEGIES */}
-//         <div className="space-y-10">
-//           <h2 className="text-4xl font-extrabold">
-//             Marketing Strategies
-//           </h2>
-
-//           <div className="grid md:grid-cols-3 gap-8">
-//             {[
-//               {
-//                 title: "E-commerce Expansion",
-//                 text:
-//                   "List your products on platforms like Amazon, Flipkart, or Meesho to access millions of customers beyond your local market.",
-//               },
-//               {
-//                 title: "Influencer Partnerships",
-//                 text:
-//                   "Work with micro-influencers in your niche to build trust and brand awareness. Influencers like Ankur Warikoo or Raj Shamani inspire millions of business owners.",
-//               },
-//               {
-//                 title: "Product Marketing",
-//                 text:
-//                   "Invest in high-quality product photos, compelling descriptions, and content that tells your brand story clearly.",
-//               },
-//             ].map((item, i) => (
-//               <div
-//                 key={i}
-//                 className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl"
-//               >
-//                 <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-//                 <p className="text-slate-300 leading-relaxed">{item.text}</p>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* GOVERNMENT SCHEMES */}
-//         <div className="space-y-10">
-//           <h2 className="text-4xl font-extrabold">
-//             Government Schemes & Support
-//           </h2>
-
-//           <div className="grid md:grid-cols-2 gap-8">
-//             {[
-//               {
-//                 title: "Procurement & Marketing Support (PMS)",
-//                 text:
-//                   "Helps MSMEs participate in national and international trade fairs, exhibitions, and adopt modern marketing and packaging techniques.",
-//               },
-//               {
-//                 title: "Digital MSME Scheme",
-//                 text:
-//                   "Encourages adoption of digital tools and ICT solutions to improve competitiveness in domestic and global markets.",
-//               },
-//             ].map((scheme, i) => (
-//               <div
-//                 key={i}
-//                 className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl"
-//               >
-//                 <h3 className="text-xl font-bold mb-2">{scheme.title}</h3>
-//                 <p className="text-slate-300">{scheme.text}</p>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* FAQs */}
-//         <div className="space-y-10 max-w-4xl">
-//           <h2 className="text-4xl font-extrabold">
-//             Marketing FAQs
-//           </h2>
-
-//           <div className="space-y-6">
-//             {[
-//               {
-//                 q: "What is a good starting budget for digital marketing?",
-//                 a:
-//                   "Start small. ₹5,000–₹10,000 per month on targeted social media ads is enough to test what works before scaling.",
-//               },
-//               {
-//                 q: "How do I find the right influencer?",
-//                 a:
-//                   "Focus on audience relevance and engagement rate, not follower count. Authentic creators convert better.",
-//               },
-//             ].map((faq, i) => (
-//               <div
-//                 key={i}
-//                 className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6"
-//               >
-//                 <h3 className="font-semibold mb-2">{faq.q}</h3>
-//                 <p className="text-slate-300">{faq.a}</p>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* ASK AI */}
-//         <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl max-w-3xl">
-//           <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-//             Ask a Marketing Question
-//           </h2>
-//           <p className="text-slate-300 mb-6">
-//             Have a specific marketing challenge? Ask and get instant,
-//             AI-powered guidance.
-//           </p>
-
-//           <div className="flex gap-3">
-//             <input
-//               type="text"
-//               placeholder="e.g., How do I market my fashion brand online?"
-//               className="flex-1 px-5 py-3 rounded-xl bg-black/40 border border-white/10 outline-none focus:border-purple-400"
-//             />
-//             <button
-              
-//               className="px-6 py-3 rounded-xl font-bold text-black
-//               bg-gradient-to-r from-purple-400 to-pink-500
-//               hover:opacity-90 transition shadow-lg"
-//             >
-//               Ask →
-//             </button>
-//           </div>
-
-//           <p className="mt-3 text-xs text-slate-400">
-//             (AI responses coming soon)
-//           </p>
-//         </div>
-
-//       </div>
-//     </section>
-//   );
-// }

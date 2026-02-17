@@ -1,0 +1,3 @@
+{
+  "/api/deleteLoan/route": "app/api/deleteLoan/route.js"
+}

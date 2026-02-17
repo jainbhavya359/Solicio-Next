@@ -1,0 +1,110 @@
+{
+  "node": {
+    "0015b1b23d1d75ec4696a84c6bc5c715145a64bc5e": {
+      "workers": {
+        "app/features/page": {
+          "moduleId": 97555,
+          "async": false,
+          "exportedName": "detectKeylessEnvDriftAction",
+          "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/features/page": "rsc"
+      },
+      "exportedName": "detectKeylessEnvDriftAction",
+      "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+    },
+    "00122326df40e39a8c82db67fa04503e0dc4194edc": {
+      "workers": {
+        "app/features/page": {
+          "moduleId": 97555,
+          "async": false,
+          "exportedName": "invalidateCacheAction",
+          "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+        }
+      },
+      "layer": {
+        "app/features/page": "action-browser"
+      },
+      "exportedName": "invalidateCacheAction",
+      "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+    },
+    "006f719d021df993fcc0fb0b51ce65562685b312b7": {
+      "workers": {
+        "app/features/page": {
+          "moduleId": 97555,
+          "async": false,
+          "exportedName": "createOrReadKeylessAction",
+          "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/features/page": "rsc"
+      },
+      "exportedName": "createOrReadKeylessAction",
+      "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+    },
+    "00cd7b8278945333cc59be22bd4c10f5d4e7e824ca": {
+      "workers": {
+        "app/features/page": {
+          "moduleId": 97555,
+          "async": false,
+          "exportedName": "collectKeylessMetadata",
+          "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        }
+      },
+      "layer": {
+        "app/features/page": "rsc"
+      },
+      "exportedName": "collectKeylessMetadata",
+      "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+    },
+    "405e4133e46e07465c77abbac01dcf8dd02715de0e": {
+      "workers": {
+        "app/features/page": {
+          "moduleId": 97555,
+          "async": false,
+          "exportedName": "formatMetadataHeaders",
+          "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+        }
+      },
+      "layer": {
+        "app/features/page": "rsc"
+      },
+      "exportedName": "formatMetadataHeaders",
+      "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/server/keyless-custom-headers.js"
+    },
+    "00e62b38dd3adb20e6e4c28877367944027c1b6b38": {
+      "workers": {
+        "app/features/page": {
+          "moduleId": 97555,
+          "async": false,
+          "exportedName": "deleteKeylessAction",
+          "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/features/page": "action-browser"
+      },
+      "exportedName": "deleteKeylessAction",
+      "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+    },
+    "40c50e99aeb5d6aefb4a0acb4b08a498f9970cf4f1": {
+      "workers": {
+        "app/features/page": {
+          "moduleId": 97555,
+          "async": false,
+          "exportedName": "syncKeylessConfigAction",
+          "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        }
+      },
+      "layer": {
+        "app/features/page": "action-browser"
+      },
+      "exportedName": "syncKeylessConfigAction",
+      "filename": "NextJs/solicio-next/node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,3 @@
+{
+  "/api/health/stock-movement/route": "app/api/health/stock-movement/route.js"
+}

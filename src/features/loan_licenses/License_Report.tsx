@@ -3,23 +3,34 @@
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShieldCheck, FileCheck, Search, Zap, Activity } from "lucide-react";
 import { LicenseCard } from "../../components/ui/LicenseCard";
 
-/* ✅ TYPE — fixes your entire error */
 type License = {
   _id: string;
   licName: string;
   authority: string;
   date?: string;
   email?: string;
+  licenseName?: string;
+  expiryDate?: string;
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 export default function LicenseReport() {
   const { user } = useUser();
-
   const email = user?.primaryEmailAddress?.emailAddress ?? "";
 
-  /* ✅ Typed state — NO MORE never[] */
   const [licenses, setLicenses] = useState<License[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,11 +38,9 @@ export default function LicenseReport() {
     if (!email) return;
 
     try {
-      /* ✅ Typed axios response */
       const res = await axios.get<License[]>(
         `/api/licenses?email=${email}`
       );
-
       setLicenses(res.data);
     } catch (err) {
       console.error("Failed to fetch licenses:", err);
@@ -55,260 +64,77 @@ export default function LicenseReport() {
 
   if (loading) {
     return (
-      <p className="text-sm text-stone-400">
-        Loading licenses…
-      </p>
-    );
-  }
-
-  if (licenses.length === 0) {
-    return (
-      <p className="text-sm text-stone-400">
-        No licenses added yet.
-      </p>
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 p-24 shadow-sm flex flex-col items-center justify-center font-outfit">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-slate-50 rounded-full" />
+          <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="mt-8 text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Synchronizing Registry...</p>
+      </div>
     );
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 my-6">
-      {licenses.map((lic) => (
-        <LicenseCard
-          key={lic._id}
-          license={lic}
-          onDelete={deleteLicense}
-        />
-      ))}
-    </div>
+    <section className="space-y-12 font-outfit">
+      {/* SECTION HEADER */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-xl shadow-slate-200">
+            <ShieldCheck className="h-7 w-7" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-extrabold text-slate-900 leading-tight tracking-tightest">
+              Regulatory <span className="text-emerald-600">Compliance</span>
+            </h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+              Active Operational Credentials
+            </p>
+          </div>
+        </div>
+        <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full bg-slate-50 border border-slate-100">
+          <Activity className="w-4 h-4 text-emerald-500" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Integrity: Verified</span>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {licenses.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-[3rem] border border-slate-100 p-24 shadow-xl shadow-slate-200/40 text-center flex flex-col items-center relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none">
+              <Zap className="w-64 h-64" />
+            </div>
+
+            <div className="w-24 h-24 rounded-[2.5rem] bg-slate-50 text-slate-200 flex items-center justify-center mb-10 ring-1 ring-inset ring-slate-100">
+              <FileCheck size={48} />
+            </div>
+            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tightest">Registry Offline</h3>
+            <p className="text-slate-500 mt-4 max-w-sm font-medium leading-relaxed italic">
+              "No active credentials synchronized. Initialize compliance monitoring to mitigate regulatory risks."
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="list"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {licenses.map((lic) => (
+              <LicenseCard
+                key={lic._id}
+                license={lic}
+                onDelete={deleteLicense}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
-
-
-
-
-// "use client"
-
-// import React, { useEffect, useState } from "react";
-// import { motion } from "framer-motion";
-// import { useUser } from "@clerk/nextjs";
-// import axios from "axios";
-
-// export default function License_Report() {
-//   const { user } = useUser();
-
-//   const [data, setData] = useState([]);
-//   const [error, setError] = useState(false);
-//   const [loading, setLoading] = useState(true);
-//   const [reload, setReload] = useState(false);
-
-//   const email = user?.primaryEmailAddress.emailAddress;
-
-//   useEffect(() => {
-//     if(!email) return;
-
-//     const fetchData = async () => {
-//       try {
-//         const response = await axios.get("/api/licenses");
-//         if (!response) throw new Error("Network issue");
-//         const json = await response.json();
-//         setData(json);
-//       } catch {
-//         setError(true);
-//       } finally {
-//         setLoading(false);
-//         setReload(false);
-//       }
-//     };
-
-//     fetchData();
-//   }, [reload, email]);
-
-//   const onHandleClick = async (id) => {
-//     try {
-//       await fetch(
-//         `${process.env.REACT_APP_BACKEND_URL}/api/deletelicense/${id}`,
-//         { method: "DELETE" }
-//       );
-//       setReload(true);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
-
-//   const userLicenses = data.filter(
-//     (lic) => lic.email === user?.email
-//   );
-
-//   return (
-//     <motion.section
-//       initial={{ opacity: 0, y: 40 }}
-//       whileInView={{ opacity: 1, y: 0 }}
-//       transition={{ duration: 0.6 }}
-//       viewport={{ once: true }}
-//       className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl"
-//     >
-//       <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-//         Your Licenses
-//       </h2>
-
-//       {loading ? (
-//         <div className="flex justify-center py-10">
-//           <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-//         </div>
-//       ) : error ? (
-//         <p className="text-red-400">Error loading licenses.</p>
-//       ) : userLicenses.length === 0 ? (
-//         <p className="text-slate-400">
-//           No licenses found. Add licenses to track compliance.
-//         </p>
-//       ) : (
-//         <div className="overflow-x-auto">
-//           <table className="min-w-full text-sm">
-//             <thead className="border-b border-white/10 text-slate-300">
-//               <tr>
-//                 <th className="py-3 text-left">License</th>
-//                 <th className="py-3 text-left">Authority</th>
-//                 <th className="py-3 text-left">Date</th>
-//                 <th className="py-3 text-left">Action</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {userLicenses.map((lic, index) => (
-//                 <tr
-//                   key={lic.id}
-//                   className="border-b border-white/5 hover:bg-white/5 transition"
-//                 >
-//                   <td className="py-4">{lic.license_name}</td>
-//                   <td className="py-4">{lic.authority}</td>
-//                   <td className="py-4 text-slate-400">
-//                     {new Date(lic.date).toISOString().split("T")[0]}
-//                   </td>
-//                   <td className="py-4">
-//                     <button
-//                       onClick={() => onHandleClick(lic.id)}
-//                       className="px-4 py-1 rounded-full border border-red-500 text-red-400 hover:bg-red-500/10 transition"
-//                     >
-//                       Remove
-//                     </button>
-//                   </td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       )}
-//     </motion.section>
-//   );
-// }
-
-
-
-// import React, { useState, useEffect, use} from "react";
-// import { useAuth0 } from "@auth0/auth0-react";
-
-// export default function License_Report(){
-
-//     const [ data, setData ] = useState([]);
-//     const [ error, setError ] = useState("");
-//     const [ loading, setLoading ] = useState(true);
-//     const [ reload, setReloading ] = useState(false);
-//     const { user, isAuthenticated } = useAuth0();
-
-//     const fetchData = async ()=> {
-//         try{
-//             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/getlicenses`);
-//             if(!response.ok){
-//                 throw new Error("Network Issue");
-//             }else{
-//                 const d = await response.json();
-//                 setData(d);
-//             }
-//         }catch(err){
-//             console.log(err);
-//             setError(err);
-//         }finally{
-//             setLoading(false);
-//         }
-//     }
-
-//     useEffect(()=>{
-//         fetchData();
-
-//         window.scrollTo(0, 0);
-//     },[]);
-
-//     useEffect(()=>{
-//         fetchData();
-//     },[reload]);
-
-//     const onHandleClick = (id) => {
-//         const DeleteItem = async () => {
-//             try{
-//                 await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/deletelicense/${id}`, {
-//                     method: "DELETE",
-//                 });
-//                 setReloading(true);
-//             }catch (err){
-//                 console.log("Error Occured", err);
-//             }
-//         }
-
-//         DeleteItem();
-//     }
-
-//     console.log(data);
-
-//     return(
-//         <>
-//             <div className="flex flex-col justify-start gap-4 rounded-xl shadow-lg p-6 m-5 mt-10 pt-10 bg-white border border-gray-100">
-//             <h2 className="text-2xl font-bold border-b pb-3 pt-3 text-indigo-600">
-//                 Your Licenses
-//             </h2>
-
-//             {loading ? (
-//                 <div className="flex justify-center items-center py-10">
-//                 <div className="w-6 h-6 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-//                 </div>
-//             ) : error ? (
-//                 <p className="text-red-500 font-medium">Error: {error}</p>
-//             ) : data && data.length > 0 ? (
-//                 <div className="overflow-x-auto">
-//                 <table className="min-w-full bg-white rounded-lg shadow-sm border border-gray-200">
-//                     <thead className="bg-indigo-500 text-white">
-//                     <tr>
-//                         <th className="py-3 px-6 text-left">License Name</th>
-//                         <th className="py-3 px-6 text-left">Issuing Authority</th>
-//                         <th className="py-3 px-6 text-left">Date</th>
-//                         <th className="py-3 px-6 text-left">Action</th>
-//                     </tr>
-//                     </thead>
-//                     <tbody>
-//                     {data.map((lic, index) => (
-//                         (lic.email == user.email ? <tr
-//                         key={lic.id}
-//                         className={`${
-//                             index % 2 === 0 ? "bg-gray-50" : "bg-white"
-//                         } hover:bg-indigo-50 transition`}
-//                         >
-//                         <td className="py-3 px-6">{lic.license_name}</td>
-//                         <td className="py-3 px-6">{lic.authority}</td>
-//                         <td className="py-3 px-6 text-gray-600">{new Date(lic.date).toISOString().split('T')[0]}</td>
-//                         <td className="py-2 px-4 border">
-//                             <button
-//                             onClick={() => onHandleClick(lic.id)}
-//                             className="bg-white text-red-500 px-3 py-1 rounded-2xl border border-red-500 hover:bg-gray-50"
-//                             >
-//                             Remove
-//                             </button>
-//                         </td>
-//                         </tr> : null)
-//                     ))}
-//                     </tbody>
-//                 </table>
-//                 </div>
-//             ) : (
-//                 <p className="text-gray-500">No licenses found.</p>
-//             )}
-//             </div>
-//         </>
-//     );
-// }

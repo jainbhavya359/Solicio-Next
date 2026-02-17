@@ -5,6 +5,8 @@ import {
   TrendingUp,
   Package,
   ShoppingCart,
+  ArrowUpRight,
+  ArrowDownRight
 } from "lucide-react";
 
 function Card({
@@ -18,28 +20,31 @@ function Card({
   const up = pct >= 0;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition">
-      <div className="flex justify-between items-start">
+    <div className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-xl transition-all duration-300">
+      <div className="flex justify-between items-start mb-4">
         <div
-          className={`h-12 w-12 rounded-xl flex items-center justify-center ${iconBg}`}
+          className={`h-12 w-12 rounded-2xl flex items-center justify-center ${iconBg} transition-transform group-hover:scale-110 duration-300`}
         >
-          <Icon size={22} className={iconColor} />
+          <Icon size={24} className={iconColor} />
         </div>
 
         <span
-          className={`text-sm font-semibold flex items-center gap-1 ${
-            up ? "text-emerald-600" : "text-rose-500"
-          }`}
+          className={`text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 border ${up
+              ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+              : "text-rose-700 bg-rose-50 border-rose-100"
+            }`}
         >
-          {up ? "↑" : "↓"} {Math.abs(pct)}%
+          {up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+          {Math.abs(pct)}%
         </span>
       </div>
 
-      <p className="mt-4 text-sm text-slate-500">{title}</p>
-
-      <p className="mt-1 text-3xl font-extrabold text-slate-900">
-        {value}
-      </p>
+      <div>
+        <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
+        <p className="text-3xl font-bold text-slate-900 tracking-tight">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }
@@ -54,7 +59,7 @@ export default function KPICards({ data }: { data: any }) {
         title="Total Revenue"
         value={`₹${data.revenue.value.toLocaleString()}`}
         pct={data.revenue.pct}
-        iconBg="bg-indigo-100"
+        iconBg="bg-indigo-50"
         iconColor="text-indigo-600"
       />
 
@@ -63,7 +68,7 @@ export default function KPICards({ data }: { data: any }) {
         title="Net Profit"
         value={`₹${data.profit.value.toLocaleString()}`}
         pct={data.profit.pct}
-        iconBg="bg-emerald-100"
+        iconBg="bg-emerald-50"
         iconColor="text-emerald-600"
       />
 
@@ -72,7 +77,7 @@ export default function KPICards({ data }: { data: any }) {
         title="Total Inventory"
         value={data.inventory.value}
         pct={data.inventory.pct}
-        iconBg="bg-violet-100"
+        iconBg="bg-violet-50"
         iconColor="text-violet-600"
       />
 
@@ -81,7 +86,7 @@ export default function KPICards({ data }: { data: any }) {
         title="Total Orders"
         value={data.orders.value}
         pct={data.orders.pct}
-        iconBg="bg-orange-100"
+        iconBg="bg-orange-50"
         iconColor="text-orange-600"
       />
     </div>

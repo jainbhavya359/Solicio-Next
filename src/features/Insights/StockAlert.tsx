@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useUser } from "@clerk/nextjs";
-import { AlertTriangle, CheckCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle, Package, ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 
 /* ================= TYPES ================= */
 
@@ -30,58 +28,69 @@ interface NoAlertExplanation {
 
 const severityMap: Record<
   Severity,
-  { chip: string; bar: string; text: string }
+  { chip: string; bar: string; text: string; iconBg: string; iconColor: string }
 > = {
   CRITICAL: {
     chip: "bg-rose-100 text-rose-700",
     bar: "bg-rose-500",
     text: "text-rose-600",
+    iconBg: "bg-rose-100",
+    iconColor: "text-rose-600",
   },
   MEDIUM: {
     chip: "bg-amber-100 text-amber-700",
     bar: "bg-amber-500",
     text: "text-amber-600",
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-600",
   },
   LOW: {
     chip: "bg-orange-100 text-orange-700",
     bar: "bg-orange-400",
     text: "text-orange-600",
+    iconBg: "bg-orange-100",
+    iconColor: "text-orange-600",
   },
 };
 
 /* ================= MAIN ================= */
 
 export default function StockAlertSmart({ data }: { data: { alerts: { count: number; products: StockAlert[] }, noAlerts: NoAlertExplanation[], } | null }) {
-
   const [open, setOpen] = useState(true);
 
   if (!data) return null;
 
+  const hasAlerts = data.alerts.count > 0;
+
   return (
-    <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+    <section className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
       {/* HEADER */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
+      <div
+        className={`p-6 flex items-center justify-between transition-colors ${open ? "bg-slate-50/50 border-b border-slate-100" : ""}`}
+      >
+        <div className="flex items-center gap-4">
+          <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-colors ${hasAlerts ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
+            {hasAlerts ? <AlertTriangle className="h-6 w-6" /> : <CheckCircle className="h-6 w-6" />}
           </div>
 
           <div>
-            <h3 className="text-base font-semibold text-slate-900">
-              Inventory alerts
+            <h3 className="text-lg font-bold text-slate-900">
+              Inventory Signals
             </h3>
-            <p className="text-sm text-slate-500">
-              {data.alerts.count} product
-              {data.alerts.count > 1 ? "s" : ""} need attention
+            <p className="text-sm font-medium text-slate-500">
+              {hasAlerts
+                ? `${data.alerts.count} product${data.alerts.count > 1 ? "s" : ""} requiring attention`
+                : "All stock levels are optimal"
+              }
             </p>
           </div>
         </div>
 
         <button
           onClick={() => setOpen(v => !v)}
-          className="text-sm text-indigo-600 hover:underline"
+          className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
         >
-          {open ? "Hide details" : "View details"} →
+          {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
         </button>
       </div>
 
@@ -92,93 +101,99 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.35 }}
-            className="space-y-3 overflow-hidden"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
           >
-            {data.alerts.products.map((p, i) => {
-              const style = severityMap[p.severity];
-              const percent =
-                p.daysLeft === null
-                  ? 40
-                  : Math.min(100, (p.daysLeft / 30) * 100);
+            <div className="p-6 space-y-4">
+              {hasAlerts ? (
+                data.alerts.products.map((p, i) => {
+                  const style = severityMap[p.severity];
+                  const percent = p.daysLeft === null ? 0 : Math.max(5, Math.min(100, (1 - (p.daysLeft / 30)) * 100));
 
-              return (
-                <motion.div
-                  key={`${p.product}-${p.unit}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="rounded-2xl bg-white border border-slate-200 p-4"
-                >
-                  {/* TOP ROW */}
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="font-medium text-slate-900">
-                        {p.product}
-                      </p>
-                      <p className="text-xs text-slate-500">{p.unit}</p>
-                    </div>
-
-                    <span
-                      className={`text-xs font-medium px-2 py-1 rounded-full ${style.chip}`}
+                  return (
+                    <motion.div
+                      key={`${p.product}-${p.unit}`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.08 }}
+                      className="group bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md hover:border-amber-200 transition-all cursor-default"
                     >
-                      {p.severity}
-                    </span>
+                      <div className="flex gap-4">
+                        <div className={`w-12 h-12 rounded-xl ${style.iconBg} flex items-center justify-center shrink-0`}>
+                          <Package className={`w-6 h-6 ${style.iconColor}`} />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h4 className="font-bold text-slate-900 truncate">
+                                {p.product}
+                              </h4>
+                              <p className="text-xs font-medium text-slate-400">{p.unit}</p>
+                            </div>
+                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${style.chip}`}>
+                              {p.severity}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                            <Metric label="Days Remaining" value={p.daysLeft ?? "—"} color={style.text} />
+                            <Metric label="Current Stock" value={p.quantity} />
+                            <Metric label="Daily Velocity" value={`${p.avgDailySales.toFixed(1)}/d`} subgroup />
+                            <div className="text-right">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                              <p className="text-xs font-bold text-slate-700">Refill Suggested</p>
+                            </div>
+                          </div>
+
+                          {/* Progress Line */}
+                          <div className="relative h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percent}%` }}
+                              transition={{ duration: 1, delay: 0.2 }}
+                              className={`absolute inset-y-0 left-0 rounded-full ${style.bar}`}
+                            />
+                          </div>
+
+                          <p className="mt-3 text-xs font-medium text-slate-500 flex items-center gap-1.5">
+                            <AlertTriangle className="w-3 h-3 text-amber-500" />
+                            {p.reason}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="py-12 flex flex-col items-center justify-center text-center"
+                >
+                  <div className="w-20 h-20 rounded-[2.5rem] bg-emerald-50 text-emerald-500 flex items-center justify-center mb-6">
+                    <CheckCircle className="w-10 h-10" />
                   </div>
-
-                  {/* MAIN METRIC */}
-                  <div className="mt-4 grid grid-cols-4 gap-4 items-end">
-                    <div>
-                      <p className="text-xs text-slate-500">Days left</p>
-                      <p
-                        className={`text-2xl font-semibold ${style.text}`}
-                      >
-                        {p.daysLeft ?? "—"}
-                      </p>
-                    </div>
-
-                    <Meta label="Stock" value={p.quantity} />
-                    <Meta
-                      label="Avg / day"
-                      value={p.avgDailySales}
-                    />
-                    <div className="text-right">
-                      <p className="text-xs text-slate-500">
-                        Status
-                      </p>
-                      <p className="text-sm text-slate-700">
-                        Low stock
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* PROGRESS */}
-                  <div className="mt-3">
-                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percent}%` }}
-                        transition={{ duration: 0.5 }}
-                        className={`h-full ${style.bar}`}
-                      />
-                    </div>
-                  </div>
-
-                  {/* REASON */}
-                  <p className="mt-2 text-xs text-slate-500">
-                    {p.reason}
+                  <h4 className="text-xl font-bold text-slate-900 mb-2">Inventory is Healthy</h4>
+                  <p className="text-slate-500 max-w-xs mx-auto">
+                    All your tracked products have sufficient stock levels based on current sales velocity.
                   </p>
                 </motion.div>
-              );
-            })}
+              )}
 
-            {/* SAFE */}
-            {data.noAlerts.length > 0 && (
-              <div className="pt-4 border-t border-slate-200 flex items-center gap-2 text-sm text-emerald-700">
-                <CheckCircle className="h-4 w-4" />
-                Products not flagged
-              </div>
-            )}
+              {/* SAFE PRODUCTS SUMMARY */}
+              {hasAlerts && data.noAlerts.length > 0 && (
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-wider">
+                    <CheckCircle className="h-4 w-4" />
+                    {data.noAlerts.length} other products are safe
+                  </div>
+                  <button className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1">
+                    Manage Stock <ArrowUpRight className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -188,11 +203,11 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
 
 /* ================= SUB ================= */
 
-function Meta({ label, value }: { label: string; value: any }) {
+function Metric({ label, value, color = "text-slate-900", subgroup = false }: { label: string; value: any; color?: string; subgroup?: boolean }) {
   return (
     <div>
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="text-sm font-medium text-slate-900">
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+      <p className={`text-base font-bold ${color}`}>
         {value}
       </p>
     </div>

@@ -1,0 +1,3 @@
+{
+  "/invoice/[voucherNo]/page": "app/invoice/[voucherNo]/page.js"
+}

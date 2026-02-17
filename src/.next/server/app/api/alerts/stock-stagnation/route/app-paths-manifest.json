@@ -1,0 +1,3 @@
+{
+  "/api/alerts/stock-stagnation/route": "app/api/alerts/stock-stagnation/route.js"
+}

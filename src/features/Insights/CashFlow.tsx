@@ -13,82 +13,74 @@ export default function CashFlowWatch({ data }: { data: CashFlowData }) {
   const net = data.sales - data.purchases;
 
   return (
-    <section
-      className={`rounded-2xl border p-6
-        ${isHealthy
-          ? "bg-emerald-50 border-emerald-200"
-          : "bg-amber-50 border-amber-200"}
-      `}
-    >
+    <section className="h-full bg-white rounded-3xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col">
       {/* HEADER */}
-      <div className="flex items-start gap-4">
-        <div
-          className={`h-10 w-10 rounded-xl flex items-center justify-center
-            ${isHealthy ? "bg-emerald-100" : "bg-amber-100"}`}
-        >
-          {isHealthy ? (
-            <CheckCircle className="w-5 h-5 text-emerald-600" />
-          ) : (
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
-          )}
-        </div>
-
-        <div className="flex-1">
-          <h3 className="text-base font-semibold text-slate-900">
-            Cash Flow
-          </h3>
-
-          <p className="text-sm text-slate-600 mt-0.5">
-            {isHealthy
-              ? `Net positive cash flow ${data.period.toLowerCase()}`
-              : `Cash outflow exceeded inflow ${data.period.toLowerCase()}`}
-          </p>
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <div className={`p-3 rounded-xl ${isHealthy ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"}`}>
+            {isHealthy ? (
+              <CheckCircle className="w-6 h-6" />
+            ) : (
+              <AlertTriangle className="w-6 h-6" />
+            )}
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">Cash Flow</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              Net {isHealthy ? "positive" : "negative"} for {data.period.toLowerCase()}
+            </p>
+          </div>
         </div>
 
         <a
           href="/transactions"
-          className="text-sm text-indigo-600 hover:underline flex items-center gap-1"
+          className="group flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-indigo-600 transition-colors"
         >
-          View
-          <ArrowRight className="w-4 h-4" />
+          Details
+          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </a>
       </div>
 
-      {/* AMOUNTS */}
-      <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
-        <div>
-          <p className="text-xs text-slate-500">Purchases</p>
-          <p className="font-semibold text-rose-600">
-            ₹{data.purchases.toLocaleString()}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-xs text-slate-500">Sales</p>
-          <p className="font-semibold text-emerald-600">
+      {/* METRICS */}
+      <div className="grid grid-cols-3 gap-6 mb-6">
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Inflow</p>
+          <p className="text-lg font-bold text-emerald-600">
             ₹{data.sales.toLocaleString()}
           </p>
         </div>
 
-        <div>
-          <p className="text-xs text-slate-500">Net</p>
-          <p
-            className={`font-semibold ${
-              net >= 0 ? "text-emerald-700" : "text-amber-700"
-            }`}
-          >
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Outflow</p>
+          <p className="text-lg font-bold text-rose-600">
+            ₹{data.purchases.toLocaleString()}
+          </p>
+        </div>
+
+        <div className={`p-4 rounded-2xl border ${isHealthy ? "bg-emerald-50 border-emerald-100" : "bg-amber-50 border-amber-100"}`}>
+          <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${isHealthy ? "text-emerald-700" : "text-amber-700"}`}>
+            Net
+          </p>
+          <p className={`text-lg font-bold ${isHealthy ? "text-emerald-700" : "text-amber-700"}`}>
             {net >= 0 ? "+" : "-"}₹{Math.abs(net).toLocaleString()}
           </p>
         </div>
       </div>
 
-      {/* REASSURANCE */}
-      {isHealthy && (
-        <div className="mt-4 flex items-center gap-2 text-sm text-emerald-700">
-          <CheckCircle className="w-4 h-4" />
-          Spending is under control and cash inflow is steady.
-        </div>
-      )}
+      {/* FOOTER MESSAGE */}
+      <div className={`mt-auto flex items-center gap-2 text-sm font-medium ${isHealthy ? "text-emerald-600" : "text-amber-600"}`}>
+        {isHealthy ? (
+          <>
+            <CheckCircle className="w-4 h-4" />
+            Healthy cash flow. Spending is under control.
+          </>
+        ) : (
+          <>
+            <AlertTriangle className="w-4 h-4" />
+            Attention: Outflow exceeds inflow this period.
+          </>
+        )}
+      </div>
     </section>
   );
 }

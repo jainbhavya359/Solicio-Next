@@ -1,0 +1,3 @@
+{
+  "/api/health/activity-recency/route": "app/api/health/activity-recency/route.js"
+}
