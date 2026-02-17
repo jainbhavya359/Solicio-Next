@@ -64,27 +64,89 @@ export async function POST(req: NextRequest) {
       if (soldQty > maxQty) throw new Error("INSUFFICIENT_INGREDIENT_STOCK");
     }
 
-    /* 📦 FIFO / COGS */
+    /* 📦 FIFO / COGS / STOCK UPDATES */
     let cogsTotal = 0;
     let fifoBreakup: any[] = [];
+    let bulkUpdates: any[] = [];
 
-    const layers = await StockLayer.find(
-      { email, productName: product.name, unit: product.unit, qtyRemaining: { $gt: 0 } },
-      null,
-      { session }
-    ).sort({ date: 1 });
+    if (dbProduct.productType === "composite") {
+      /* 🧩 Deduct from Ingredients */
+      for (const item of dbProduct.recipe) {
+        const neededQty = soldQty * item.qtyRequired;
 
-    const fifo = calculateFIFO(layers, soldQty);
-    cogsTotal = fifo.cogs;
-    fifoBreakup = fifo.breakup;
+        const layers = await StockLayer.find(
+          {
+            email,
+            productName: item.productName,
+            unit: item.unit,
+            qtyRemaining: { $gt: 0 },
+          },
+          null,
+          { session }
+        ).sort({ date: 1 });
 
-    await StockLayer.bulkWrite(fifo.updates, { session });
+        const fifo = calculateFIFO(layers, neededQty);
+        cogsTotal += fifo.cogs;
 
-    await Products.updateOne(
-      { email, name: product.name, unit: product.unit },
-      { $inc: { quantity: -soldQty }, $set: { lastSaleAt: txDate, lastMovedAt: txDate } },
-      { session }
-    );
+        // Tag the breakup with ingredient info for better audit trail
+        fifoBreakup.push(
+          ...fifo.breakup.map((b) => ({
+            ...b,
+            parentIngredient: item.productName,
+          }))
+        );
+
+        bulkUpdates.push(...fifo.updates);
+
+        // Decrease physical stock of the ingredient
+        await Products.updateOne(
+          { _id: item.productId, email },
+          {
+            $inc: { quantity: -neededQty },
+            $set: { lastMovedAt: txDate },
+          },
+          { session }
+        );
+      }
+
+      // Update the composite product's sale metadata
+      await Products.updateOne(
+        { email, name: product.name, unit: product.unit },
+        { $set: { lastSaleAt: txDate, lastMovedAt: txDate } },
+        { session }
+      );
+    } else {
+      /* 💎 Simple Product Deduction */
+      const layers = await StockLayer.find(
+        {
+          email,
+          productName: product.name,
+          unit: product.unit,
+          qtyRemaining: { $gt: 0 },
+        },
+        null,
+        { session }
+      ).sort({ date: 1 });
+
+      const fifo = calculateFIFO(layers, soldQty);
+      cogsTotal = fifo.cogs;
+      fifoBreakup = fifo.breakup;
+      bulkUpdates = fifo.updates;
+
+      await Products.updateOne(
+        { email, name: product.name, unit: product.unit },
+        {
+          $inc: { quantity: -soldQty },
+          $set: { lastSaleAt: txDate, lastMovedAt: txDate },
+        },
+        { session }
+      );
+    }
+
+    /* ⚡ Execute FIFO Layer Updates */
+    if (bulkUpdates.length > 0) {
+      await StockLayer.bulkWrite(bulkUpdates, { session });
+    }
 
     /* 🧾 GST */
     const gst = computeGST({
@@ -167,8 +229,8 @@ export async function POST(req: NextRequest) {
         subtotal: soldQty * product.rate,
         tax: gst.tax,
         taxBreakup: gst.type === "NONE"
-        ? { type: "NONE" }
-        : {
+          ? { type: "NONE" }
+          : {
             type: gst.type,
             ...gst.breakup,
           },
@@ -194,20 +256,20 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest){
-    try{
-        const { searchParams } = new URL(request.url);
-        const email = searchParams.get("email");
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
 
-        if(!email){
-            return NextResponse.json({error: "No email Found"},{status: 400});
-        }
-
-        const Stocks = await Stock.find({email, voucher: "Sale"}).sort({date: -1, createdAt: -1});
-
-        return NextResponse.json(Stocks);
-    }catch(error){
-        console.log("Error: ",error);
-        return NextResponse.json({error: error}, {status: 500});
+    if (!email) {
+      return NextResponse.json({ error: "No email Found" }, { status: 400 });
     }
+
+    const Stocks = await Stock.find({ email, voucher: "Sale" }).sort({ date: -1, createdAt: -1 });
+
+    return NextResponse.json(Stocks);
+  } catch (error) {
+    console.log("Error: ", error);
+    return NextResponse.json({ error: error }, { status: 500 });
+  }
 }

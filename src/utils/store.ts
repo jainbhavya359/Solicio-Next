@@ -1,25 +1,25 @@
 export const scores_rate = [
-  "Poor 🚨 High risk — difficult approvals & high interest.",
-  "Fair ⚠️ Below average — approvals with strict terms.",
-  "Good 🙂 Acceptable — loans possible, not best rates.",
-  "Very Good ✅ Safe — better rates & approvals.",
-  "Excellent 🌟 Elite — best interest & limits.",
+    "Poor 🚨 High risk — difficult approvals & high interest.",
+    "Fair ⚠️ Below average — approvals with strict terms.",
+    "Good 🙂 Acceptable — loans possible, not best rates.",
+    "Very Good ✅ Safe — better rates & approvals.",
+    "Excellent 🌟 Elite — best interest & limits.",
 ];
 
 export const UNITS = [
-  "Pcs",
-  "Kg",
-  "Gram",
-  "Liter",
-  "Ml",
-  "Meter",
-  "Feet",
-  "Box",
-  "Packet",
-  "Dozen",
-  "Bag",
-  "Ton",
-  "Custom"
+    "Pcs",
+    "Kg",
+    "Gram",
+    "Liter",
+    "Ml",
+    "Meter",
+    "Feet",
+    "Box",
+    "Packet",
+    "Dozen",
+    "Bag",
+    "Ton",
+    "Custom"
 ];
 
 
@@ -29,8 +29,9 @@ export const Service_data = [
         title: "Business Insights",
         to: "/businessInsights",
         description:
-        "Daily insights that tell you what’s happening in your business and what needs attention right now.",
+            "Daily insights that tell you what’s happening in your business and what needs attention right now.",
         accent: "from-indigo-500 to-violet-500",
+        tag: "Intelligence"
     },
 
     {
@@ -38,8 +39,9 @@ export const Service_data = [
         title: "Inventory & Sales",
         to: "/inventory",
         description:
-        "Track purchases, sales, stock levels, and profit movement—without complex accounting.",
+            "Track purchases, sales, stock levels, and profit movement—without complex accounting.",
         accent: "from-emerald-500 to-teal-500",
+        tag: "Logistics"
     },
 
     {
@@ -47,8 +49,9 @@ export const Service_data = [
         title: "Loans & Credit Health",
         to: "/loan",
         description:
-        "Manage loans, understand credit score impact, and discover affordable funding options.",
+            "Manage loans, understand credit score impact, and discover affordable funding options.",
         accent: "from-orange-500 to-amber-500",
+        tag: "Funding"
     },
 
     {
@@ -56,16 +59,18 @@ export const Service_data = [
         title: "Business Knowledge",
         to: "/business",
         description:
-        "Clear explanations of business terms, processes, and decisions—made for non-experts.",
+            "Clear explanations of business terms, processes, and decisions—made for non-experts.",
         accent: "from-blue-500 to-cyan-500",
+        tag: "Education"
     },
 
     {
         img: "/business-network_.png",
         title: "Local Business Network",
         description:
-        "Connect with nearby wholesalers, suppliers, and partners you can trust.",
+            "Connect with nearby wholesalers, suppliers, and partners you can trust.",
         accent: "from-pink-500 to-rose-500",
+        tag: "B2B Sync"
     },
 
     {
@@ -73,8 +78,9 @@ export const Service_data = [
         title: "Licenses & Compliance",
         to: "/licenses",
         description:
-        "Stay compliant with reminders and guidance for licenses, renewals, and certificates.",
+            "Stay compliant with reminders and guidance for licenses, renewals, and certificates.",
         accent: "from-yellow-500 to-amber-600",
+        tag: "Compliance"
     },
 
     {
@@ -82,7 +88,8 @@ export const Service_data = [
         title: "Growth & Marketing",
         to: "/marketing",
         description:
-        "Simple tools to grow visibility, reach new customers, and build your brand online.",
+            "Simple tools to grow visibility, reach new customers, and build your brand online.",
         accent: "from-fuchsia-500 to-purple-500",
+        tag: "Growth"
     },
 ];

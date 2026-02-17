@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, Package, ChevronDown, Sparkles, Layers } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddProductModal from "./AddProduct";
+import DocumentModal from "../documents/DocumentModal";
 import { UNITS } from "../../utils/store";
 
 export default function Purchase({
@@ -26,6 +27,9 @@ export default function Purchase({
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showProducts, setShowProducts] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+
+  const [showDocModal, setShowDocModal] = useState(false);
+  const [lastVoucherNo, setLastVoucherNo] = useState("");
 
   const [partyCategory, setPartyCategory] =
     useState<"Individual" | "Company">("Individual");
@@ -137,7 +141,10 @@ export default function Purchase({
         setNotes("");
         setSelectedProduct(null);
         reloadSetter(!reload);
-        router.push(`/bill/${res.data.voucherNo}`);
+
+        // Instead of redirect, open the modal
+        setLastVoucherNo(res.data.voucherNo);
+        setShowDocModal(true);
       }
     } catch (error) {
       toast.error("Failed to add purchase");
@@ -481,38 +488,52 @@ export default function Purchase({
       </div>
 
       {/* ADD PRODUCT MODAL */}
-      {showAddProduct && (
-        <AddProductModal
-          open={showAddProduct}
-          onClose={() => setShowAddProduct(false)}
-          units={UNITS}
-          products={products}
-          onSave={async (payload: any) => {
-            try {
-              const res = await axios.post(
-                payload.productType === "simple"
-                  ? "/api/products"
-                  : "/api/composite-product",
-                {
-                  email,
-                  name: payload.name,
-                  unit: payload.unit,
-                  sellingPrice: payload.sellingPrice,
-                  recipe: payload.recipe,
-                }
-              );
+      <AnimatePresence>
+        {showAddProduct && (
+          <AddProductModal
+            open={showAddProduct}
+            onClose={() => setShowAddProduct(false)}
+            units={UNITS}
+            products={products}
+            onSave={async (payload: any) => {
+              try {
+                const res = await axios.post(
+                  payload.productType === "simple"
+                    ? "/api/products"
+                    : "/api/composite-product",
+                  {
+                    email,
+                    name: payload.name,
+                    unit: payload.unit,
+                    sellingPrice: payload.sellingPrice,
+                    recipe: payload.recipe,
+                  }
+                );
 
-              const created = res.data?.product ?? res.data;
-              setProducts((prev) => [...prev, created]);
-              setSelectedProduct(created);
-              toast.success("Operational Hub Updated");
-              setShowAddProduct(false);
-            } catch {
-              toast.error("Hub Sync Failed");
-            }
-          }}
-        />
-      )}
+                const created = res.data?.product ?? res.data;
+                setProducts((prev) => [...prev, created]);
+                setSelectedProduct(created);
+                toast.success("Operational Hub Updated");
+                setShowAddProduct(false);
+              } catch {
+                toast.error("Hub Sync Failed");
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* DOCUMENT MODAL */}
+      <AnimatePresence>
+        {showDocModal && (
+          <DocumentModal
+            open={showDocModal}
+            onClose={() => setShowDocModal(false)}
+            voucherNo={lastVoucherNo}
+            email={email || ""}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

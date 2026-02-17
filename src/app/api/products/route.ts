@@ -3,37 +3,37 @@ import { Products } from "@/src/models/ProductModel";
 import { calculateCompositeStock } from "@/src/utils/compositeStock";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest){
-    await connect();
+export async function GET(request: NextRequest) {
+  await connect();
 
-    try{
-        const { searchParams } = new URL(request.url);
-        const email = searchParams.get("email");
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
 
-        if(!email){
-            return NextResponse.json({error: "No email Found"},{status: 400});
-        }
-
-        const products = await Products.find({ email }).lean();
-
-        for (const p of products) {
-          if (p.productType === "composite") {
-            p.availableQty = await calculateCompositeStock(p, null);
-          } else {
-            p.availableQty = p.quantity;
-          }
-        }
-
-        return NextResponse.json(products);
-
-
-        // const productList = await Products.find({email});
-
-        // return NextResponse.json({products: productList});
-    }catch(error){
-        console.log("Error: ",error);
-        return NextResponse.json({error: error}, {status: 500});
+    if (!email) {
+      return NextResponse.json({ error: "No email Found" }, { status: 400 });
     }
+
+    const products = await Products.find({ email }).lean();
+
+    for (const p of products) {
+      if (p.productType === "composite") {
+        p.availableQty = await calculateCompositeStock(p, null);
+      } else {
+        p.availableQty = p.quantity;
+      }
+    }
+
+    return NextResponse.json(products);
+
+
+    // const productList = await Products.find({email});
+
+    // return NextResponse.json({products: productList});
+  } catch (error) {
+    console.log("Error: ", error);
+    return NextResponse.json({ error: error }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -67,16 +67,17 @@ export async function POST(request: NextRequest) {
       {
         new: true,
         upsert: true,
-        rawResult: true,
+        includeResultMetadata: true,
       }
     );
 
     // If product already existed
     if (!result.lastErrorObject?.upserted) {
-      if (result.value.unit !== unit) {
+      const existingProduct = result.value;
+      if (existingProduct && existingProduct.unit !== unit) {
         return NextResponse.json(
           {
-            error: `Unit locked. Product '${normalizedName}' already exists with unit '${result.value.unit}'`,
+            error: `Unit locked. Product '${normalizedName}' already exists with unit '${existingProduct.unit}'`,
           },
           { status: 409 }
         );

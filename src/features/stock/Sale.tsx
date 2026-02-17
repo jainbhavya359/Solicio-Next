@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Plus, Minus, Package, ChevronDown, Sparkles, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import DocumentModal from "../documents/DocumentModal";
 
 export default function Sale({
   visible,
@@ -23,6 +24,9 @@ export default function Sale({
   const [products, setProducts] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [showProducts, setShowProducts] = useState(false);
+
+  const [showDocModal, setShowDocModal] = useState(false);
+  const [lastVoucherNo, setLastVoucherNo] = useState("");
 
   const [partyCategory, setPartyCategory] =
     useState<"Individual" | "Company">("Individual");
@@ -155,7 +159,10 @@ export default function Sale({
         setNotes("");
         setSelectedProduct(null);
         reloadSetter(!reload);
-        router.push(`/invoice/${res.data.voucherNo}`);
+
+        // Instead of redirect, open the modal
+        setLastVoucherNo(res.data.voucherNo);
+        setShowDocModal(true);
       }
     } catch {
       toast.error("Conversion failed");
@@ -491,6 +498,18 @@ export default function Sale({
           </button>
         </div>
       </div>
+
+      {/* DOCUMENT MODAL */}
+      <AnimatePresence>
+        {showDocModal && (
+          <DocumentModal
+            open={showDocModal}
+            onClose={() => setShowDocModal(false)}
+            voucherNo={lastVoucherNo}
+            email={email || ""}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

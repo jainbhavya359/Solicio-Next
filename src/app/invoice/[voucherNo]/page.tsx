@@ -2,7 +2,7 @@ import PrintableDocument from "@/src/features/documents/PrintableDocument";
 import connect from "@/src/dbConfig/dbConnection";
 import { Document } from "@/src/models/DocumentModel";
 import { auth } from "@clerk/nextjs/server";
-import PrintButton from "@/src/components/ui/PrintButton";
+import DocumentHeader from "@/src/components/ui/DocumentHeader";
 
 export default async function InvoicePage(props: {
   params: Promise<{ voucherNo: string }>;
@@ -23,10 +23,7 @@ export default async function InvoicePage(props: {
 
   return (
     <>
-      {/* ✅ Client component — safe */}
-      <div className="max-w-3xl mx-auto my-4 flex justify-end print:hidden">
-        <PrintButton />
-      </div>
+      <DocumentHeader />
 
       {/* ✅ Pure server-rendered JSX */}
       <PrintableDocument type="Invoice" doc={doc} />

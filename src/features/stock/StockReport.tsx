@@ -1,6 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
+import toast from "react-hot-toast";
 import {
   Package,
   Plus,
@@ -9,8 +13,11 @@ import {
   TrendingUp,
   AlertTriangle,
   ChevronRight,
-  Search
+  Search,
+  Sparkles
 } from "lucide-react";
+import AddProductModal from "./AddProduct";
+import { UNITS } from "../../utils/store";
 
 // 1. Define the shape of a single Stock item
 interface StockItem {
@@ -39,6 +46,7 @@ interface StockReportProps {
   purchaseSetter: (val: boolean) => void;
   saleSetter: (val: boolean) => void;
   reloadKey?: number;
+  reloadSetter?: (val: any) => void;
 }
 
 export default function StockReport({
@@ -47,11 +55,30 @@ export default function StockReport({
   productSetter,
   purchaseSetter,
   saleSetter,
+  reloadKey,
+  reloadSetter,
 }: StockReportProps) {
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress;
+
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
 
   const summary = data?.summary;
   const items: StockItem[] = data?.breakdown || [];
   const loading = !data;
+
+  /* ---------------- Fetch Products (for Recipe Builder context) ---------------- */
+  useEffect(() => {
+    if (!email || !visible) return;
+    axios
+      .get("/api/products", { params: { email } })
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : res.data?.products ?? [];
+        setProducts(list);
+      })
+      .catch(() => console.error("Failed to sync products for builder context"));
+  }, [email, visible, reloadKey]);
 
   if (!visible) return null;
 
@@ -86,22 +113,33 @@ export default function StockReport({
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-7xl mx-auto p-6 space-y-12"
+      className="max-w-7xl mx-auto p-6 space-y-12 font-outfit"
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider mb-3">
             <Layers className="w-3 h-3" />
             Inventory Control
           </div>
           <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
             Stock <span className="text-emerald-600">Report</span>
           </h2>
-          <p className="text-lg text-slate-500 mt-2 max-w-2xl">
+          <p className="text-lg text-slate-500 mt-2 max-w-2xl font-medium">
             Real-time monitoring of your stock health, capital exposure, and turnover efficiency.
           </p>
         </div>
+
+        <button
+          onClick={() => setShowAddProduct(true)}
+          className="group relative flex items-center justify-center gap-3 px-8 h-16 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase tracking-[0.25em] shadow-2xl shadow-slate-900/20 hover:bg-emerald-600 transition-all active:scale-95 overflow-hidden"
+        >
+          <span className="relative z-10 flex items-center gap-2">
+            <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+            New Strategic Asset
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        </button>
       </div>
 
       {/* KPI STRIP */}
@@ -139,22 +177,22 @@ export default function StockReport({
       )}
 
       {/* TABLE */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-200">
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Product Info</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">In Stock</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Stock Value</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Sale Velocity</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+              <tr className="bg-slate-50/50 border-b border-slate-100">
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Product Info</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">In Stock</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Price</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Stock Value</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Sale Velocity</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-50">
               <AnimatePresence mode="popLayout">
                 {loading ? (
                   <motion.tr
@@ -167,7 +205,7 @@ export default function StockReport({
                         <div className="absolute inset-0 border-4 border-emerald-100 rounded-full" />
                         <div className="absolute inset-0 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
                       </div>
-                      <p className="mt-4 text-sm font-medium text-slate-400">Loading inventory data...</p>
+                      <p className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Loading inventory data...</p>
                     </td>
                   </motion.tr>
                 ) : (
@@ -176,59 +214,59 @@ export default function StockReport({
                       key={`${stock.product}-${stock.unit}`}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.03 }}
+                      transition={{ delay: idx * 0.02 }}
                       className="group hover:bg-slate-50/50 transition-colors"
                     >
-                      <td className="px-6 py-5">
+                      <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
-                          <div className="h-11 w-11 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
-                            <Package size={20} />
+                          <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-all duration-300">
+                            <Package size={22} />
                           </div>
                           <div>
-                            <p className="font-bold text-slate-900 capitalize">{stock.product}</p>
-                            <p className="text-xs font-medium text-slate-400">{stock.unit}</p>
+                            <p className="text-base font-bold text-slate-900 capitalize tracking-tight group-hover:text-emerald-700 transition-colors">{stock.product}</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stock.unit}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-5">
+                      <td className="px-8 py-6">
                         <div className="flex items-baseline gap-1">
-                          <span className="text-lg font-bold text-slate-900">{stock.quantity}</span>
-                          <span className="text-xs font-medium text-slate-400 lowercase">{stock.unit}</span>
+                          <span className="text-xl font-bold text-slate-900 tracking-tight">{stock.quantity}</span>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest lowercase">{stock.unit}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-5 text-sm font-medium text-slate-600">₹{stock.price}</td>
-                      <td className="px-6 py-5 text-right">
-                        <span className="text-base font-bold text-emerald-600">₹{stock.stockValue.toLocaleString()}</span>
+                      <td className="px-8 py-6 text-sm font-bold text-slate-600">₹{stock.price}</td>
+                      <td className="px-8 py-6 text-right">
+                        <span className="text-lg font-extrabold text-emerald-600 tracking-tight">₹{stock.stockValue.toLocaleString()}</span>
                       </td>
-                      <td className="px-6 py-5">
+                      <td className="px-8 py-6">
                         <DaysLeft days={stock.daysSinceLastSale} />
                       </td>
-                      <td className="px-6 py-5">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${stock.category === "fast" ? "bg-emerald-100 text-emerald-600" :
-                            stock.category === "warning" ? "bg-amber-100 text-amber-600" :
-                              "bg-rose-50 text-rose-500"
+                      <td className="px-8 py-6">
+                        <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] ${stock.category === "fast" ? "bg-emerald-100 text-emerald-700" :
+                          stock.category === "warning" ? "bg-amber-100 text-amber-700" :
+                            "bg-rose-50 text-rose-600"
                           }`}>
-                          <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${stock.category === "fast" ? "bg-emerald-500" :
-                              stock.category === "warning" ? "bg-amber-500" :
-                                "bg-rose-500"
+                          <div className={`w-2 h-2 rounded-full mr-2 ${stock.category === "fast" ? "bg-emerald-500" :
+                            stock.category === "warning" ? "bg-amber-500" :
+                              "bg-rose-500"
                             }`} />
                           {statusMap[stock.category] || stock.category}
                         </span>
                       </td>
-                      <td className="px-6 py-5">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <td className="px-8 py-6">
+                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                           <ActionButton
                             onClick={() => adjustQty(stock, -1)}
                             title="Quick Sale"
                           >
-                            <Minus size={14} />
+                            <Minus size={16} />
                           </ActionButton>
                           <ActionButton
                             onClick={() => adjustQty(stock, 1)}
                             primary
                             title="Restock"
                           >
-                            <Plus size={14} />
+                            <Plus size={16} />
                           </ActionButton>
                         </div>
                       </td>
@@ -241,14 +279,49 @@ export default function StockReport({
         </div>
 
         {!loading && items.length === 0 && (
-          <div className="py-20 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-slate-50 mb-4 text-slate-300">
-              <Search size={32} />
+          <div className="py-32 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-slate-50 mb-6 text-slate-300 ring-1 ring-slate-100">
+              <Search size={40} />
             </div>
-            <p className="text-slate-500 font-medium">No inventory items found</p>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No active inventory detected</p>
+            <p className="text-slate-300 text-[10px] uppercase tracking-[0.2em] mt-2">Begin provisioning by clicking 'New Strategic Asset'</p>
           </div>
         )}
       </div>
+
+      {/* ADD PRODUCT MODAL */}
+      <AnimatePresence>
+        {showAddProduct && (
+          <AddProductModal
+            open={showAddProduct}
+            onClose={() => setShowAddProduct(false)}
+            units={UNITS}
+            products={products}
+            onSave={async (payload: any) => {
+              try {
+                const res = await axios.post(
+                  payload.productType === "simple"
+                    ? "/api/products"
+                    : "/api/composite-product",
+                  {
+                    email,
+                    name: payload.name,
+                    unit: payload.unit,
+                    sellingPrice: payload.sellingPrice,
+                    recipe: payload.recipe,
+                  }
+                );
+
+                toast.success("Operational Hub Synchronized");
+                setShowAddProduct(false);
+                if (reloadSetter) reloadSetter(Date.now());
+              } catch {
+                toast.error("Cloud Sync Failed");
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 }
@@ -270,20 +343,20 @@ function Kpi({
   const styles = {
     emerald: "border-emerald-100 bg-emerald-50 text-emerald-600 bg-emerald-500/10",
     amber: "border-amber-100 bg-amber-50 text-amber-600 bg-amber-500/10",
-    slate: "border-slate-200 bg-white text-slate-400 bg-slate-500/5",
+    slate: "border-slate-100 bg-slate-50 text-slate-400 bg-slate-900/5",
   };
 
   return (
-    <div className={`group rounded-3xl border p-6 bg-white transition-all hover:shadow-md hover:border-emerald-200 cursor-default`}>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</span>
-        <div className={`p-2.5 rounded-2xl ${styles[variant]} transition-colors group-hover:bg-emerald-500 group-hover:text-white`}>
-          <Icon className="w-5 h-5" />
+    <div className={`group rounded-[2rem] border p-8 bg-white transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-emerald-200 cursor-default border-slate-100`}>
+      <div className="flex items-center justify-between mb-6">
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">{label}</span>
+        <div className={`p-3 rounded-2xl ${styles[variant]} transition-all duration-500 group-hover:bg-slate-900 group-hover:text-white`}>
+          <Icon className="w-6 h-6" />
         </div>
       </div>
-      <p className="text-3xl font-bold text-slate-900 tracking-tight">{value}</p>
+      <p className="text-4xl font-extrabold text-slate-900 tracking-tightest">{value}</p>
       {description && (
-        <p className="text-xs font-medium text-slate-400 mt-1 line-clamp-1">{description}</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 mt-2 line-clamp-1">{description}</p>
       )}
     </div>
   );
@@ -304,9 +377,9 @@ function ActionButton({
     <button
       onClick={onClick}
       title={title}
-      className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all active:scale-95 ${primary
-          ? "bg-slate-900 text-white hover:bg-emerald-600 shadow-sm"
-          : "bg-white border border-slate-200 text-slate-500 hover:border-emerald-200 hover:text-emerald-600"
+      className={`h-11 w-11 rounded-2xl flex items-center justify-center transition-all duration-300 active:scale-95 shadow-lg ${primary
+        ? "bg-slate-900 text-white hover:bg-emerald-600 shadow-slate-900/10"
+        : "bg-white border border-slate-200 text-slate-500 hover:border-emerald-200 hover:text-emerald-600 shadow-slate-200/50"
         }`}
     >
       {children}
@@ -315,23 +388,23 @@ function ActionButton({
 }
 
 function DaysLeft({ days }: { days: number | null }) {
-  if (days == null) return <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Never Sold</span>;
+  if (days == null) return <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.25em]">Never Sold</span>;
 
   const intensity = Math.min(days / 60, 1);
   const isDead = days > 90;
 
   return (
-    <div className="flex flex-col gap-1.5 w-24">
+    <div className="flex flex-col gap-2 w-28">
       <div className="flex justify-between items-end">
-        <span className={`text-[10px] font-bold uppercase tracking-wider ${isDead ? "text-rose-500" : "text-slate-400"}`}>
-          {isDead ? "Dead Stock" : days === 0 ? "Selling Today" : `${days}d since sale`}
+        <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDead ? "text-rose-500" : "text-slate-400"}`}>
+          {isDead ? "Dead Asset" : days === 0 ? "Liquid Today" : `${days}D Since Salutation`}
         </span>
       </div>
-      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden p-[1px]">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.max(5, 100 - (intensity * 100))}%` }}
-          className={`h-full rounded-full ${days < 7 ? "bg-emerald-500" : days < 30 ? "bg-amber-400" : "bg-rose-400"}`}
+          className={`h-full rounded-full transition-colors duration-500 ${days < 7 ? "bg-emerald-500" : days < 30 ? "bg-amber-400" : "bg-rose-500"}`}
         />
       </div>
     </div>
