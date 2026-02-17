@@ -78,22 +78,37 @@ export default function Sale({
   useEffect(() => {
     if (!email) return;
 
-    if (preSelectedProduct && Object.keys(preSelectedProduct).length) {
-      setSelectedProduct(preSelectedProduct);
-    }
-
-    axios
-      .get("/api/products", { params: { email } })
-      .then((res) => {
+    const fetchItems = async () => {
+      try {
+        const res = await axios.get("/api/products", { params: { email } });
         const list = Array.isArray(res.data)
           ? res.data
           : Array.isArray(res.data?.products)
             ? res.data.products
             : [];
 
-        setProducts(list.filter((p: any) => p?.name && p?.unit));
-      })
-      .catch(() => toast.error("Failed to load products"));
+        const filteredList = list.filter((p: any) => p?.name && p?.unit);
+        setProducts(filteredList);
+
+        // Resolve string preselection
+        if (typeof preSelectedProduct === "string" && preSelectedProduct.length > 0) {
+          const match = filteredList.find((p: any) => p.name.toLowerCase() === preSelectedProduct.toLowerCase());
+          if (match) {
+            setSelectedProduct(match);
+            setPrice(match.sellingPrice ?? "");
+          }
+        }
+        // Resolve object preselection
+        else if (preSelectedProduct && typeof preSelectedProduct === "object" && preSelectedProduct.name) {
+          setSelectedProduct(preSelectedProduct);
+          setPrice(preSelectedProduct.sellingPrice ?? "");
+        }
+      } catch {
+        toast.error("Failed to load products");
+      }
+    };
+
+    fetchItems();
   }, [email, reload, preSelectedProduct]);
 
   /* ---------------- Quantity Controls ---------------- */

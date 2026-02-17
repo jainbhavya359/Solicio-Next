@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { fetchInventorySnapshot } from "@/src/lib/api/inventory";
 import { AnimatePresence, motion } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
-import { Package, Activity, Sparkles, Layout, ChevronRight, Zap, TrendingUp } from "lucide-react";
+import { Package, Activity, Sparkles, Layout, ChevronRight, Zap, TrendingUp, FileText } from "lucide-react";
 
 import Purchase from "../features/stock/Purchase";
 import Sale from "../features/stock/Sale";
 import StockReport from "../features/stock/StockReport";
 import StockAlertSmart from "../features/Insights/StockAlert";
 import StockHistory from "../features/stock/StockHistory";
-import ProfitLossReport from "../features/stock/ProfitLossReoprt";
+import ProfitLossReport from "../features/stock/ProfitLossReport";
+import FinancialReport from "../features/stock/FinancialReport";
 
 const PanelMotion = ({ children }: { children: React.ReactNode }) => (
   <motion.div
@@ -27,6 +29,7 @@ const PanelMotion = ({ children }: { children: React.ReactNode }) => (
 
 export default function Inventory() {
   const [activeTab, setActiveTab] = useState<"report" | "purchase" | "sale">("report");
+  const [showFinancialModal, setShowFinancialModal] = useState(false);
   const [reload, setReload] = useState(false);
   const [product, setProduct] = useState("");
 
@@ -35,6 +38,23 @@ export default function Inventory() {
 
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const action = searchParams.get("action");
+    const preSelectedProduct = searchParams.get("product");
+
+    if (action === "sale") {
+      setActiveTab("sale");
+    } else if (action === "purchase") {
+      setActiveTab("purchase");
+    }
+
+    if (preSelectedProduct) {
+      setProduct(preSelectedProduct);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!email) return;
@@ -120,6 +140,17 @@ export default function Inventory() {
             >
               Inventory Report
             </ActionButton>
+
+            <div className="w-px h-8 bg-white/10 mx-1" />
+
+            <ActionButton
+              variant="secondary"
+              active={showFinancialModal}
+              icon={<FileText className="w-4 h-4" />}
+              onClick={() => setShowFinancialModal(true)}
+            >
+              Financial Audit
+            </ActionButton>
           </motion.div>
         </div>
 
@@ -163,6 +194,7 @@ export default function Inventory() {
                     purchaseSetter={setNewPurchase}
                     saleSetter={setNewSale}
                     reloadKey={reload ? 1 : 0}
+                    reloadSetter={() => setReload(!reload)}
                   />
 
                   {/* HIGH-VISIBILITY INSIGHTS STACK - BusinessInsights Alignment */}
@@ -180,6 +212,12 @@ export default function Inventory() {
                   </section>
                 </div>
               </PanelMotion>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showFinancialModal && (
+              <FinancialReport onClose={() => setShowFinancialModal(false)} />
             )}
           </AnimatePresence>
         </div>

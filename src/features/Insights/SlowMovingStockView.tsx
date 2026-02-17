@@ -15,6 +15,7 @@ import {
   Search,
   ArrowUpRight
 } from "lucide-react";
+import Link from "next/link";
 
 export interface SlowMovingItem {
   product: string;
@@ -196,9 +197,12 @@ export default function SlowMovingStockView({
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="h-9 w-9 rounded-xl flex items-center justify-center bg-white border border-slate-200 text-slate-500 hover:border-amber-200 hover:text-amber-600 transition-all">
+                            <Link
+                              href={`/inventory?action=sale&product=${item.product}`}
+                              className="h-9 w-9 rounded-xl flex items-center justify-center bg-white border border-slate-200 text-slate-500 hover:border-amber-200 hover:text-amber-600 transition-all"
+                            >
                               <ArrowUpRight size={14} />
-                            </button>
+                            </Link>
                           </div>
                         </td>
                       </motion.tr>

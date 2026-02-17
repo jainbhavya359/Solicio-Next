@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, CheckCircle, Package, ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
+import Link from "next/link";
 
 /* ================= TYPES ================= */
 
@@ -188,9 +189,12 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
                     <CheckCircle className="h-4 w-4" />
                     {data.noAlerts.length} other products are safe
                   </div>
-                  <button className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1">
+                  <Link
+                    href="/inventory"
+                    className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                  >
                     Manage Stock <ArrowUpRight className="w-3 h-3" />
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>

@@ -12,7 +12,7 @@ import { useCreditStore } from "../../store/useCreditStore";
 import LedgerSearchBox from "../ledger/LedgerSearchBox";
 import StockReport from "../stock/StockReport";
 import LedgerEntries from "../ledger/LedgerEntries";
-import ProfitLossReport from "../stock/ProfitLossReoprt";
+import ProfitLossReport from "../stock/ProfitLossReport";
 import StockValuation from "../stock/StockValuation";
 import StockAlertSmart from "../Insights/StockAlert";
 import CashFlowWatch from "../Insights/CashFlow";

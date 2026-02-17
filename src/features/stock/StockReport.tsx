@@ -14,7 +14,8 @@ import {
   AlertTriangle,
   ChevronRight,
   Search,
-  Sparkles
+  Sparkles,
+  Trash2
 } from "lucide-react";
 import AddProductModal from "./AddProductForm";
 import { UNITS } from "../../utils/store";
@@ -62,6 +63,8 @@ export default function StockReport({
   const email = user?.primaryEmailAddress?.emailAddress;
 
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<StockItem | null>(null);
   const [products, setProducts] = useState<any[]>([]);
 
   const summary = data?.summary;
@@ -107,6 +110,34 @@ export default function StockReport({
     slow: "Slow Moving",
     dead: "Dead Stock",
     "never-sold": "Never Sold",
+  };
+
+  const handleDeleteProduct = (stock: StockItem) => {
+    setItemToDelete(stock);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      const res = await axios.delete("/api/products", {
+        params: {
+          email,
+          name: itemToDelete.product,
+          unit: itemToDelete.unit
+        }
+      });
+
+      if (res.data.success) {
+        toast.success("Asset decommissioned");
+        setShowDeleteModal(false);
+        setItemToDelete(null);
+        if (reloadSetter) reloadSetter(Date.now());
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Failed to decommission asset");
+    }
   };
 
   return (
@@ -268,6 +299,15 @@ export default function StockReport({
                           >
                             <Plus size={16} />
                           </ActionButton>
+                          {stock.quantity === 0 && (
+                            <ActionButton
+                              onClick={() => handleDeleteProduct(stock)}
+                              danger
+                              title="Decommission Product"
+                            >
+                              <Trash2 size={16} />
+                            </ActionButton>
+                          )}
                         </div>
                       </td>
                     </motion.tr>
@@ -322,6 +362,20 @@ export default function StockReport({
           />
         )}
       </AnimatePresence>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {showDeleteModal && itemToDelete && (
+          <DeleteConfirmationModal
+            item={itemToDelete}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setItemToDelete(null);
+            }}
+            onConfirm={confirmDelete}
+          />
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 }
@@ -366,11 +420,13 @@ function ActionButton({
   children,
   onClick,
   primary,
+  danger,
   title
 }: {
   children: React.ReactNode;
   onClick: () => void;
   primary?: boolean;
+  danger?: boolean;
   title?: string;
 }) {
   return (
@@ -379,11 +435,74 @@ function ActionButton({
       title={title}
       className={`h-11 w-11 rounded-2xl flex items-center justify-center transition-all duration-300 active:scale-95 shadow-lg ${primary
         ? "bg-slate-900 text-white hover:bg-emerald-600 shadow-slate-900/10"
-        : "bg-white border border-slate-200 text-slate-500 hover:border-emerald-200 hover:text-emerald-600 shadow-slate-200/50"
+        : danger
+          ? "bg-white border border-rose-200 text-rose-500 hover:border-rose-400 hover:text-rose-600 shadow-rose-200/50"
+          : "bg-white border border-slate-200 text-slate-500 hover:border-emerald-200 hover:text-emerald-600 shadow-slate-200/50"
         }`}
     >
       {children}
     </button>
+  );
+}
+
+function DeleteConfirmationModal({
+  item,
+  onClose,
+  onConfirm
+}: {
+  item: StockItem;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden"
+      >
+        <div className="p-8 space-y-6">
+          <div className="w-16 h-16 rounded-[1.5rem] bg-rose-50 flex items-center justify-center text-rose-500 mx-auto">
+            <AlertTriangle className="w-8 h-8" />
+          </div>
+
+          <div className="text-center space-y-2">
+            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Decommission Asset</h3>
+            <p className="text-slate-500 font-medium">
+              Are you sure you want to remove <span className="text-slate-900 font-bold capitalize">{item.product}</span> ({item.unit})? This strategic decision cannot be reversed.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 pt-2">
+            <button
+              onClick={onConfirm}
+              className="w-full h-14 rounded-2xl bg-rose-600 text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-rose-700 transition-all active:scale-[0.98] shadow-lg shadow-rose-900/10"
+            >
+              Confirm Decommissioning
+            </button>
+            <button
+              onClick={onClose}
+              className="w-full h-14 rounded-2xl bg-slate-50 text-slate-500 font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-100 transition-all active:scale-[0.98]"
+            >
+              Abeyance (Cancel)
+            </button>
+          </div>
+        </div>
+
+        <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Permanent Registry Deletion</span>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 

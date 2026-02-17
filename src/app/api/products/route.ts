@@ -112,3 +112,65 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function DELETE(request: NextRequest) {
+  await connect();
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
+    const name = searchParams.get("name");
+    const unit = searchParams.get("unit");
+
+    if (!email || !name || !unit) {
+      return NextResponse.json(
+        { error: "Email, name, and unit are required" },
+        { status: 400 }
+      );
+    }
+
+    const normalizedName = name.trim().toLowerCase();
+
+    // 1. Check if product exists and check quantity
+    const product = await Products.findOne({ email, name: normalizedName, unit });
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (product.quantity > 0) {
+      return NextResponse.json(
+        { error: "Only products with zero quantity can be removed" },
+        { status: 400 }
+      );
+    }
+
+    // 2. Check if product is used in any composite product's recipe
+    const dependency = await Products.findOne({
+      email,
+      "recipe.productId": product._id
+    });
+
+    if (dependency) {
+      return NextResponse.json(
+        { error: `Cannot delete. Product is an ingredient in composite product: ${dependency.name}` },
+        { status: 400 }
+      );
+    }
+
+    // 3. Perform deletion
+    await Products.deleteOne({ _id: product._id });
+
+    return NextResponse.json({
+      success: true,
+      message: "Strategic asset decommissioned successfully",
+    });
+
+  } catch (error) {
+    console.error("Product delete error:", error);
+    return NextResponse.json(
+      { error: "Failed to decommission product" },
+      { status: 500 }
+    );
+  }
+}
+

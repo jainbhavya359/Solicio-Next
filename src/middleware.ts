@@ -2,7 +2,8 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 
 const isPrivateRoute = createRouteMatcher([
-  '/profile','/loan', 'DashBoard'
+  '/profile', '/loan', '/dashboard', '/dashboard/loan-licenses', '/dashboard/loan-licenses/add', '/dashboard/loan-licenses/edit'
+  , '/businessInsights', '/inventory', '/invoice', '/bill', '/business', '/transactions', '/licenses'
 ])
 
 export default clerkMiddleware(async (auth, req) => {
