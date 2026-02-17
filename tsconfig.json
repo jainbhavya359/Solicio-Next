@@ -25,23 +25,18 @@
     "baseUrl": ".",
     "paths": {
       "mongoose": [
-        "./node_modules/mongoose/types/index.d.ts",
         "./node_modules/mongoose"
       ],
       "@clerk/nextjs": [
-        "./node_modules/@clerk/nextjs/dist/types/index.d.ts",
         "./node_modules/@clerk/nextjs"
       ],
       "lucide-react": [
-        "./node_modules/lucide-react/dist/lucide-react.d.ts",
         "./node_modules/lucide-react"
       ],
       "react-hot-toast": [
-        "./node_modules/react-hot-toast/dist/index.d.ts",
         "./node_modules/react-hot-toast"
       ],
       "recharts": [
-        "./node_modules/recharts/types/index.d.ts",
         "./node_modules/recharts"
       ],
       "@/*": [
