@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, Package, ChevronDown, Sparkles, Layers } from "lucide-react";
 import { useRouter } from "next/navigation";
-import AddProductModal from "./AddProduct";
+import AddProductModal from "./AddProductForm";
 import DocumentModal from "../documents/DocumentModal";
 import { UNITS } from "../../utils/store";
 

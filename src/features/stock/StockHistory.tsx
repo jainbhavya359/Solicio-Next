@@ -1,6 +1,25 @@
 "use client";
 
+import { motion } from "framer-motion";
+import {
+  History,
+  TrendingUp,
+  ShoppingBag,
+  ArrowRight,
+  Sparkles,
+  Layers,
+  Activity
+} from "lucide-react";
 import StockHistoryTable from "./StockHistoryTable";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  },
+} as any;
 
 export default function StockHistory({
   data,
@@ -9,10 +28,11 @@ export default function StockHistory({
 }) {
   if (!data) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white p-8">
-        <div className="flex justify-center py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
-        </div>
+      <section className="rounded-[2.5rem] border border-slate-200 bg-white p-12 shadow-sm border-dashed flex flex-col items-center justify-center min-h-[400px]">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-100 border-t-emerald-600 mb-4" />
+        <p className="text-xs font-black text-slate-400 uppercase tracking-widest">
+          Synchronizing Audit Logs...
+        </p>
       </section>
     );
   }
@@ -20,32 +40,137 @@ export default function StockHistory({
   const purchases = data.filter((r: any) => r.voucher === "Purchase");
   const sales = data.filter((r: any) => r.voucher === "Sale");
 
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-slate-900">
-          Stock History
-        </h2>
-        <p className="text-slate-500">
-          Purchases and sales recorded in your inventory
-        </p>
-      </div>
+  const totalPurchaseValue = purchases.reduce((sum, r) => sum + (r.quantity * r.price), 0);
+  const totalSaleValue = sales.reduce((sum, r) => sum + (r.quantity * r.price), 0);
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  return (
+    <div className="space-y-12 font-sans">
+      {/* HERO HEADER */}
+      <motion.div
+        variants={fadeInUp}
+        initial="hidden"
+        animate="visible"
+        className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+      >
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
+            <History className="w-3 h-3" />
+            Audit Protocol
+          </div>
+          <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter">
+            Fiscal <span className="text-emerald-600">Manifest</span>
+          </h2>
+          <p className="text-lg text-slate-500 mt-2 max-w-2xl font-medium">
+            A high-fidelity ledger tracing every asset deployment and revenue event within your inventory ecosystem.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-emerald-500/5 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+          <Activity className="w-5 h-5 text-emerald-500 relative z-10" />
+          <div className="relative z-10">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Log Density</p>
+            <p className="text-base font-black text-slate-900 mt-1">{data.length} Transactions</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* KPI STRIP */}
+      <motion.div
+        variants={fadeInUp}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
+        <Kpi
+          label="Total Acquisition"
+          value={`₹${totalPurchaseValue.toLocaleString()}`}
+          icon={ShoppingBag}
+          variant="slate"
+          description="Inbound asset value"
+        />
+        <Kpi
+          label="Total Deployment"
+          value={`₹${totalSaleValue.toLocaleString()}`}
+          icon={TrendingUp}
+          variant="emerald"
+          description="Outbound revenue value"
+        />
+        <Kpi
+          label="Log Entries"
+          value={data.length}
+          icon={Layers}
+          variant="slate"
+          description="Total records processed"
+        />
+        <Kpi
+          label="Audit Integrity"
+          value="Verified"
+          icon={Sparkles}
+          variant="emerald"
+          description="Neural-ledger verified"
+        />
+      </motion.div>
+
+      {/* TABLES SECTION */}
+      <motion.section
+        variants={fadeInUp}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+      >
         <StockHistoryTable
-          title="Purchases"
-          subtitle="Stock added to inventory"
+          title="Inbound Acquisitions"
+          subtitle="Stock successfully added to strategic reserves"
           rows={purchases}
           type="Purchase"
         />
         <StockHistoryTable
-          title="Sales"
-          subtitle="Stock sold to customers"
+          title="Outbound Deployments"
+          subtitle="Strategic assets successfully delivered to clients"
           rows={sales}
           type="Sale"
         />
+      </motion.section>
+    </div>
+  );
+}
+
+function Kpi({
+  label,
+  value,
+  icon: Icon,
+  variant = "slate",
+  description
+}: {
+  label: string;
+  value: string | number;
+  icon: any;
+  variant?: "emerald" | "slate";
+  description?: string;
+}) {
+  return (
+    <div className="group rounded-3xl border border-slate-100 p-6 bg-white transition-all hover:shadow-xl hover:border-emerald-200 cursor-default relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-full -mr-12 -mt-12 group-hover:bg-emerald-50 transition-colors" />
+
+      <div className="relative z-10 flex items-center justify-between mb-4">
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
+        <div className={`p-2.5 rounded-2xl ${variant === 'emerald' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-slate-50 text-slate-400'} transition-all group-hover:scale-110`}>
+          <Icon className="w-5 h-5" />
+        </div>
       </div>
-    </section>
+
+      <div className="relative z-10">
+        <p className={`text-3xl font-black tracking-tighter leading-none ${variant === 'emerald' ? 'text-emerald-600' : 'text-slate-900'}`}>
+          {value}
+        </p>
+        {description && (
+          <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 

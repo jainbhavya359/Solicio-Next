@@ -97,7 +97,21 @@ export async function GET(req: NextRequest) {
     }
 
     /* ---------------- DAILY SALES AGGREGATION ---------------- */
-    const rawDaily = await LedgerEntry.aggregate([
+    interface DailySalesAggregationResult {
+      _id: { day: string };
+      sales: number;
+      qty: number;
+      cost: number;
+      profit: number;
+    }
+
+    interface StockItem {
+      quantity: number;
+      price: number;
+      email: string;
+    }
+
+    const rawDaily: DailySalesAggregationResult[] = await LedgerEntry.aggregate([
       {
         $match: {
           email,
@@ -175,9 +189,9 @@ export async function GET(req: NextRequest) {
 
 
     /* ---------------- SUMMARY ---------------- */
-    const totalSales = timeline.reduce((s, d) => s + d.sales, 0);
-    const totalQty = timeline.reduce((s, d) => s + d.qty, 0);
-    const totalProfit = timeline.reduce((s, d) => s + d.profit, 0);
+    const totalSales = timeline.reduce((s: number, d) => s + d.sales, 0);
+    const totalQty = timeline.reduce((s: number, d) => s + d.qty, 0);
+    const totalProfit = timeline.reduce((s: number, d) => s + d.profit, 0);
 
     const avgDailySales = totalSales / days;
 
@@ -185,11 +199,11 @@ export async function GET(req: NextRequest) {
     const mid = Math.floor(timeline.length / 2);
     const firstHalfSales = timeline
       .slice(0, mid)
-      .reduce((s, d) => s + d.sales, 0);
+      .reduce((s: number, d) => s + d.sales, 0);
 
     const secondHalfSales = timeline
       .slice(mid)
-      .reduce((s, d) => s + d.sales, 0);
+      .reduce((s: number, d) => s + d.sales, 0);
 
     const growthPct =
       firstHalfSales > 0
@@ -206,7 +220,7 @@ export async function GET(req: NextRequest) {
 
     const variance =
       salesValues.reduce(
-        (s, v) => s + Math.pow(v - avg, 2),
+        (s: number, v) => s + Math.pow(v - avg, 2),
         0
       ) / salesValues.length;
 
@@ -221,10 +235,10 @@ export async function GET(req: NextRequest) {
       totalQty > 0 ? totalProfit / totalQty : 0;
 
     /* ---------------- INVENTORY IMPACT ---------------- */
-    const stock = await Stock.find({ email }).lean();
+    const stock = (await Stock.find({ email }).lean()) as unknown as StockItem[];
 
     const stockValue = stock.reduce(
-      (s, i) => s + i.quantity * i.price,
+      (s: number, i) => s + i.quantity * i.price,
       0
     );
 

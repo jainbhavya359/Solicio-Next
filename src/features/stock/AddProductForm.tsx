@@ -209,7 +209,7 @@ export default function AddProductModal({
               {/* PRICE */}
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
-                  Projected Selling Valutaion
+                  Projected Selling Valuta
                 </label>
                 <div className="relative">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</div>

@@ -16,7 +16,7 @@ import {
   Search,
   Sparkles
 } from "lucide-react";
-import AddProductModal from "./AddProduct";
+import AddProductModal from "./AddProductForm";
 import { UNITS } from "../../utils/store";
 
 // 1. Define the shape of a single Stock item
