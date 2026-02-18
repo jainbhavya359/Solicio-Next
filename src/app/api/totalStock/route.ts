@@ -1,5 +1,6 @@
 import connect from "@/src/dbConfig/dbConnection";
-import { TotalStock } from "@/src/models/totalStockModel";
+import { Products } from "@/src/models/ProductModel"; // Switch to Products model
+import { calculateCompositeStock } from "@/src/utils/compositeStock";
 import { NextRequest, NextResponse } from "next/server";
 
 const DAY = 86400000;
@@ -18,7 +19,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const stocks = await TotalStock.find({ email }).lean();
+    // Fetch from Products instead of TotalStock
+    const products = await Products.find({ email }).lean();
 
     const now = Date.now();
 
@@ -33,10 +35,29 @@ export async function GET(req: NextRequest) {
 
     let slowValue = 0;
 
-    const breakdown = stocks.map((s) => {
-      const value = s.quantity * s.price;
+    // Process all products (handling composite stock if needed)
+    const breakdown = await Promise.all(products.map(async (p) => {
+      // Calculate quantity for composite products if needed, though for total stock report 
+      // usually we want the raw quantity or computed. Inventory API does computed.
+      // Let's stick to simple quantity for consistency with previous TotalStock logic, 
+      // OR better, copy logic from inventory API for consistency.
+      // Inventory API does:
+      /*
+         const quantity = p.productType === "composite"
+            ? await calculateCompositeStock(p, null)
+            : p.quantity;
+      */
+
+      const quantity = p.productType === "composite"
+        ? await calculateCompositeStock(p, null)
+        : p.quantity;
+
+      // Map sellingPrice to price (TotalStock used 'price', Product uses 'sellingPrice')
+      const price = p.sellingPrice ?? 0;
+      const value = quantity * price;
+
       totalStockValue += value;
-      totalQuantity += s.quantity;
+      totalQuantity += quantity;
 
       let daysSinceLastSale: number | null = null;
       let category:
@@ -46,9 +67,9 @@ export async function GET(req: NextRequest) {
         | "dead"
         | "never-sold" = "never-sold";
 
-      if (s.lastSaleAt) {
+      if (p.lastSaleAt) {
         daysSinceLastSale = Math.floor(
-          (now - new Date(s.lastSaleAt).getTime()) / DAY
+          (now - new Date(p.lastSaleAt).getTime()) / DAY
         );
 
         if (daysSinceLastSale <= 7) {
@@ -72,15 +93,15 @@ export async function GET(req: NextRequest) {
       }
 
       return {
-        product: s.name,
-        unit: s.unit,
-        quantity: s.quantity,
-        price: s.price,
+        product: p.name,
+        unit: p.unit,
+        quantity: quantity,
+        price: price,
         stockValue: value,
         daysSinceLastSale,
         category,
       };
-    });
+    }));
 
     const productCount = breakdown.length;
     const slowStockPct =

@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       date: txDate,
       session,
     });
-    
+
     /* 📦 Stock history */
     await Stock.create(
       [{
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       }],
       { session }
     );
-    
+
     /* 📒 Ledger */
     const [ledger] = await LedgerEntry.create(
       [{
@@ -65,23 +65,23 @@ export async function POST(req: NextRequest) {
         date: txDate,
         voucherType: "Purchase",
         voucherNo,
-        
+
         partyName: party?.name || "Cash",
         partyType: "Supplier",
 
         itemName: product.name,
         unit: product.unit,
-        
+
         debitQty: product.quantity,
         creditQty: 0,
-        
+
         rate: product.rate,
         amount,
         narration: meta?.notes || "",
       }],
       { session }
     );
-    
+
     /* 📦 FIFO Layer */
     await StockLayer.create(
       [{
@@ -96,14 +96,14 @@ export async function POST(req: NextRequest) {
       }],
       { session }
     );
-    
+
     /* 📦 Product quantity */
     await Products.updateOne(
       { email, name: product.name, unit: product.unit },
       { $inc: { quantity: product.quantity }, $set: { purchasePrice: product.rate } },
       { session }
     );
-    
+
     /* 📊 TotalStock */
     await TotalStock.findOneAndUpdate(
       { email, name: product.name, unit: product.unit },
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
 
     /* 🏢 Company snapshot */
     const company = await CompanyProfile.findOne({ email }).lean();
-    
+
     /* 📄 BILL DOCUMENT */
     const gst = computeGST({
       amount: product.quantity * product.rate,
@@ -155,8 +155,8 @@ export async function POST(req: NextRequest) {
         subtotal: product.quantity * product.rate,
         tax: gst.tax,
         taxBreakup: gst.type === "NONE"
-        ? { type: "NONE" }
-        : {
+          ? { type: "NONE" }
+          : {
             type: gst.type,
             ...gst.breakup,
           },
@@ -179,20 +179,20 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest){
-    try{
-        const { searchParams } = new URL(request.url);
-        const email = searchParams.get("email");
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
 
-        if(!email){
-            return NextResponse.json({error: "No email Found"},{status: 400});
-        }
-
-        const Stocks = await Stock.find({email}).sort({date: -1, createdAt: -1});
-
-        return NextResponse.json(Stocks);
-    }catch(error){
-        console.log("Error: ",error);
-        return NextResponse.json({error: error}, {status: 500});
+    if (!email) {
+      return NextResponse.json({ error: "No email Found" }, { status: 400 });
     }
+
+    const Stocks = await Stock.find({ email }).sort({ date: -1, createdAt: -1 });
+
+    return NextResponse.json(Stocks);
+  } catch (error) {
+    console.log("Error: ", error);
+    return NextResponse.json({ error: error }, { status: 500 });
+  }
 }
