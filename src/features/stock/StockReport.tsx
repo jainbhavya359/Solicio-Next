@@ -144,30 +144,37 @@ export default function StockReport({
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-7xl mx-auto p-6 space-y-12 font-outfit"
+      className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-12 font-outfit"
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-row items-center justify-between gap-4 sm:gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider mb-2 sm:mb-3">
             <Layers className="w-3 h-3" />
             Inventory Control
           </div>
-          <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
-            Stock <span className="text-emerald-600">Report</span>
+          <div className="hidden sm:block">
+            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
+              Stock <span className="text-emerald-600">Report</span>
+            </h2>
+            <p className="text-lg text-slate-500 mt-2 max-w-2xl font-medium">
+              Real-time monitoring of your stock health, capital exposure, and turnover efficiency.
+            </p>
+          </div>
+          {/* Mobile Title */}
+          <h2 className="block sm:hidden text-2xl font-bold text-slate-900 tracking-tight">
+            Stock Report
           </h2>
-          <p className="text-lg text-slate-500 mt-2 max-w-2xl font-medium">
-            Real-time monitoring of your stock health, capital exposure, and turnover efficiency.
-          </p>
         </div>
 
         <button
           onClick={() => setShowAddProduct(true)}
-          className="group relative flex items-center justify-center gap-3 px-8 h-16 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase tracking-[0.25em] shadow-2xl shadow-slate-900/20 hover:bg-emerald-600 transition-all active:scale-95 overflow-hidden"
+          className="group relative flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 h-12 sm:h-16 rounded-xl sm:rounded-2xl bg-slate-900 text-white font-black text-[10px] sm:text-xs uppercase tracking-[0.1em] sm:tracking-[0.25em] shadow-xl shadow-slate-900/20 hover:bg-emerald-600 transition-all active:scale-95 overflow-hidden"
         >
           <span className="relative z-10 flex items-center gap-2">
-            <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-            New Strategic Asset
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:rotate-90" />
+            <span className="hidden sm:inline">New Strategic Asset</span>
+            <span className="inline sm:hidden">Add Product</span>
           </span>
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         </button>
@@ -175,41 +182,42 @@ export default function StockReport({
 
       {/* KPI STRIP */}
       {summary && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           <Kpi
             label="Total Stock Value"
             value={`₹${summary.totalStockValue.toLocaleString()}`}
             icon={TrendingUp}
             variant="emerald"
-            description="Working capital locked"
+            description="Locked Capital"
           />
           <Kpi
             label="Active Products"
             value={summary.productCount}
             icon={Package}
             variant="slate"
-            description="Unique SKUs in stock"
+            description="Unique SKUs"
           />
           <Kpi
             label="Total Units"
             value={summary.totalQuantity.toLocaleString()}
             icon={Layers}
             variant="slate"
-            description="Physical units count"
+            description="Physical Count"
           />
           <Kpi
             label="At Risk"
             value={`${summary.slowStockPct}%`}
             icon={AlertTriangle}
             variant="amber"
-            description="Slow moving capital"
+            description="Slow Moving"
           />
         </div>
       )}
 
       {/* TABLE */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-xl sm:shadow-2xl shadow-slate-200/50 overflow-hidden">
+        {/* DESKTOP TABLE */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
@@ -318,13 +326,81 @@ export default function StockReport({
           </table>
         </div>
 
+        {/* MOBILE LIST VIEW */}
+        <div className="block sm:hidden">
+          <div className="divide-y divide-slate-100">
+            {items.map((stock, idx) => (
+              <motion.div
+                key={`mob-${stock.product}-${stock.unit}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.02 }}
+                className="p-4"
+              >
+                {/* Row 1: Header & Status */}
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0">
+                      <Package size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm capitalize leading-tight">{stock.product}</h4>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stock.unit} • ₹{stock.price}</p>
+                    </div>
+                  </div>
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${stock.category === "fast" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : stock.category === "warning" ? "bg-amber-50 border-amber-100 text-amber-600" : "bg-rose-50 border-rose-100 text-rose-500"}`}>
+                    {statusMap[stock.category] || stock.category}
+                  </span>
+                </div>
+
+                {/* Row 2: Metrics Grid */}
+                <div className="grid grid-cols-2 gap-2 mb-3 pl-13">
+                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100/50">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Stock Level</p>
+                    <p className="text-sm font-bold text-slate-800">{stock.quantity} <span className="text-[10px] text-slate-400 font-medium">{stock.unit}</span></p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100/50">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Value</p>
+                    <p className="text-sm font-bold text-emerald-600">₹{stock.stockValue.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* Row 3: Actions */}
+                <div className="flex items-center gap-2 pl-13">
+                  <button
+                    onClick={() => adjustQty(stock, -1)}
+                    className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50"
+                  >
+                    <Minus size={14} /> Sale
+                  </button>
+                  <button
+                    onClick={() => adjustQty(stock, 1)}
+                    className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg bg-slate-900 text-white font-bold text-xs hover:bg-slate-800"
+                  >
+                    <Plus size={14} /> Restock
+                  </button>
+                  {stock.quantity === 0 && (
+                    <button
+                      onClick={() => handleDeleteProduct(stock)}
+                      className="h-9 w-9 flex items-center justify-center rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+
         {!loading && items.length === 0 && (
-          <div className="py-32 text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-slate-50 mb-6 text-slate-300 ring-1 ring-slate-100">
-              <Search size={40} />
+          <div className="py-20 sm:py-32 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-[2rem] bg-slate-50 mb-6 text-slate-300 ring-1 ring-slate-100">
+              <Search size={32} />
             </div>
             <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No active inventory detected</p>
-            <p className="text-slate-300 text-[10px] uppercase tracking-[0.2em] mt-2">Begin provisioning by clicking 'New Strategic Asset'</p>
+            <p className="text-slate-300 text-[10px] uppercase tracking-[0.2em] mt-2">Begin provisioning by clicking 'Add Product'</p>
           </div>
         )}
       </div>
@@ -401,16 +477,16 @@ function Kpi({
   };
 
   return (
-    <div className={`group rounded-[2rem] border p-8 bg-white transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-emerald-200 cursor-default border-slate-100`}>
-      <div className="flex items-center justify-between mb-6">
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">{label}</span>
-        <div className={`p-3 rounded-2xl ${styles[variant]} transition-all duration-500 group-hover:bg-slate-900 group-hover:text-white`}>
-          <Icon className="w-6 h-6" />
+    <div className={`group rounded-2xl sm:rounded-[2rem] border p-4 sm:p-8 bg-white transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-emerald-200 cursor-default border-slate-100`}>
+      <div className="flex items-center justify-between mb-3 sm:mb-6">
+        <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">{label}</span>
+        <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl ${styles[variant]} transition-all duration-500 group-hover:bg-slate-900 group-hover:text-white`}>
+          <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
         </div>
       </div>
-      <p className="text-4xl font-extrabold text-slate-900 tracking-tightest">{value}</p>
+      <p className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tightest">{value}</p>
       {description && (
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 mt-2 line-clamp-1">{description}</p>
+        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300 mt-1 sm:mt-2 line-clamp-1">{description}</p>
       )}
     </div>
   );

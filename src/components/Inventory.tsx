@@ -108,18 +108,19 @@ export default function Inventory() {
         </motion.div>
 
         {/* STRATEGIC COMMAND CENTER - Action Bar */}
-        <div className="sticky bottom-8 z-50 flex justify-center w-full pointer-events-none">
+        <div className="sticky bottom-4 sm:bottom-8 z-50 flex justify-center w-full pointer-events-none px-4 sm:px-0">
           <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-2.5 shadow-2xl flex items-center gap-2 pointer-events-auto"
+            className="bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2.5rem] p-1.5 sm:p-2.5 shadow-2xl flex items-center gap-1 sm:gap-2 pointer-events-auto max-w-full overflow-x-auto"
           >
             <ActionButton
               active={activeTab === "purchase"}
               icon={<Sparkles className="w-4 h-4" />}
               onClick={() => setActiveTab("purchase")}
             >
-              Dispatch Purchase
+              <span className="hidden sm:inline">Dispatch Purchase</span>
+              <span className="sm:hidden">Buy</span>
             </ActionButton>
 
             <ActionButton
@@ -127,10 +128,11 @@ export default function Inventory() {
               icon={<Zap className="w-4 h-4" />}
               onClick={() => setActiveTab("sale")}
             >
-              Execute Sale
+              <span className="hidden sm:inline">Execute Sale</span>
+              <span className="sm:hidden">Sell</span>
             </ActionButton>
 
-            <div className="w-px h-8 bg-white/10 mx-1" />
+            <div className="w-px h-6 sm:h-8 bg-white/10 mx-0.5 sm:mx-1" />
 
             <ActionButton
               variant="secondary"
@@ -138,10 +140,11 @@ export default function Inventory() {
               icon={<Layout className="w-4 h-4" />}
               onClick={() => setActiveTab("report")}
             >
-              Inventory Report
+              <span className="hidden sm:inline">Inventory Report</span>
+              <span className="sm:hidden">Report</span>
             </ActionButton>
 
-            <div className="w-px h-8 bg-white/10 mx-1" />
+            <div className="w-px h-6 sm:h-8 bg-white/10 mx-0.5 sm:mx-1" />
 
             <ActionButton
               variant="secondary"
@@ -149,7 +152,8 @@ export default function Inventory() {
               icon={<FileText className="w-4 h-4" />}
               onClick={() => setShowFinancialModal(true)}
             >
-              Financial Audit
+              <span className="hidden sm:inline">Financial Audit</span>
+              <span className="sm:hidden">Audit</span>
             </ActionButton>
           </motion.div>
         </div>
@@ -255,7 +259,7 @@ function ActionButton({
     <button
       onClick={onClick}
       className={`
-        flex items-center gap-2.5 px-6 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300
+        flex items-center gap-1.5 sm:gap-2.5 px-3 py-2.5 sm:px-6 sm:py-3.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all duration-300 whitespace-nowrap
         ${active
           ? variant === "primary" ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/40" : "bg-white text-slate-900 shadow-lg shadow-white/20"
           : "text-slate-400 hover:text-white hover:bg-white/5"

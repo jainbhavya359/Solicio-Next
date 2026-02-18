@@ -64,10 +64,10 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
   const hasAlerts = data.alerts.count > 0;
 
   return (
-    <section className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
-      {/* HEADER */}
+    <section className="bg-white rounded-none sm:rounded-[2rem] sm:border border-slate-200 sm:shadow-sm overflow-visible sm:overflow-hidden">
+      {/* HEADER - Hidden on mobile, visible on desktop */}
       <div
-        className={`p-6 flex items-center justify-between transition-colors ${open ? "bg-slate-50/50 border-b border-slate-100" : ""}`}
+        className={`hidden sm:flex p-6 items-center justify-between transition-colors ${open ? "bg-slate-50/50 border-b border-slate-100" : ""}`}
       >
         <div className="flex items-center gap-4">
           <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-colors ${hasAlerts ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
@@ -75,7 +75,7 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
           </div>
 
           <div>
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-lg font-bold text-slate-900 leading-tight">
               Inventory Signals
             </h3>
             <p className="text-sm font-medium text-slate-500">
@@ -103,97 +103,150 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden"
+            className="overflow-visible sm:overflow-hidden"
           >
-            <div className="p-6 space-y-4">
+            <div className="p-0 sm:p-6 space-y-4 sm:space-y-4">
               {hasAlerts ? (
-                data.alerts.products.map((p, i) => {
-                  const style = severityMap[p.severity];
-                  const percent = p.daysLeft === null ? 0 : Math.max(5, Math.min(100, (1 - (p.daysLeft / 30)) * 100));
-
-                  return (
-                    <motion.div
-                      key={`${p.product}-${p.unit}`}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="group bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md hover:border-amber-200 transition-all cursor-default"
-                    >
-                      <div className="flex gap-4">
-                        <div className={`w-12 h-12 rounded-xl ${style.iconBg} flex items-center justify-center shrink-0`}>
-                          <Package className={`w-6 h-6 ${style.iconColor}`} />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h4 className="font-bold text-slate-900 truncate">
-                                {p.product}
-                              </h4>
-                              <p className="text-xs font-medium text-slate-400">{p.unit}</p>
+                <>
+                  {/* MOBILE LAYOUT (Compact 2x2 GRID) */}
+                  <div className="block sm:hidden space-y-4">
+                    {data.alerts.products.map((p, i) => {
+                      const style = severityMap[p.severity];
+                      const percent = p.daysLeft === null ? 0 : Math.max(5, Math.min(100, (1 - (p.daysLeft / 30)) * 100));
+                      return (
+                        <div
+                          key={`mobile-${p.product}-${p.unit}`}
+                          className="bg-white rounded-xl border border-slate-100 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]"
+                        >
+                          {/* Top: Product + Badge */}
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-lg ${style.iconBg} flex items-center justify-center shrink-0`}>
+                                <Package className={`w-4 h-4 ${style.iconColor}`} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2">
+                                  {p.product}
+                                </h4>
+                                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{p.unit}</p>
+                              </div>
                             </div>
-                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${style.chip}`}>
+                            <span className={`ml-2 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${style.chip}`}>
                               {p.severity}
                             </span>
                           </div>
 
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-                            <Metric label="Days Remaining" value={p.daysLeft ?? "—"} color={style.text} />
-                            <Metric label="Current Stock" value={p.quantity} />
-                            <Metric label="Daily Velocity" value={`${p.avgDailySales.toFixed(1)}/d`} subgroup />
-                            <div className="text-right">
+                          {/* Middle: Clean Metrics Grid */}
+                          <div className="grid grid-cols-2 gap-y-3 gap-x-4 mb-4">
+                            <Metric label="Days Left" value={p.daysLeft ?? "—"} color={style.text} />
+                            <Metric label="In Stock" value={p.quantity} />
+                            <Metric label="Velocity" value={`${p.avgDailySales.toFixed(1)}/d`} subgroup />
+                            <div>
                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                              <p className="text-xs font-bold text-slate-700">Refill Suggested</p>
+                              <p className="text-xs font-bold text-slate-700 leading-tight">Refill Now</p>
                             </div>
                           </div>
 
-                          {/* Progress Line */}
-                          <div className="relative h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percent}%` }}
-                              transition={{ duration: 1, delay: 0.2 }}
+                          {/* Bottom: Progress Bar */}
+                          <div className="relative h-1 w-full bg-slate-100 rounded-full overflow-hidden mb-2">
+                            <div
+                              style={{ width: `${percent}%` }}
                               className={`absolute inset-y-0 left-0 rounded-full ${style.bar}`}
                             />
                           </div>
-
-                          <p className="mt-3 text-xs font-medium text-slate-500 flex items-center gap-1.5">
-                            <AlertTriangle className="w-3 h-3 text-amber-500" />
+                          <p className="text-[10px] font-medium text-slate-400 flex items-center gap-1.5">
+                            <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />
                             {p.reason}
                           </p>
                         </div>
-                      </div>
-                    </motion.div>
-                  );
-                })
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="py-12 flex flex-col items-center justify-center text-center"
-                >
-                  <div className="w-20 h-20 rounded-[2.5rem] bg-emerald-50 text-emerald-500 flex items-center justify-center mb-6">
-                    <CheckCircle className="w-10 h-10" />
+                      );
+                    })}
                   </div>
-                  <h4 className="text-xl font-bold text-slate-900 mb-2">Inventory is Healthy</h4>
-                  <p className="text-slate-500 max-w-xs mx-auto">
-                    All your tracked products have sufficient stock levels based on current sales velocity.
-                  </p>
-                </motion.div>
+
+                  {/* DESKTOP LAYOUT (Horizontal) */}
+                  <div className="hidden sm:block space-y-4">
+                    {data.alerts.products.map((p, i) => {
+                      const style = severityMap[p.severity];
+                      const percent = p.daysLeft === null ? 0 : Math.max(5, Math.min(100, (1 - (p.daysLeft / 30)) * 100));
+                      return (
+                        <motion.div
+                          key={`desktop-${p.product}-${p.unit}`}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.08 }}
+                          className="group bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md hover:border-amber-200 transition-all cursor-default"
+                        >
+                          <div className="flex gap-4">
+                            <div className={`w-12 h-12 rounded-xl ${style.iconBg} flex items-center justify-center shrink-0`}>
+                              <Package className={`w-6 h-6 ${style.iconColor}`} />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <h4 className="font-bold text-slate-900 truncate">
+                                    {p.product}
+                                  </h4>
+                                  <p className="text-xs font-medium text-slate-400">{p.unit}</p>
+                                </div>
+                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${style.chip}`}>
+                                  {p.severity}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-4 gap-4 mb-4">
+                                <Metric label="Days Remaining" value={p.daysLeft ?? "—"} color={style.text} />
+                                <Metric label="Current Stock" value={p.quantity} />
+                                <Metric label="Daily Velocity" value={`${p.avgDailySales.toFixed(1)}/d`} subgroup />
+                                <div className="text-right">
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                  <p className="text-xs font-bold text-slate-700">Refill Suggested</p>
+                                </div>
+                              </div>
+
+                              {/* Progress Line */}
+                              <div className="relative h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${percent}%` }}
+                                  transition={{ duration: 1, delay: 0.2 }}
+                                  className={`absolute inset-y-0 left-0 rounded-full ${style.bar}`}
+                                />
+                              </div>
+
+                              <p className="mt-3 text-xs font-medium text-slate-500 flex items-center gap-1.5">
+                                <AlertTriangle className="w-3 h-3 text-amber-500" />
+                                {p.reason}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="py-8 flex flex-col items-center justify-center text-center">
+                  {/* Empty state simplified for mobile */}
+                  <div className="w-16 h-16 rounded-[2rem] bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4">
+                    <CheckCircle className="w-8 h-8" />
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-900">Inventory Healthy</h4>
+                </div>
               )}
 
-              {/* SAFE PRODUCTS SUMMARY */}
+              {/* SAFE PRODUCTS SUMMARY - Compact */}
               {hasAlerts && data.noAlerts.length > 0 && (
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-wider">
-                    <CheckCircle className="h-4 w-4" />
-                    {data.noAlerts.length} other products are safe
+                <div className="pt-2 sm:pt-4 border-t border-slate-100/50 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider">
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                    {data.noAlerts.length} Products Safe
                   </div>
                   <Link
                     href="/inventory"
                     className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
                   >
-                    Manage Stock <ArrowUpRight className="w-3 h-3" />
+                    Manage <ArrowUpRight className="w-3 h-3" />
                   </Link>
                 </div>
               )}

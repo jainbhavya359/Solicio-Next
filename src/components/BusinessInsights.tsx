@@ -72,7 +72,7 @@ export default function BusinessInsights() {
 
       <Toaster />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 space-y-20">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-24 space-y-12 sm:space-y-20">
 
         {/* HERO HEADER */}
         <motion.div
@@ -84,17 +84,17 @@ export default function BusinessInsights() {
             <Activity className="w-3 h-3" />
             Neural Analysis Center
           </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tightest leading-none">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tightest leading-none">
             Business <span className="text-emerald-600">Insights</span>
           </h1>
-          <p className="mt-6 text-xl text-slate-600 leading-relaxed font-medium">
+          <p className="mt-4 sm:mt-6 text-lg sm:text-xl text-slate-600 leading-relaxed font-medium">
             Strategic real-time view of operation risks, inventory health, and neural cash exposure forecasting.
           </p>
         </motion.div>
 
         {/* INSIGHTS GRID */}
         {!loadingSnapshot && snapshot && (
-          <div className="grid gap-12 grid-cols-1">
+          <div className="grid gap-8 sm:gap-12 grid-cols-1">
 
             <InsightCard title="Dynamic Stock Alerts" icon={<Activity className="w-4 h-4" />}>
               <StockAlertSmart data={snapshot.lowStock} />
@@ -118,46 +118,49 @@ export default function BusinessInsights() {
         )}
 
         {/* STRATEGIC ACTION BAR */}
-        <div className="sticky bottom-8 z-30 flex justify-center w-full pointer-events-none">
+        <div className="sticky bottom-4 sm:bottom-8 z-30 flex justify-center w-full pointer-events-none">
           <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-2.5 shadow-2xl flex items-center gap-2 pointer-events-auto"
+            className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-full sm:rounded-[2.5rem] p-1.5 sm:p-2.5 shadow-2xl flex items-center gap-1.5 sm:gap-2 pointer-events-auto"
           >
             <ActionButton
-              icon={<Sparkles className="w-4 h-4" />}
+              icon={<Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               onClick={() => {
                 setNewPurchase(true);
                 setNewSale(false);
                 setViewStock(false);
               }}
             >
-              Add Purchase
+              <span className="hidden sm:inline">Add Purchase</span>
+              <span className="inline sm:hidden">Buy</span>
             </ActionButton>
 
             <ActionButton
-              icon={<Zap className="w-4 h-4" />}
+              icon={<Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               onClick={() => {
                 setNewSale(true);
                 setNewPurchase(false);
                 setViewStock(false);
               }}
             >
-              Record Sale
+              <span className="hidden sm:inline">Record Sale</span>
+              <span className="inline sm:hidden">Sell</span>
             </ActionButton>
 
-            <div className="w-px h-8 bg-white/10 mx-1" />
+            <div className="w-px h-6 sm:h-8 bg-white/10 mx-0.5 sm:mx-1" />
 
             <ActionButton
               variant="secondary"
-              icon={<Layout className="w-4 h-4" />}
+              icon={<Layout className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               onClick={() => {
                 setViewStock(true);
                 setNewPurchase(false);
                 setNewSale(false);
               }}
             >
-              Inventory Map
+              <span className="hidden sm:inline">Inventory Map</span>
+              <span className="inline sm:hidden">Map</span>
             </ActionButton>
           </motion.div>
         </div>
@@ -224,12 +227,12 @@ function InsightCard({
       viewport={{ once: true }}
       className="
         bg-white border border-slate-100 rounded-[2rem]
-        p-8 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group relative overflow-hidden
+        p-5 sm:p-8 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group relative overflow-hidden
       "
     >
       <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700" />
 
-      <div className="relative flex items-center justify-between mb-8">
+      <div className="relative flex items-center justify-between mb-6 sm:mb-8">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/50">
             {icon}
@@ -238,7 +241,7 @@ function InsightCard({
             <h3 className="font-bold text-slate-900 tracking-tight">
               {title}
             </h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Neural Insights active</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight mt-0.5">Neural Insights active</p>
           </div>
         </div>
       </div>
@@ -265,7 +268,7 @@ function ActionButton({
     <button
       onClick={onClick}
       className={`
-        flex items-center gap-2.5 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-200
+        flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-6 py-2.5 sm:py-3 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all duration-200 shrink-0
         ${variant === "primary"
           ? "bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-900/40"
           : "bg-white/10 text-white hover:bg-white/20"

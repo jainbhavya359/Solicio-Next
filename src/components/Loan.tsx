@@ -167,32 +167,32 @@ function AddLoanCard({ email, name }: any) {
     }
   };
 
-  const labelClass = "text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] px-1";
-  const inputClass = "w-full mt-2 px-5 py-4 rounded-2xl border border-slate-200 bg-white text-slate-900 font-semibold placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300 shadow-sm";
+  const labelClass = "text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] px-1";
+  const inputClass = "w-full mt-1.5 sm:mt-2 px-4 sm:px-5 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200 bg-white text-slate-900 text-sm sm:text-base font-bold placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300 shadow-sm";
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-white rounded-[2.5rem] border border-slate-100 p-10 shadow-2xl shadow-slate-200/50 relative overflow-hidden"
+      className="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 p-4 sm:p-10 shadow-sm sm:shadow-2xl shadow-slate-200/50 relative overflow-hidden"
     >
-      <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
+      <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none hidden sm:block">
         <CreditCard className="w-48 h-48 rotate-12" />
       </div>
 
-      <div className="flex items-center gap-4 mb-10">
-        <div className="p-3.5 rounded-2xl bg-slate-900 text-white shadow-xl shadow-slate-200">
-          <Zap className="w-6 h-6" />
+      <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-10">
+        <div className="p-2 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-900 text-white shadow-xl shadow-slate-200">
+          <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tightest">New <span className="text-emerald-600">Capital Deployment</span></h2>
-          <p className="text-sm font-bold uppercase tracking-widest text-slate-400 mt-1">Operational Funding Request</p>
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tightest">New <span className="text-emerald-600">Capital Deployment</span></h2>
+          <p className="text-[10px] sm:text-sm font-bold uppercase tracking-widest text-slate-400 mt-0.5 sm:mt-1">Operational Funding Request</p>
         </div>
       </div>
 
-      <div className="space-y-8">
-        <div className="grid md:grid-cols-2 gap-8 text-left">
+      <div className="space-y-4 sm:space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 text-left">
           <div>
             <label className={labelClass}>Capital Purpose</label>
             <input value={loanType} onChange={(e) => setLoanType(e.target.value)} placeholder="e.g., Inventory Scaling" className={inputClass} maxLength={20} />
@@ -203,7 +203,7 @@ function AddLoanCard({ email, name }: any) {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 text-left">
           <div>
             <label className={labelClass}>Principal Amount (₹)</label>
             <input type="number" value={principal} onChange={(e) => setPrincipal(e.target.value === "" ? "" : +e.target.value)} className={inputClass} min={0} />
@@ -214,7 +214,7 @@ function AddLoanCard({ email, name }: any) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-8 text-left">
+        <div className="grid grid-cols-3 gap-4 sm:gap-8 text-left">
           <div className="col-span-2">
             <label className={labelClass}>Time Horizon</label>
             <input type="number" value={tenure} onChange={(e) => setTenure(+e.target.value)} className={inputClass} min={1} />
@@ -228,25 +228,25 @@ function AddLoanCard({ email, name }: any) {
           </div>
         </div>
 
-        <div className="p-8 rounded-3xl bg-slate-900 text-white shadow-2xl relative overflow-hidden group">
+        <div className="p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-slate-900 text-white shadow-xl sm:shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/20 to-transparent pointer-events-none"></div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 text-center md:text-left">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-400 mb-2">Tactical Projection</p>
-              <h3 className="text-xs font-bold uppercase tracking-widest opacity-60">Estimated Monthly Obligation</h3>
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-400 mb-1 sm:mb-2">Tactical Projection</p>
+              <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest opacity-60">Estimated Monthly Obligation</h3>
             </div>
             {emi.emi > 0 ? (
-              <div className="text-right">
-                <p className="text-4xl font-black text-white tracking-tightest">
+              <div className="text-center md:text-right">
+                <p className="text-3xl sm:text-4xl font-black text-white tracking-tightest">
                   ₹{emi.emi.toLocaleString()}
                 </p>
-                <div className="flex gap-4 mt-2 justify-end opacity-60">
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Int: ₹{emi.totalInterest.toLocaleString()}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Total: ₹{emi.totalPayable.toLocaleString()}</span>
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-2 md:justify-end opacity-60">
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest">Int: ₹{emi.totalInterest.toLocaleString()}</span>
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest">Total: ₹{emi.totalPayable.toLocaleString()}</span>
                 </div>
               </div>
             ) : (
-              <p className="text-sm font-bold text-slate-400 normal-case italic">Awaiting structural configuration...</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-400 normal-case italic">Awaiting structural configuration...</p>
             )}
           </div>
         </div>
@@ -258,9 +258,9 @@ function AddLoanCard({ email, name }: any) {
 
         <button
           onClick={submitLoan}
-          className="w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-white bg-emerald-600 hover:bg-emerald-500 shadow-xl shadow-emerald-900/20 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3"
+          className="w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white bg-emerald-600 hover:bg-emerald-500 shadow-xl shadow-emerald-900/20 transition-all duration-300 active:scale-[0.99] flex items-center justify-center gap-3"
         >
-          Synchronize Capital Desk <ChevronRight className="w-4 h-4" />
+          Synchronize Capital Desk <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
       </div>
     </motion.div>
@@ -312,7 +312,7 @@ export default function Loan() {
 
       <Toaster />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 space-y-24">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-24 space-y-6 sm:space-y-24">
 
         {/* HERO HEADER */}
         <motion.div
@@ -320,24 +320,24 @@ export default function Loan() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-widest mb-6 border border-slate-200/50">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest mb-4 sm:mb-6 border border-slate-200/50">
             <CreditCard className="w-3 h-3 text-emerald-600" />
             Neural Capital Deck
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tightest leading-none">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tightest leading-none">
             Credit <span className="text-emerald-600">& Capital</span>
           </h1>
-          <p className="mt-8 text-xl md:text-2xl text-slate-500 leading-relaxed font-medium max-w-2xl">
-            Leverage financial intelligence to optimize your business capital structure and expand your operational horizons.
+          <p className="mt-4 sm:mt-8 text-sm sm:text-xl md:text-2xl text-slate-500 leading-relaxed font-medium max-w-2xl">
+            Leverage financial intelligence to optimize your business capital structure.
           </p>
         </motion.div>
 
         {/* TOP METRICS STRIP */}
-        <div className="grid sm:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-8">
           {[
-            { label: "Neural Credit Rating", value: score || "--", color: "text-emerald-600", icon: <Target className="w-4 h-4" /> },
-            { label: "Tier Classification", value: show ? ["Poor", "Fair", "Good", "Very Good", "Excellent"][index] : "--", color: "text-slate-900", icon: <TrendingUp className="w-4 h-4" /> },
-            { label: "Risk Exposure Level", value: show ? (index <= 1 ? "Critical" : index === 2 ? "Balanced" : "Minimal") : "--", color: index <= 1 ? "text-rose-600" : index === 2 ? "text-amber-600" : "text-emerald-600", icon: <Activity className="w-4 h-4" /> },
+            { label: "Neural Credit Rating", value: score || "--", color: "text-emerald-600", icon: <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> },
+            { label: "Tier Classification", value: show ? ["Poor", "Fair", "Good", "Very Good", "Excellent"][index] : "--", color: "text-slate-900", icon: <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> },
+            { label: "Risk Exposure Level", value: show ? (index <= 1 ? "Critical" : index === 2 ? "Balanced" : "Minimal") : "--", color: index <= 1 ? "text-rose-600" : index === 2 ? "text-amber-600" : "text-emerald-600", icon: <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -345,33 +345,33 @@ export default function Loan() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-xl shadow-slate-200/40 relative overflow-hidden group"
+              className="bg-white border border-slate-100 rounded-xl sm:rounded-[2rem] p-4 sm:p-8 shadow-sm sm:shadow-xl shadow-slate-200/40 relative overflow-hidden group"
             >
-              <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-500">
+              <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-500 hidden sm:block">
                 {item.icon}
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3">{item.label}</p>
-              <p className={`text-4xl font-extrabold tracking-tightest ${item.color}`}>{item.value}</p>
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-1 sm:mb-3">{item.label}</p>
+              <p className={`text-2xl sm:text-4xl font-extrabold tracking-tightest ${item.color}`}>{item.value}</p>
             </motion.div>
           ))}
         </div>
 
         {/* SIMULATOR & GAUGE SECTION */}
-        <div className="grid lg:grid-cols-1 gap-16">
+        <div className="grid lg:grid-cols-1 gap-6 sm:gap-16">
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="bg-white rounded-[3rem] border border-slate-100 p-12 shadow-2xl shadow-slate-200/50"
+            className="bg-white rounded-2xl sm:rounded-[3rem] border border-slate-100 p-4 sm:p-12 shadow-sm sm:shadow-2xl shadow-slate-200/50"
           >
-            <div className="grid lg:grid-cols-2 gap-16 items-start">
-              <div className="text-left space-y-8">
+            <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-start">
+              <div className="text-left space-y-6 sm:space-y-8">
                 <div>
-                  <h2 className="text-4xl font-extrabold text-slate-900 tracking-tightest mb-4">Neural <span className="text-emerald-600">Simulateur</span></h2>
-                  <p className="text-lg text-slate-500 font-medium">Calibrate your credit variables to project future capital accessibility.</p>
+                  <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tightest mb-2 sm:mb-4">Neural <span className="text-emerald-600">Simulator</span></h2>
+                  <p className="text-sm sm:text-lg text-slate-500 font-medium">Calibrate your credit variables to project future capital accessibility.</p>
                 </div>
 
-                <div className="grid gap-8">
+                <div className="grid gap-6 sm:gap-8">
                   {[
                     { label: "Operational Payment Success (%)", value: paymentHistory, setter: setPaymentHistory, icon: <Zap /> },
                     { label: "Capital Utilization Ratio (%)", value: ratio, setter: setRatio, icon: <Activity /> },
@@ -379,9 +379,9 @@ export default function Loan() {
                     { label: "Strategic Hard Inquiries", value: inquiries, setter: setInquiries, icon: <ShieldCheck /> },
                   ].map((field: any, i) => (
                     <div key={i} className="group">
-                      <div className="flex justify-between items-center mb-3">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{field.label}</label>
-                        <span className="text-sm font-black text-slate-900 group-focus-within:text-emerald-600 transition-colors">{field.value}</span>
+                      <div className="flex justify-between items-center mb-2 sm:mb-3">
+                        <label className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 max-w-[70%] leading-tight sm:max-w-none">{field.label}</label>
+                        <span className="text-xs sm:text-sm font-black text-slate-900 group-focus-within:text-emerald-600 transition-colors">{field.value}</span>
                       </div>
                       <input
                         type="range"
@@ -397,9 +397,9 @@ export default function Loan() {
 
                 <button
                   onClick={calculateScore}
-                  className="px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-white bg-slate-900 hover:bg-slate-800 shadow-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3 w-fit"
+                  className="w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white bg-slate-900 hover:bg-slate-800 shadow-xl sm:shadow-2xl transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-3"
                 >
-                  Project Neural Score <Calculator className="w-4 h-4" />
+                  Project Neural Score <Calculator className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
               </div>
 

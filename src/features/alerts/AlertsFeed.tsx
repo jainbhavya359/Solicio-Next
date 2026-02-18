@@ -124,36 +124,36 @@ export default function AlertsFeed({ email }: { email: string }) {
 
   /* ---------- ALERTS PRESENT ---------- */
   return (
-    <div className="space-y-12">
+    <div className="space-y-6 sm:space-y-12">
       {/* Header Context */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-3">
             <Bell className="w-3 h-3" />
             Strategic Monitoring
           </div>
-          <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight leading-tight">
             Prioritized <span className="text-emerald-600">Feed</span>
           </h2>
-          <p className="text-lg text-slate-500 mt-2 max-w-2xl">
+          <p className="text-sm sm:text-lg text-slate-500 mt-2 max-w-2xl leading-relaxed">
             Real-time operational signals and AI-driven decision points requiring your immediate attention.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-3 bg-white px-4 py-2 sm:px-5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-100 shadow-sm w-fit">
           <div className="flex -space-x-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
+              <div key={i} className="h-6 w-6 sm:h-8 sm:w-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] sm:text-[10px] font-black text-slate-400">
                 {String.fromCharCode(64 + i)}
               </div>
             ))}
           </div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Stakeholders Notified</p>
+          <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Stakeholders Notified</p>
         </div>
       </div>
 
       {/* KPI STRIP */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <Kpi
           label="Pending Actions"
           value={alerts.length}
@@ -185,12 +185,12 @@ export default function AlertsFeed({ email }: { email: string }) {
       </div>
 
       {/* Alerts Area */}
-      <div className="space-y-10">
+      <div className="space-y-6 sm:space-y-10">
         <motion.div
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
-          className="space-y-6"
+          className="space-y-4 sm:space-y-6"
         >
           <AnimatePresence>
             {alerts.map((alert, i) => (
@@ -208,25 +208,25 @@ export default function AlertsFeed({ email }: { email: string }) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="rounded-[2.5rem] bg-white border border-slate-200 p-10 shadow-sm"
+            className="rounded-[2rem] sm:rounded-[2.5rem] bg-white border border-slate-200 p-6 sm:p-10 shadow-sm"
           >
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/50">
-                <ShieldCheck size={22} />
+            <div className="flex items-center gap-3 mb-6 sm:mb-8">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/50">
+                <ShieldCheck size={18} className="sm:w-6 sm:h-6" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Operational Standards</p>
-                <h4 className="text-xl font-bold text-slate-900">Health & Compliance Signals</h4>
+                <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">Operational Standards</p>
+                <h4 className="text-lg sm:text-xl font-bold text-slate-900">Health & Compliance Signals</h4>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-4 sm:gap-y-6">
               {health.map((h, i) => (
-                <div key={i} className="flex items-center gap-4 group">
-                  <div className="h-6 w-6 rounded-full border-2 border-emerald-100 flex items-center justify-center text-emerald-500 transition-colors group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-500">
-                    <CheckCircle size={12} />
+                <div key={i} className="flex items-center gap-3 sm:gap-4 group">
+                  <div className="h-5 w-5 sm:h-6 sm:w-6 rounded-full border-2 border-emerald-100 flex items-center justify-center text-emerald-500 transition-colors group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-500 shrink-0">
+                    <CheckCircle size={10} className="sm:w-3 sm:h-3" />
                   </div>
-                  <p className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+                  <p className="text-xs sm:text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
                     {h.summary}
                   </p>
                 </div>
@@ -270,16 +270,16 @@ function Kpi({
   };
 
   return (
-    <div className={`group rounded-3xl border p-6 bg-white transition-all hover:shadow-md hover:border-emerald-200 cursor-default`}>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</span>
-        <div className={`p-2.5 rounded-2xl ${styles[variant]} transition-colors group-hover:bg-emerald-500 group-hover:text-white`}>
-          <Icon className="w-5 h-5" />
+    <div className={`group rounded-2xl sm:rounded-3xl border p-4 sm:p-6 bg-white transition-all hover:shadow-md hover:border-emerald-200 cursor-default`}>
+      <div className="flex items-center justify-between mb-2 sm:mb-4">
+        <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest truncate mr-2">{label}</span>
+        <div className={`p-2 sm:p-2.5 rounded-xl sm:rounded-2xl ${styles[variant]} transition-colors group-hover:bg-emerald-500 group-hover:text-white shrink-0`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
       </div>
-      <p className="text-3xl font-bold text-slate-900 tracking-tight">{value}</p>
+      <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{value}</p>
       {description && (
-        <p className="text-xs font-medium text-slate-400 mt-1 line-clamp-1">{description}</p>
+        <p className="text-[10px] sm:text-xs font-medium text-slate-400 mt-1 line-clamp-1">{description}</p>
       )}
     </div>
   );

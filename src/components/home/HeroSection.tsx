@@ -96,7 +96,7 @@ export default function HeroSection() {
             {/* Stats */}
             <motion.div
               variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-              className="grid grid-cols-3 gap-8 pt-8 border-t border-slate-200"
+              className="grid grid-cols-3 gap-4 sm:gap-8 pt-8 border-t border-slate-200"
             >
               <div>
                 <div className="text-2xl font-bold text-slate-900">
@@ -180,13 +180,13 @@ export default function HeroSection() {
             </motion.div>
 
             {/* Floating Cards */}
-            <FloatingCard className="top-6 -left-12" delay={400}>
+            <FloatingCard className="hidden lg:block top-6 -left-12" delay={400}>
               Today’s Sales ₹42,500
             </FloatingCard>
-            <FloatingCard className="bottom-24 -right-10" delay={700}>
+            <FloatingCard className="hidden lg:block bottom-24 -right-10" delay={700}>
               Rice stock running low
             </FloatingCard>
-            <FloatingCard className="bottom-6 -left-8" delay={900}>
+            <FloatingCard className="hidden lg:block bottom-6 -left-8" delay={900}>
               Pending ₹15,200
             </FloatingCard>
           </div>

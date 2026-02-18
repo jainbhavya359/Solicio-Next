@@ -50,37 +50,43 @@ export default function StockHistory({
         variants={fadeInUp}
         initial="hidden"
         animate="visible"
-        className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+        className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6"
       >
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-3">
             <History className="w-3 h-3" />
             Audit Protocol
           </div>
-          <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter">
+          <div className="hidden sm:block">
+            <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter">
+              Fiscal <span className="text-emerald-600">Manifest</span>
+            </h2>
+            <p className="text-lg text-slate-500 mt-2 max-w-2xl font-medium">
+              A high-fidelity ledger tracing every asset deployment and revenue event within your inventory ecosystem.
+            </p>
+          </div>
+          {/* Mobile Title */}
+          <h2 className="block sm:hidden text-2xl font-black text-slate-900 tracking-tighter">
             Fiscal <span className="text-emerald-600">Manifest</span>
           </h2>
-          <p className="text-lg text-slate-500 mt-2 max-w-2xl font-medium">
-            A high-fidelity ledger tracing every asset deployment and revenue event within your inventory ecosystem.
-          </p>
         </div>
 
-        <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+        <div className="flex items-center gap-3 bg-white px-4 py-2 sm:px-5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group self-start sm:self-auto">
           <div className="absolute inset-0 bg-emerald-500/5 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-          <Activity className="w-5 h-5 text-emerald-500 relative z-10" />
+          <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 relative z-10" />
           <div className="relative z-10">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Log Density</p>
-            <p className="text-base font-black text-slate-900 mt-1">{data.length} Transactions</p>
+            <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Log Density</p>
+            <p className="text-xs sm:text-base font-black text-slate-900 mt-0.5 sm:mt-1">{data.length} Transactions</p>
           </div>
         </div>
       </motion.div>
 
-      {/* KPI STRIP */}
+      {/* KPI STRIP - Dense 2x2 Grid on Mobile */}
       <motion.div
         variants={fadeInUp}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6"
       >
         <Kpi
           label="Total Acquisition"
@@ -150,22 +156,22 @@ function Kpi({
   description?: string;
 }) {
   return (
-    <div className="group rounded-3xl border border-slate-100 p-6 bg-white transition-all hover:shadow-xl hover:border-emerald-200 cursor-default relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-full -mr-12 -mt-12 group-hover:bg-emerald-50 transition-colors" />
+    <div className="group rounded-2xl sm:rounded-3xl border border-slate-100 p-4 sm:p-6 bg-white transition-all hover:shadow-xl hover:border-emerald-200 cursor-default relative overflow-hidden h-full">
+      <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 bg-slate-50 rounded-full -mr-8 -mt-8 sm:-mr-12 sm:-mt-12 group-hover:bg-emerald-50 transition-colors" />
 
-      <div className="relative z-10 flex items-center justify-between mb-4">
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
-        <div className={`p-2.5 rounded-2xl ${variant === 'emerald' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-slate-50 text-slate-400'} transition-all group-hover:scale-110`}>
-          <Icon className="w-5 h-5" />
+      <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-4">
+        <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[70%]">{label}</span>
+        <div className={`p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl ${variant === 'emerald' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-slate-50 text-slate-400'} transition-all group-hover:scale-110`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
       </div>
 
       <div className="relative z-10">
-        <p className={`text-3xl font-black tracking-tighter leading-none ${variant === 'emerald' ? 'text-emerald-600' : 'text-slate-900'}`}>
+        <p className={`text-xl sm:text-3xl font-black tracking-tighter leading-none ${variant === 'emerald' ? 'text-emerald-600' : 'text-slate-900'}`}>
           {value}
         </p>
         {description && (
-          <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">
+          <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 mt-1 sm:mt-2 uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity truncate">
             {description}
           </p>
         )}

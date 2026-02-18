@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Header() {
   const pathname = usePathname();
   const [show, setShow] = useState(true);
   const [lastScroll, setLastScroll] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,7 +47,7 @@ export default function Header() {
           </span>
         </Link>
 
-        {/* NAV */}
+        {/* DESKTOP NAV */}
         <nav className="hidden md:flex gap-8">
           {links.map((link) => {
             const active = pathname === link.href;
@@ -55,10 +56,9 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 className={`relative text-sm font-semibold transition
-                  ${
-                    active
-                      ? "text-emerald-600"
-                      : "text-slate-600 hover:text-slate-900"
+                  ${active
+                    ? "text-emerald-600"
+                    : "text-slate-600 hover:text-slate-900"
                   }
                 `}
               >
@@ -71,134 +71,65 @@ export default function Header() {
           })}
         </nav>
 
-        {/* CTA */}
+        {/* DESKTOP CTA */}
         <Link
           href="/signup"
-          className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold
+          className="hidden md:inline-block px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold
           hover:bg-emerald-700 transition shadow"
         >
           Get Started Free
         </Link>
+
+        {/* MOBILE HAMBURGER */}
+        <button
+          className="md:hidden p-2 text-slate-600"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></svg>
+          )}
+        </button>
       </header>
+
+      {/* MOBILE MENU */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="md:hidden overflow-hidden bg-white border-b border-slate-200"
+          >
+            <nav className="flex flex-col p-6 gap-4">
+              {links.map((link) => {
+                const active = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-lg font-semibold ${active ? "text-emerald-600" : "text-slate-600"
+                      }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+              <hr className="border-slate-100 my-2" />
+              <Link
+                href="/signup"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-center px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold shadow"
+              >
+                Get Started Free
+              </Link>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
-
-// "use client";
-
-// import Link from "next/link";
-// import { usePathname } from "next/navigation";
-// import { useEffect, useState } from "react";
-// import { motion } from "framer-motion";
-
-// export default function Header() {
-//   const pathname = usePathname();
-//   const [show, setShow] = useState(true);
-//   const [lastScroll, setLastScroll] = useState(0);
-
-//   useEffect(() => {
-//     const handleScroll = () => {
-//       const currentScroll = window.scrollY;
-
-//       if (currentScroll > lastScroll && currentScroll > 80) {
-//         setShow(false);
-//       } else {
-//         setShow(true);
-//       }
-
-//       setLastScroll(currentScroll);
-//     };
-
-//     window.addEventListener("scroll", handleScroll);
-//     return () => window.removeEventListener("scroll", handleScroll);
-//   }, [lastScroll]);
-
-//   const links = [
-//     { href: "/", label: "Home" },
-//     { href: "/about", label: "About" },
-//     { href: "/services", label: "Services" },
-//     { href: "/contact", label: "Contact" },
-//     { href: "/DashBoard", label: "DashBoard" },
-//   ];
-
-//   return (
-//     <motion.div
-//       initial={{ y: -80, opacity: 0 }}
-//       animate={{ y: show ? 0 : -120, opacity: show ? 1 : 0 }}
-//       transition={{ duration: 0.45, ease: "easeInOut" }}
-//       className="
-//         fixed top-0 w-full z-50
-//         backdrop-blur-xl bg-black/50
-//         border-b border-white/10
-//         shadow-[0_8px_30px_rgba(0,0,0,0.4)]
-//       "
-//     >
-//       <header className="max-w-7xl mx-auto flex justify-between items-center px-8 py-4 text-white">
-
-//         {/* LOGO */}
-//         <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-//           <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 via-pink-500 to-amber-400 shadow-lg group-hover:scale-105 transition">
-//             <svg
-//               xmlns="http://www.w3.org/2000/svg"
-//               viewBox="0 0 24 24"
-//               className="w-6 h-6 text-black"
-//               fill="currentColor"
-//             >
-//               <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z" />
-//             </svg>
-//           </div>
-
-//           <span className="text-2xl font-extrabold tracking-wide bg-gradient-to-r from-indigo-400 via-pink-400 to-amber-400 bg-clip-text text-transparent">
-//             Solicio
-//           </span>
-//         </Link>
-
-//         {/* NAV LINKS */}
-//         <nav className="hidden md:flex items-center gap-8">
-//           {links.map((link) => {
-//             const isActive = pathname === link.href;
-
-//             return (
-//               <Link
-//                 key={link.href}
-//                 href={link.href}
-//                 className={`
-//                   relative text-sm font-semibold tracking-wide
-//                   transition-all duration-300
-//                   ${isActive ? "text-white" : "text-slate-300 hover:text-white"}
-//                   after:absolute after:left-0 after:-bottom-2
-//                   after:h-[2px] after:w-full after:origin-left
-//                   after:scale-x-0 after:bg-gradient-to-r
-//                   after:from-indigo-400 after:via-pink-400 after:to-amber-400
-//                   after:transition-transform after:duration-300
-//                   hover:after:scale-x-100
-//                   ${isActive ? "after:scale-x-100" : ""}
-//                 `}
-//               >
-//                 {link.label}
-//               </Link>
-//             );
-//           })}
-//         </nav>
-
-//         {/* CTA */}
-//         <div className="hidden md:block">
-//           <Link
-//             href="/services"
-//             className="
-//               px-5 py-2 rounded-full font-bold text-sm
-//               bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400
-//               text-black
-//               hover:opacity-90 transition
-//               shadow-lg
-//             "
-//           >
-//             Get Started
-//           </Link>
-//         </div>
-
-//       </header>
-//     </motion.div>
-//   );
-// }

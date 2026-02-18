@@ -177,11 +177,11 @@ export default function LedgerSearchBox({ email }: { email: string }) {
             key="results"
             className="space-y-6"
           >
-            <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
-              <div className="w-full overflow-x-auto">
-                <div className="min-w-[1200px] p-6">
+            <div className="rounded-2xl sm:rounded-[2rem] border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
+              <div className="w-full">
+                <div className="w-full sm:min-w-[1200px] p-0 sm:p-6">
                   {/* HEAD */}
-                  <div className="grid grid-cols-12 gap-4 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50 mb-4">
+                  <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50 mb-4">
                     <div className="col-span-1">Date</div>
                     <div className="col-span-3">Product Information</div>
                     <div className="col-span-2">Party Details</div>
@@ -199,7 +199,7 @@ export default function LedgerSearchBox({ email }: { email: string }) {
                     variants={{
                       visible: { transition: { staggerChildren: 0.05 } }
                     }}
-                    className="space-y-3"
+                    className="space-y-3 p-4 sm:p-0"
                   >
                     {visibleResults.map(row => {
                       const inactive = row.isReversal || reversedMap.has(row._id);
@@ -211,35 +211,19 @@ export default function LedgerSearchBox({ email }: { email: string }) {
                             hidden: { opacity: 0, x: -10 },
                             visible: { opacity: 1, x: 0 }
                           }}
-                          className={`grid grid-cols-12 items-center gap-4 px-6 py-4 rounded-2xl border transition-all
-                          ${inactive ? "bg-slate-50 opacity-60 grayscale grayscale-[0.8]" : "bg-white border-slate-100 hover:border-emerald-100 hover:shadow-md group"}
-                        `}
+                          className={`
+                            relative overflow-hidden transition-all
+                            sm:grid sm:grid-cols-12 sm:items-center sm:gap-4 sm:px-6 sm:py-4 sm:rounded-2xl sm:border
+                            rounded-xl border p-4 flex flex-col gap-3
+                            ${inactive ? "bg-slate-50 opacity-60 grayscale grayscale-[0.8]" : "bg-white border-slate-100 hover:border-emerald-100 hover:shadow-md group"}
+                          `}
                         >
-                          <div className="col-span-1 font-bold text-xs text-slate-900 uppercase">
-                            {row.date.slice(0, 10)}
-                          </div>
-
-                          <div className="col-span-3">
-                            <div className="flex items-center gap-4">
-                              <div className={`p-2 rounded-xl bg-slate-50 text-slate-400 ${!inactive && "group-hover:bg-emerald-50 group-hover:text-emerald-600"} transition-colors`}>
-                                <Package size={18} />
-                              </div>
-                              <div>
-                                <p className="font-bold text-slate-900 leading-none">{row.itemName}</p>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{row.unit}</p>
-                              </div>
+                          {/* Mobile Header Row */}
+                          <div className="flex justify-between items-start sm:hidden">
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-slate-900">{row.date.slice(0, 10)}</span>
+                              <span className="text-[10px] font-medium text-slate-400">Transaction Date</span>
                             </div>
-                          </div>
-
-                          <div className="col-span-2 text-sm">
-                            <div className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
-                              <p className="font-bold text-slate-700">{row.partyName || "General Store"}</p>
-                            </div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-3.5 mt-0.5">{row.partyType || "Customer"}</p>
-                          </div>
-
-                          <div className="col-span-1">
                             <div className={`inline-flex px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
                             ${row.voucherType === "Purchase" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}
                           `}>
@@ -247,22 +231,80 @@ export default function LedgerSearchBox({ email }: { email: string }) {
                             </div>
                           </div>
 
-                          <div className="col-span-1 text-right font-black text-sm text-emerald-600">
+                          <div className="col-span-1 font-bold text-xs text-slate-900 uppercase hidden sm:block">
+                            {row.date.slice(0, 10)}
+                          </div>
+
+                          <div className="col-span-3 w-full sm:w-auto">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                              <div className={`p-2 rounded-xl bg-slate-50 text-slate-400 ${!inactive && "group-hover:bg-emerald-50 group-hover:text-emerald-600"} transition-colors hidden sm:block`}>
+                                <Package size={18} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-bold text-slate-900 leading-none truncate">{row.itemName}</p>
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.unit}</p>
+                                  <span className="text-slate-300 text-[10px] sm:hidden">•</span>
+                                  <p className="text-[10px] font-bold text-slate-600 truncate sm:hidden">{row.partyName || "General Store"}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="col-span-2 text-sm hidden sm:block">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
+                              <p className="font-bold text-slate-700">{row.partyName || "General Store"}</p>
+                            </div>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-3.5 mt-0.5">{row.partyType || "Customer"}</p>
+                          </div>
+
+                          <div className="col-span-1 hidden sm:block">
+                            <div className={`inline-flex px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
+                            ${row.voucherType === "Purchase" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}
+                          `}>
+                              {row.voucherType}
+                            </div>
+                          </div>
+
+                          {/* Mobile: Financials Row */}
+                          <div className="flex items-center justify-between mt-2 pt-3 border-t border-slate-50 sm:hidden">
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Amount</span>
+                              <span className={`text-sm font-black ${row.debitQty ? "text-emerald-600" : "text-rose-600"}`}>
+                                {row.debitQty ? `+${row.debitQty}` : `-${row.creditQty}`}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="flex flex-col items-end mr-2">
+                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Ref</span>
+                                <span className="text-xs font-mono font-bold text-slate-500">{row.voucherNo}</span>
+                              </div>
+                              <Link
+                                href={row.voucherType === "Sale" ? `/invoice/${row.voucherNo}` : `/bill/${row.voucherNo}`}
+                                className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+                              >
+                                <Eye size={16} />
+                              </Link>
+                            </div>
+                          </div>
+
+                          <div className="col-span-1 text-right font-black text-sm text-emerald-600 hidden sm:block">
                             {row.debitQty ? `+${row.debitQty}` : "—"}
                           </div>
 
-                          <div className="col-span-1 text-right font-black text-sm text-rose-600">
+                          <div className="col-span-1 text-right font-black text-sm text-rose-600 hidden sm:block">
                             {row.creditQty ? `-${row.creditQty}` : "—"}
                           </div>
 
-                          <div className="col-span-2 text-center">
+                          <div className="col-span-2 text-center hidden sm:block">
                             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-mono font-bold text-slate-500 uppercase">
                               <Hash size={10} />
                               {row.voucherNo}
                             </div>
                           </div>
 
-                          <div className="col-span-1 text-right flex items-center justify-end gap-2">
+                          <div className="col-span-1 text-right hidden sm:flex items-center justify-end gap-2">
                             <Link
                               href={row.voucherType === "Sale" ? `/invoice/${row.voucherNo}` : `/bill/${row.voucherNo}`}
                               className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
