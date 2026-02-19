@@ -245,7 +245,7 @@ export default function Dashboard() {
     "bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-transparent";
 
   return (
-    <div className="min-h-screen bg-[#F7FAF9] flex">
+    <div className="min-h-screen bg-[#F7FAF9] flex overflow-x-hidden w-full">
       <Toaster />
 
       {/* Mobile Header */}
@@ -281,34 +281,34 @@ export default function Dashboard() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-[280px] bg-white border-r border-slate-200 flex flex-col
+        className={`fixed top-0 left-0 z-50 h-full w-[260px] lg:w-[280px] bg-white border-r border-slate-200 flex flex-col
           transform transition-transform duration-300 ease-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0 lg:z-30 shadow-2xl lg:shadow-none`}
       >
         {/* Sidebar Header */}
-        <div className="p-8">
+        <div className="p-6 lg:p-8">
           <div className="flex items-center gap-3">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-200"
+              className="w-10 h-10 lg:w-11 lg:h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-200"
             >
               {Icons.logo}
             </motion.div>
             <div>
-              <h1 className="font-extrabold text-slate-900 text-xl tracking-tight">Solicio</h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Command Center</p>
+              <h1 className="font-extrabold text-slate-900 text-lg lg:text-xl tracking-tight">Solicio</h1>
+              <p className="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Command Center</p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 mt-2">
-          <p className="px-4 mb-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Menu Navigation</p>
-          <div className="space-y-1.5">
+        <nav className="flex-1 px-3 lg:px-4 mt-2 overflow-y-auto">
+          <p className="px-4 mb-2 lg:mb-3 text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Menu Navigation</p>
+          <div className="space-y-1 lg:space-y-1.5">
             <motion.a
               href="/"
-              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-100 hover:text-emerald-600"
+              className="w-full flex items-center justify-between px-4 py-2.5 lg:py-3 rounded-2xl transition-all duration-200 text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-100 hover:text-emerald-600"
               whileHover={{ x: 2 }}
             >
               <div className="flex items-center gap-3">
@@ -318,7 +318,7 @@ export default function Dashboard() {
             </motion.a>
             <motion.a
               href="/features"
-              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-100"
+              className="w-full flex items-center justify-between px-4 py-2.5 lg:py-3 rounded-2xl transition-all duration-200 text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-100"
               whileHover={{ x: 2 }}
             >
               <div className="flex items-center gap-3">
@@ -327,8 +327,8 @@ export default function Dashboard() {
               </div>
             </motion.a>
 
-            <div className="h-4" />
-            <p className="px-4 mb-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Insights & Control</p>
+            <div className="h-3 lg:h-4" />
+            <p className="px-4 mb-2 lg:mb-3 text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Insights & Control</p>
 
             {navItems.map((item) => (
               <motion.button
@@ -336,7 +336,7 @@ export default function Dashboard() {
                 onClick={() => scrollToSection(item.id)}
                 whileHover={{ x: activeSection === item.id ? 0 : 2 }}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-left transition-all duration-200
+                className={`w-full flex items-center justify-between px-4 py-2.5 lg:py-3 rounded-2xl text-left transition-all duration-200
                   ${activeSection === item.id
                     ? "bg-slate-900 text-white shadow-xl shadow-slate-200"
                     : "text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-100"
@@ -363,10 +363,10 @@ export default function Dashboard() {
         </nav>
 
         {/* User Section */}
-        <div className="p-4">
+        <div className="p-3 lg:p-4">
           <div className="bg-slate-50 rounded-3xl p-2 border border-slate-100">
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+            <div className="flex items-center gap-3 p-2 lg:p-3 rounded-2xl bg-white border border-slate-100 shadow-sm">
+              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
                 {user?.firstName?.charAt(0) || "U"}
               </div>
               <div className="flex-1 min-w-0">
@@ -387,30 +387,30 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-[280px] min-h-screen pt-16 lg:pt-0">
+      <main className="flex-1 lg:ml-[280px] min-h-screen pt-16 lg:pt-0 [zoom:0.85] lg:[zoom:1]">
         {/* Top Header Bar */}
-        <div className="p-6 w-full max-w-full overflow-hidden">
+        <div className="p-4 sm:p-6 w-full max-w-full overflow-hidden">
           {email && <LedgerSearchBox key={activeSection} email={email} />}
         </div>
 
         {/* Page Content */}
-        <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           {/* Page Title */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
-            <h1 className="text-2xl font-bold text-stone-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-stone-900">
               {sectionInfo[activeSection]?.title || "Dashboard"}
             </h1>
-            <p className="text-stone-500 mt-1">
+            <p className="text-xs sm:text-base text-stone-500 mt-1">
               {sectionInfo[activeSection]?.subtitle || "Manage your business"}
             </p>
           </motion.div>
 
           {/* Sections */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* OVERVIEW SECTION */}
             {activeSection === "overview" && (
               <section id="overview">
@@ -418,10 +418,10 @@ export default function Dashboard() {
                   variants={staggerContainer}
                   initial="hidden"
                   animate="visible"
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                 >
                   {/* Date Filter Bar */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
                         {Icons.calendar}
@@ -429,36 +429,36 @@ export default function Dashboard() {
                       <h2 className="text-sm font-semibold text-stone-700">Filter Range</h2>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex items-center gap-2 flex-1 sm:flex-none">
                         <span className="text-xs font-medium text-stone-400">From</span>
                         <input
                           type="date"
                           value={fromDate}
                           onChange={(e) => setFromDate(e.target.value)}
-                          className="px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
+                          className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
                         />
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-1 sm:flex-none">
                         <span className="text-xs font-medium text-stone-400">To</span>
                         <input
                           type="date"
                           value={toDate}
                           onChange={(e) => setToDate(e.target.value)}
-                          className="px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
+                          className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Business Health & KPIs */}
-                  <div className="space-y-8">
+                  <div className="space-y-4 sm:space-y-8">
                     <KPICards data={dashboardData?.kpis} />
                     {email && <BusinessHealthCard data={dashboardData?.healthSummary} />}
                   </div>
 
                   {/* Two Column Layout */}
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
                     <motion.div variants={fadeInUp} className="h-full">
                       <CreditGauge score={score} />
                     </motion.div>
@@ -480,17 +480,17 @@ export default function Dashboard() {
                       Unable to load insights
                     </div>
                   ) : (
-                    <section className="mx-auto max-w-7xl px-4 py-20 space-y-10">
+                    <section className="mx-auto max-w-7xl px-0 sm:px-4 py-8 sm:py-20 space-y-6 sm:space-y-10">
                       {/* 1️⃣ Sales Trend (hero insight) */}
                       <SalesTrendGraphCard data={data} />
 
                       {/* 2️⃣ Forward-looking */}
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
                         <ForecastSummaryCard data={data} />
                       </div>
 
                       {/* 4️⃣ Context */}
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
                         <TopProductDonut data={data} onViewInventory={() => scrollToSection("inventory")} />
                         <MarginTrendGraph data={data} />
                       </div>
@@ -512,9 +512,9 @@ export default function Dashboard() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                 >
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <StockReport
                       visible={true}
                       data={dashboardData?.inventory}
@@ -547,13 +547,13 @@ export default function Dashboard() {
                       </PanelMotion>
                     )}
                   </AnimatePresence>
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <TopProductsCard />
                   </motion.div>
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <StockAlertSmart data={dashboardData?.lowStock} />
                   </motion.div>
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <StockValuation />
                   </motion.div>
                 </motion.div>
@@ -568,12 +568,12 @@ export default function Dashboard() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                 >
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <ProfitLossReport />
                   </motion.div>
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <CashFlowWatch data={dashboardData?.cashFlow} />
                   </motion.div>
                 </motion.div>
@@ -588,9 +588,9 @@ export default function Dashboard() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                 >
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <LedgerEntries />
                   </motion.div>
                 </motion.div>
@@ -605,12 +605,12 @@ export default function Dashboard() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                 >
                   <ActiveLoans data={loans} loading={loadingLoans} setLoans={setLoans} />
 
                   {/* Licenses */}
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <License_Report />
                   </motion.div>
                 </motion.div>
@@ -625,12 +625,12 @@ export default function Dashboard() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                 >
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <SlowMovingStockContainer data={dashboardData?.slowMoving} />
                   </motion.div>
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     {email && <AlertsFeed email={email} />}
                   </motion.div>
                 </motion.div>
@@ -645,7 +645,7 @@ export default function Dashboard() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
-                  className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm"
+                  className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm"
                 >
                   <UserProfile routing="hash" />
                 </motion.div>
@@ -654,7 +654,7 @@ export default function Dashboard() {
           </div>
 
           {/* Footer Spacer */}
-          <div className="h-8" />
+          <div className="h-4 sm:h-8" />
         </div>
       </main>
     </div>

@@ -52,19 +52,19 @@ export default function TopProductsCard() {
       : 0;
 
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="bg-white rounded-2xl sm:rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
       {/* HEADER */}
-      <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-              <Package className="h-6 w-6" />
+      <div className="p-3 sm:p-6 border-b border-slate-100 bg-slate-50/50">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+              <Package className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-900">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900">
                 Top Products
               </h3>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-xs sm:text-sm font-medium text-slate-500">
                 Sales performance by SKU
               </p>
             </div>
@@ -77,7 +77,7 @@ export default function TopProductsCard() {
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
-                className="w-28 text-xs font-bold text-slate-600 border-none bg-transparent focus:ring-0 cursor-pointer"
+                className="w-24 sm:w-28 text-[10px] sm:text-xs font-bold text-slate-600 border-none bg-transparent focus:ring-0 cursor-pointer"
               />
             </div>
             <div className="h-4 w-px bg-slate-200" />
@@ -86,7 +86,7 @@ export default function TopProductsCard() {
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
-                className="w-28 text-xs font-bold text-slate-600 border-none bg-transparent focus:ring-0 cursor-pointer"
+                className="w-24 sm:w-28 text-[10px] sm:text-xs font-bold text-slate-600 border-none bg-transparent focus:ring-0 cursor-pointer"
               />
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function TopProductsCard() {
       </div>
 
       {/* CONTENT */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-3 sm:p-6">
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div
@@ -132,7 +132,7 @@ export default function TopProductsCard() {
               variants={{
                 visible: { transition: { staggerChildren: 0.08 } }
               }}
-              className="space-y-4"
+              className="space-y-3 sm:space-y-4"
             >
               {products.map((p) => {
                 const trending = p.sales >= avgSales;
@@ -144,39 +144,39 @@ export default function TopProductsCard() {
                       hidden: { opacity: 0, scale: 0.95, y: 10 },
                       visible: { opacity: 1, scale: 1, y: 0 }
                     }}
-                    className="group flex items-center justify-between rounded-2xl bg-white border border-slate-100 p-4 hover:border-indigo-200 hover:shadow-md transition-all active:scale-[0.98]"
+                    className="group flex items-center justify-between rounded-xl sm:rounded-2xl bg-white border border-slate-100 p-3 sm:p-4 hover:border-indigo-200 hover:shadow-md transition-all active:scale-[0.98]"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                        <Package size={20} />
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                        <Package size={16} className="sm:w-5 sm:h-5" />
                       </div>
                       <div>
-                        <p className="font-bold text-slate-900 capitalize truncate max-w-[120px] sm:max-w-none">
+                        <p className="font-bold text-sm sm:text-base text-slate-900 capitalize truncate max-w-[100px] sm:max-w-none">
                           {p._id}
                         </p>
-                        <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">
+                        <p className="text-[10px] sm:text-xs font-medium text-slate-400 uppercase tracking-widest">
                           {p.qty.toLocaleString()} units sold
                         </p>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <p className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                      <p className="text-sm sm:text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                         ₹{(p.sales / 1000).toFixed(1)}k
                       </p>
 
                       <div
                         className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${trending ? "text-emerald-600 bg-emerald-50" : "text-rose-500 bg-rose-50"
-                          } px-2 py-0.5 rounded-full mt-1`}
+                          } px-1.5 py-0.5 sm:px-2 rounded-full mt-0.5 sm:mt-1`}
                       >
                         {trending ? (
                           <>
-                            <ArrowUpRight size={12} strokeWidth={3} />
+                            <ArrowUpRight size={10} className="sm:w-3 sm:h-3" strokeWidth={3} />
                             Trending
                           </>
                         ) : (
                           <>
-                            <ArrowDownRight size={12} strokeWidth={3} />
+                            <ArrowDownRight size={10} className="sm:w-3 sm:h-3" strokeWidth={3} />
                             Declining
                           </>
                         )}
@@ -192,7 +192,7 @@ export default function TopProductsCard() {
 
       {/* FOOTER ACTION */}
       {!loading && products.length > 0 && (
-        <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex justify-center">
+        <div className="p-3 sm:p-4 bg-slate-50/50 border-t border-slate-100 flex justify-center">
           <button className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] hover:text-indigo-600 transition-colors">
             View Analytics Report
           </button>

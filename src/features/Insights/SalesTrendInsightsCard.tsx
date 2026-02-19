@@ -27,7 +27,7 @@ function Card({ children, className = "", delay = 0 }: any) {
       viewport={{ once: true }}
       transition={{ duration: 0.35, ease: "easeOut", delay }}
       whileHover={{ y: -2 }}
-      className={`relative rounded-3xl bg-white p-6 shadow-sm hover:shadow-md transition-all ${className}`}
+      className={`relative rounded-2xl sm:rounded-3xl bg-white p-3 sm:p-6 shadow-sm hover:shadow-md transition-all ${className}`}
     >
       {children}
     </motion.div>
@@ -71,61 +71,61 @@ export function SalesHealthCards({ data }: { data: any }) {
   }).format(avgDaily);
 
   return (
-    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
       <Card delay={0.05}>
-        <p className="text-sm text-slate-500">Total Sales</p>
-        <p className="mt-1 text-3xl font-semibold">₹{totalSales}</p>
-        <p className="text-xs text-slate-400">Avg/day {formattedAvg}</p>
+        <p className="text-xs sm:text-sm text-slate-500">Total Sales</p>
+        <p className="mt-0.5 sm:mt-1 text-xl sm:text-3xl font-semibold">₹{totalSales}</p>
+        <p className="text-[10px] sm:text-xs text-slate-400">Avg/day {formattedAvg}</p>
       </Card>
 
 
       <Card delay={0.1}>
-        <p className="text-sm text-slate-500">Growth</p>
+        <p className="text-xs sm:text-sm text-slate-500">Growth</p>
         <p
-          className={`mt-1 text-3xl font-semibold ${data.growth.percentage >= 0
+          className={`mt-0.5 sm:mt-1 text-xl sm:text-3xl font-semibold ${data.growth.percentage >= 0
             ? "text-emerald-600"
             : "text-red-600"
             }`}
         >
           {data.growth.percentage}%
         </p>
-        <p className="text-xs text-slate-400">Period momentum</p>
+        <p className="text-[10px] sm:text-xs text-slate-400">Period momentum</p>
       </Card>
 
       <Card delay={0.15}>
-        <p className="text-sm text-slate-500">Gross Margin</p>
-        <p className="mt-1 text-3xl font-semibold">
+        <p className="text-xs sm:text-sm text-slate-500">Gross Margin</p>
+        <p className="mt-0.5 sm:mt-1 text-xl sm:text-3xl font-semibold">
           {data.profitability.grossMargin}%
         </p>
-        <p className="text-xs text-slate-400">
+        <p className="text-[10px] sm:text-xs text-slate-400">
           ₹{data.profitability.profitPerUnit.toFixed(2)} / unit
         </p>
       </Card>
 
       <Card delay={0.2}>
-        <p className="text-sm text-slate-500">Inventory Cover</p>
-        <p className="mt-1 text-3xl font-semibold">
+        <p className="text-xs sm:text-sm text-slate-500">Inventory Cover</p>
+        <p className="mt-0.5 sm:mt-1 text-xl sm:text-3xl font-semibold">
           {data.inventoryImpact.inventoryToSalesDays} days
         </p>
-        <p className="text-xs text-slate-400">
+        <p className="text-[10px] sm:text-xs text-slate-400">
           Stock ₹{data.inventoryImpact.stockValue}
         </p>
       </Card>
 
-      <Card delay={0.25}>
-        <p className="text-sm text-slate-500">Sales Volatility</p>
-        <p className="mt-1 text-3xl font-semibold">
+      <Card delay={0.25} className="col-span-1">
+        <p className="text-xs sm:text-sm text-slate-500">Sales Volatility</p>
+        <p className="mt-0.5 sm:mt-1 text-xl sm:text-3xl font-semibold">
           {data.consistency.volatilityRatio}
         </p>
-        <p className="text-xs text-slate-400">Lower is healthier</p>
+        <p className="text-[10px] sm:text-xs text-slate-400">Lower is healthier</p>
       </Card>
 
-      <Card delay={0.3}>
-        <span className="inline-block rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+      <Card delay={0.3} className="col-span-1">
+        <span className="inline-block rounded-full bg-emerald-50 px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-medium text-emerald-700">
           Business Health
         </span>
         <p
-          className={`mt-3 text-4xl font-bold ${score >= 75
+          className={`mt-1 sm:mt-3 text-2xl sm:text-4xl font-bold ${score >= 75
             ? "text-emerald-600"
             : score >= 50
               ? "text-amber-600"
@@ -134,13 +134,13 @@ export function SalesHealthCards({ data }: { data: any }) {
         >
           {score}/100
         </p>
-        <p className="text-xs text-slate-400">Overall score</p>
+        <p className="text-[10px] sm:text-xs text-slate-400">Overall score</p>
       </Card>
 
       {data.risks.length > 0 && (
-        <Card delay={0.35} className="bg-red-50">
-          <p className="text-sm font-semibold text-red-600">Risks</p>
-          <ul className="mt-2 space-y-1 text-sm text-red-600">
+        <Card delay={0.35} className="bg-red-50 col-span-2">
+          <p className="text-xs sm:text-sm font-semibold text-red-600">Risks</p>
+          <ul className="mt-1 sm:mt-2 space-y-1 text-xs sm:text-sm text-red-600">
             {data.risks.map((r: string, i: number) => (
               <li key={i}>• {r}</li>
             ))}
@@ -194,7 +194,7 @@ export function SalesTrendGraphCard({ data }: { data: any }) {
         </div>
       </div>
 
-      <div className="h-[350px] w-full">
+      <div className="h-[250px] sm:h-[350px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={[...chartData, ...forecast]} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
             <defs>
@@ -551,7 +551,7 @@ export function MarginTrendGraph({ data }: { data: any }) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-[200px] w-full">
+      <div className="flex-1 min-h-[150px] sm:min-h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>

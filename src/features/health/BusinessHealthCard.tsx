@@ -42,7 +42,7 @@ export default function BusinessHealthCard({ data }: { data: BusinessHealthData 
   return (
     <div className="space-y-8">
       {/* MAIN SCORE CARD */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl relative overflow-hidden">
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xl relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-[0.4] pointer-events-none">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-3xl -mr-16 -mt-16" />
@@ -50,29 +50,29 @@ export default function BusinessHealthCard({ data }: { data: BusinessHealthData 
         </div>
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-6 sm:mb-8">
             <div className="p-2 bg-emerald-100 rounded-lg text-emerald-700">
               <Activity className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">Business Health Score</h2>
-              <p className="text-sm text-slate-500">Real-time diagnostic of your business performance</p>
+              <h2 className="text-lg sm:text-2xl font-bold text-slate-900">Business Health Score</h2>
+              <p className="text-xs sm:text-sm text-slate-500">Real-time diagnostic of your business performance</p>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-12">
+          <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-12">
             {/* SCORE CIRCLE */}
             <div className="relative flex-shrink-0">
-              <div className="w-40 h-40 flex items-center justify-center relative">
+              <div className="w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center relative">
                 {/* Outer Glow */}
                 <div className={`absolute inset-0 rounded-full blur-xl opacity-20 ${data.healthScore >= 80 ? "bg-emerald-500" : "bg-indigo-500"
                   }`} />
 
-                <svg className="w-full h-full -rotate-90 transform">
-                  <circle cx="50%" cy="50%" r="70" stroke="#f1f5f9" strokeWidth="12" fill="none" />
+                <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 160 160">
+                  <circle cx="80" cy="80" r="70" stroke="#f1f5f9" strokeWidth="12" fill="none" />
                   <circle
-                    cx="50%"
-                    cy="50%"
+                    cx="80"
+                    cy="80"
                     r="70"
                     stroke={strokeColor}
                     strokeWidth="12"
@@ -84,29 +84,29 @@ export default function BusinessHealthCard({ data }: { data: BusinessHealthData 
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-4xl font-extrabold ${scoreColor}`}>
+                  <span className={`text-3xl sm:text-4xl font-extrabold ${scoreColor}`}>
                     {data.healthScore}
                   </span>
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">Score</span>
+                  <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">Score</span>
                 </div>
               </div>
             </div>
 
             {/* STATUS & BREAKDOWN */}
             <div className="flex-1 w-full">
-              <div className="flex items-center gap-2 mb-6">
-                <span className="text-lg font-medium text-slate-600">Status:</span>
-                <span className={`text-xl font-bold px-4 py-1 rounded-full ${data.healthScore >= 80 ? "bg-emerald-100 text-emerald-700" : "bg-indigo-100 text-indigo-700"
+              <div className="flex items-center gap-2 mb-4 sm:mb-6 justify-center md:justify-start">
+                <span className="text-sm sm:text-lg font-medium text-slate-600">Status:</span>
+                <span className={`text-sm sm:text-xl font-bold px-3 py-0.5 sm:px-4 sm:py-1 rounded-full ${data.healthScore >= 80 ? "bg-emerald-100 text-emerald-700" : "bg-indigo-100 text-indigo-700"
                   }`}>
                   {data.status}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {Object.entries(data.breakdown).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
-                    <span className="text-sm font-medium text-slate-500 capitalize">{key.replace("Score", "")}</span>
-                    <span className="text-lg font-bold text-slate-900">{value}</span>
+                  <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <span className="text-[10px] sm:text-sm font-medium text-slate-500 capitalize">{key.replace("Score", "")}</span>
+                    <span className="text-sm sm:text-lg font-bold text-slate-900">{value}</span>
                   </div>
                 ))}
               </div>
