@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connect from "@/src/dbConfig/dbConnection";
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
-import { TotalStock } from "@/src/models/totalStockModel";
 import { Products } from "@/src/models/ProductModel";
+import { calculateCompositeStock } from "@/src/utils/compositeStock";
 
 const DAYS_WINDOW = 30;
 
@@ -13,6 +13,7 @@ type SeverityResult = {
   severity: Severity;
   reason: string;
   daysLeft: number | null;
+  status: string;
 };
 
 function evaluateSeverity(
@@ -26,57 +27,70 @@ function evaluateSeverity(
     lowDays: number;
   }
 ): SeverityResult {
+  let daysLeft: number | null = null;
+
+  if (avgDailySales > 0) {
+    daysLeft = Number((qty / avgDailySales).toFixed(1));
+  }
+
   // 🔴 HARD QUANTITY RULES (always apply)
   if (qty <= cfg.minQty) {
     return {
       severity: "CRITICAL",
-      reason: `Stock below minimum threshold (${cfg.minQty})`,
-      daysLeft: null,
+      reason: daysLeft !== null
+        ? `Stock critical (${qty}), ~${daysLeft} days left`
+        : `Stock below minimum threshold (${cfg.minQty})`,
+      daysLeft,
+      status: "Below Minimum",
     };
   }
 
-  if (qty <= cfg.warningQty && avgDailySales > 0) {
-    const daysLeft = qty / avgDailySales;
+  if (qty <= cfg.warningQty) {
     return {
       severity: "MEDIUM",
-      reason: `Low stock (${qty}), ~${daysLeft.toFixed(1)} days left`,
-      daysLeft: Number(daysLeft.toFixed(1)),
+      reason: daysLeft !== null
+        ? `Low stock (${qty}), ~${daysLeft} days left`
+        : `Low stock (${qty}), refill suggested`,
+      daysLeft,
+      status: "Low Stock",
     };
   }
 
 
   // 📉 VELOCITY-BASED RULES
-  if (avgDailySales > 0) {
-    const daysLeft = qty / avgDailySales;
-
+  if (daysLeft !== null) {
     if (daysLeft <= cfg.criticalDays) {
       return {
         severity: "CRITICAL",
-        reason: `Only ${daysLeft.toFixed(1)} days of stock left`,
-        daysLeft: Number(daysLeft.toFixed(1)),
+        reason: `Only ${daysLeft} days of stock left`,
+        daysLeft,
+        status: "High Movement",
       };
     }
 
     if (daysLeft <= cfg.warningDays) {
       return {
         severity: "MEDIUM",
-        reason: `Stock will run out in ~${daysLeft.toFixed(1)} days`,
-        daysLeft: Number(daysLeft.toFixed(1)),
+        reason: `Stock will run out in ~${daysLeft} days`,
+        daysLeft,
+        status: "Refill Soon",
       };
     }
 
     if (daysLeft <= cfg.lowDays) {
       return {
         severity: "LOW",
-        reason: `Monitor stock, ${daysLeft.toFixed(1)} days remaining`,
-        daysLeft: Number(daysLeft.toFixed(1)),
+        reason: `Monitor stock, ${daysLeft} days remaining`,
+        daysLeft,
+        status: "Monitor",
       };
     }
 
     return {
       severity: "OK",
-      reason: `Healthy stock for ~${daysLeft.toFixed(1)} days`,
-      daysLeft: Number(daysLeft.toFixed(1)),
+      reason: `Healthy stock for ~${daysLeft} days`,
+      daysLeft,
+      status: "Healthy",
     };
   }
 
@@ -85,6 +99,7 @@ function evaluateSeverity(
     severity: "OK",
     reason: "No recent sales and stock above minimum threshold",
     daysLeft: null,
+    status: "Healthy",
   };
 }
 
@@ -101,14 +116,8 @@ export async function GET(req: NextRequest) {
   const fromDate = new Date();
   fromDate.setDate(fromDate.getDate() - DAYS_WINDOW);
 
-  /* 1️⃣ Current stock */
-  const stock = await TotalStock.find({ email }).lean();
+  /* 1️⃣ Current stock (Using Products model now) */
   const products = await Products.find({ email }).lean();
-
-  const productMap = new Map(
-    products.map(p => [`${p.name}|${p.unit}`, p])
-  );
-
 
   /* 2️⃣ Sales in last 30 days */
   const sales = await LedgerEntry.find(
@@ -133,17 +142,36 @@ export async function GET(req: NextRequest) {
   const alerts: any[] = [];
   const explanations: any[] = [];
 
-  for (const s of stock) {
-    const key = `${s.name}|${s.unit}`;
-    const qty = s.quantity;
-    if (qty <= 0) continue;
+  for (const p of products) {
+    const key = `${p.name}|${p.unit}`;
+
+    // Compute quantity correctly for composite products
+    const qty =
+      p.productType === "composite"
+        ? await calculateCompositeStock(p, null)
+        : p.quantity;
+
+    if (qty <= 0 && p.productType !== "composite") {
+      // Evaluate 0 stock items immediately as critical if they are simple products
+      alerts.push({
+        product: p.name,
+        unit: p.unit,
+        quantity: 0,
+        avgDailySales: 0,
+        daysLeft: 0,
+        severity: "CRITICAL",
+        reason: "Out of stock",
+        status: "Out of Stock",
+      });
+      continue;
+    }
+
 
     const soldQty = salesMap.get(key) || 0;
     const avgDailySales = soldQty / DAYS_WINDOW;
 
-    const product = productMap.get(key);
-
-    const cfg = product?.lowStockConfig ?? {
+    // Default config fallback
+    const defaults = {
       minQty: 5,
       warningQty: 10,
       criticalDays: 3,
@@ -151,43 +179,41 @@ export async function GET(req: NextRequest) {
       lowDays: 14,
     };
 
+    const cfg = { ...defaults, ...(p.lowStockConfig || {}) };
+
     const result = evaluateSeverity(qty, avgDailySales, cfg);
 
     if (result.severity === "OK") {
       explanations.push({
-        product: s.name,
-        unit: s.unit,
+        product: p.name,
+        unit: p.unit,
         message: result.reason,
         quantity: qty,
         avgDailySales: Number(avgDailySales.toFixed(2)),
         daysLeft: result.daysLeft,
+        status: result.status,
       });
       continue;
     }
 
     alerts.push({
-      product: s.name,
-      unit: s.unit,
+      product: p.name,
+      unit: p.unit,
       quantity: qty,
       avgDailySales: Number(avgDailySales.toFixed(2)),
       daysLeft: result.daysLeft,
       severity: result.severity,
       reason: result.reason,
+      status: result.status,
     });
   }
-
-
-  // console.log(sales);
-  // console.log(stock);
-  // console.log(salesMap);
-  // console.log(alerts)
 
   return NextResponse.json({
     alerts: {
       count: alerts.length,
       products: alerts,
     },
-    noAlerts: explanations, // 👈 UI gold
+    noAlerts: explanations,
   });
 
 }

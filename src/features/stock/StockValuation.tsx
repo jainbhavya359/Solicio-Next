@@ -38,9 +38,16 @@ export default function StockValuationComparison() {
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
 
-  const today = new Date().toISOString().split("T")[0];
-  const [fromDate, setFromDate] = useState(today);
-  const [toDate, setToDate] = useState(today);
+  /* 📅 Default to last month */
+  const today = new Date();
+  const prior = new Date();
+  prior.setMonth(prior.getMonth() - 1);
+
+  const todayStr = today.toISOString().split("T")[0];
+  const priorStr = prior.toISOString().split("T")[0];
+
+  const [fromDate, setFromDate] = useState(priorStr);
+  const [toDate, setToDate] = useState(todayStr);
 
   const [rows, setRows] = useState<RowDelta[]>([]);
   const [loading, setLoading] = useState(false);

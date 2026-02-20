@@ -17,6 +17,7 @@ interface StockAlert {
   daysLeft: number | null;
   severity: Severity;
   reason: string;
+  status: string;
 }
 
 interface NoAlertExplanation {
@@ -57,7 +58,7 @@ const severityMap: Record<
 /* ================= MAIN ================= */
 
 export default function StockAlertSmart({ data }: { data: { alerts: { count: number; products: StockAlert[] }, noAlerts: NoAlertExplanation[], } | null }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   if (!data) return null;
 
@@ -143,7 +144,7 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
                             <Metric label="Velocity" value={`${p.avgDailySales.toFixed(1)}/d`} subgroup />
                             <div>
                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                              <p className="text-xs font-bold text-slate-700 leading-tight">Refill Now</p>
+                              <p className="text-xs font-bold text-slate-700 leading-tight">{p.status}</p>
                             </div>
                           </div>
 
@@ -200,7 +201,7 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
                                 <Metric label="Daily Velocity" value={`${p.avgDailySales.toFixed(1)}/d`} subgroup />
                                 <div className="text-right">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                                  <p className="text-xs font-bold text-slate-700">Refill Suggested</p>
+                                  <p className="text-xs font-bold text-slate-700">{p.status}</p>
                                 </div>
                               </div>
 

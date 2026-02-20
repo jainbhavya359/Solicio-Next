@@ -389,9 +389,11 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 lg:ml-[280px] min-h-screen pt-16 lg:pt-0 [zoom:0.85] lg:[zoom:1]">
         {/* Top Header Bar */}
-        <div className="p-4 sm:p-6 w-full max-w-full overflow-hidden">
-          {email && <LedgerSearchBox key={activeSection} email={email} />}
-        </div>
+        {email && activeSection === "overview" && (
+          <div className="p-4 sm:p-6 w-full max-w-full overflow-hidden">
+            <LedgerSearchBox key={activeSection} email={email} />
+          </div>
+        )}
 
         {/* Page Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">

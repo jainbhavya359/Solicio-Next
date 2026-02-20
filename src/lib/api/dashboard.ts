@@ -49,7 +49,7 @@ export async function fetchDashboardData(email: string, from?: string, to?: stri
     axios.get("/api/profit-loss", {
       params: { email, from: iso(prevStartDate), to: iso(prevEndDate) },
     }),
-    axios.get("/api/totalStock", { params: { email } }),
+    axios.get("/api/inventory", { params: { email } }),
     axios.get("/api/cash-flow", { params: { email } }),
     axios.get("/api/health/summary", { params: { email } }),
     axios.get("/api/low-stock", { params: { email } }),

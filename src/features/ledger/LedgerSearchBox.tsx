@@ -120,11 +120,12 @@ export default function LedgerSearchBox({ email }: { email: string }) {
   return (
     <div className="space-y-8">
       {/* SEARCH HEADER */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-2 shadow-sm focus-within:ring-4 focus-within:ring-emerald-500/5 transition-all">
+      {/* SEARCH HEADER */}
+      <div className="w-full">
         <UniversalSearchBox
           placeholder="Search items, parties, or voucher numbers…"
           onSubmit={handleSearch}
-          autoFocus
+          autoFocus={false}
         />
       </div>
 
