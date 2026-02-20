@@ -66,20 +66,20 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
 
   return (
     <section className="bg-white rounded-none sm:rounded-[2rem] sm:border border-slate-200 sm:shadow-sm overflow-visible sm:overflow-hidden">
-      {/* HEADER - Hidden on mobile, visible on desktop */}
+      {/* HEADER - Visible on all screens */}
       <div
-        className={`hidden sm:flex p-6 items-center justify-between transition-colors ${open ? "bg-slate-50/50 border-b border-slate-100" : ""}`}
+        className={`flex p-4 sm:p-6 items-center justify-between transition-colors ${open ? "bg-slate-50/50 border-b border-slate-100" : ""}`}
       >
-        <div className="flex items-center gap-4">
-          <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-colors ${hasAlerts ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
-            {hasAlerts ? <AlertTriangle className="h-6 w-6" /> : <CheckCircle className="h-6 w-6" />}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-colors ${hasAlerts ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
+            {hasAlerts ? <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6" /> : <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />}
           </div>
 
           <div>
-            <h3 className="text-lg font-bold text-slate-900 leading-tight">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
               Inventory Signals
             </h3>
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-xs sm:text-sm font-medium text-slate-500">
               {hasAlerts
                 ? `${data.alerts.count} product${data.alerts.count > 1 ? "s" : ""} requiring attention`
                 : "All stock levels are optimal"
@@ -90,9 +90,9 @@ export default function StockAlertSmart({ data }: { data: { alerts: { count: num
 
         <button
           onClick={() => setOpen(v => !v)}
-          className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
+          className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all ml-2"
         >
-          {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          {open ? <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" /> : <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />}
         </button>
       </div>
 

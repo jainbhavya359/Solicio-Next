@@ -245,19 +245,24 @@ export default function StockReport({
             <tbody className="divide-y divide-slate-50">
               <AnimatePresence mode="popLayout">
                 {loading ? (
-                  <motion.tr
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <td colSpan={7} className="py-24 text-center">
-                      <div className="relative w-12 h-12 mx-auto">
-                        <div className="absolute inset-0 border-4 border-emerald-100 rounded-full" />
-                        <div className="absolute inset-0 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-                      </div>
-                      <p className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Loading inventory data...</p>
-                    </td>
-                  </motion.tr>
+                  <>
+                    {[...Array(3)].map((_, i) => (
+                      <motion.tr
+                        key={`skel-desk-${i}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="animate-pulse bg-white border-b border-slate-50"
+                      >
+                        <td className="px-8 py-6"><div className="flex gap-4 items-center"><div className="w-12 h-12 bg-slate-200 rounded-2xl" /><div className="space-y-2"><div className="w-24 h-4 bg-slate-200 rounded text-slate-200">-</div><div className="w-12 h-2 bg-slate-200 rounded text-slate-200">-</div></div></div></td>
+                        <td className="px-8 py-6"><div className="w-16 h-6 bg-slate-200 rounded text-slate-200">-</div></td>
+                        <td className="px-8 py-6"><div className="w-12 h-4 bg-slate-200 rounded text-slate-200">-</div></td>
+                        <td className="px-8 py-6 right"><div className="w-20 h-6 bg-slate-200 rounded ml-auto text-slate-200">-</div></td>
+                        <td className="px-8 py-6"><div className="w-16 h-6 bg-slate-200 rounded text-slate-200">-</div></td>
+                        <td className="px-8 py-6"><div className="w-24 h-6 bg-slate-200 rounded-full text-slate-200">-</div></td>
+                        <td className="px-8 py-6" />
+                      </motion.tr>
+                    ))}
+                  </>
                 ) : (
                   items.map((stock, idx) => (
                     <motion.tr
@@ -346,76 +351,103 @@ export default function StockReport({
         {/* MOBILE LIST VIEW */}
         <div className="block sm:hidden">
           <div className="divide-y divide-slate-100">
-            {items.map((stock, idx) => (
-              <motion.div
-                key={`mob-${stock.product}-${stock.unit}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.02 }}
-                className="p-4"
-              >
-                {/* Row 1: Header & Status */}
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0">
-                      <Package size={20} />
+            {loading ? (
+              <>
+                {[...Array(3)].map((_, i) => (
+                  <div key={`skel-mob-${i}`} className="p-4 animate-pulse">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-slate-200" />
+                        <div className="space-y-2">
+                          <div className="w-20 h-4 bg-slate-200 rounded" />
+                          <div className="w-12 h-2 bg-slate-200 rounded" />
+                        </div>
+                      </div>
+                      <div className="w-16 h-4 bg-slate-200 rounded-full" />
                     </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 text-sm capitalize leading-tight">{stock.product}</h4>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stock.unit} • ₹{stock.price}</p>
+                    <div className="grid grid-cols-2 gap-2 mb-3 pl-13">
+                      <div className="h-12 rounded-lg bg-slate-200" />
+                      <div className="h-12 rounded-lg bg-slate-200" />
+                    </div>
+                    <div className="flex items-center gap-2 pl-13">
+                      <div className="h-9 w-9 rounded-lg bg-slate-200" />
+                      <div className="h-9 flex-1 rounded-lg bg-slate-200" />
+                      <div className="h-9 flex-1 rounded-lg bg-slate-200" />
                     </div>
                   </div>
-                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${stock.category === "fast" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : stock.category === "warning" ? "bg-amber-50 border-amber-100 text-amber-600" : "bg-rose-50 border-rose-100 text-rose-500"}`}>
-                    {statusMap[stock.category] || stock.category}
-                  </span>
-                </div>
-
-                {/* Row 2: Metrics Grid */}
-                <div className="grid grid-cols-2 gap-2 mb-3 pl-13">
-                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100/50">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Stock Level</p>
-                    <p className="text-sm font-bold text-slate-800">{stock.quantity} <span className="text-[10px] text-slate-400 font-medium">{stock.unit}</span></p>
+                ))}
+              </>
+            ) : (
+              items.map((stock, idx) => (
+                <motion.div
+                  key={`mob-${stock.product}-${stock.unit}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.02 }}
+                  className="p-4"
+                >
+                  {/* Row 1: Header & Status */}
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0">
+                        <Package size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-sm capitalize leading-tight">{stock.product}</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stock.unit} • ₹{stock.price}</p>
+                      </div>
+                    </div>
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${stock.category === "fast" ? "bg-emerald-50 border-emerald-100 text-emerald-600" : stock.category === "warning" ? "bg-amber-50 border-amber-100 text-amber-600" : "bg-rose-50 border-rose-100 text-rose-500"}`}>
+                      {statusMap[stock.category] || stock.category}
+                    </span>
                   </div>
-                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100/50">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Value</p>
-                    <p className="text-sm font-bold text-emerald-600">₹{stock.stockValue.toLocaleString()}</p>
-                  </div>
-                </div>
 
-                {/* Row 3: Actions */}
-                <div className="flex items-center gap-2 pl-13">
-                  <button
-                    onClick={() => handleEditProduct(stock)}
-                    className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-emerald-600 hover:bg-emerald-50 shrink-0"
-                  >
-                    <Edit2 size={14} />
-                  </button>
-                  <button
-                    onClick={() => adjustQty(stock, -1)}
-                    className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50"
-                  >
-                    <Minus size={14} /> Sale
-                  </button>
-                  <button
-                    onClick={() => adjustQty(stock, 1)}
-                    className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg bg-slate-900 text-white font-bold text-xs hover:bg-slate-800"
-                  >
-                    <Plus size={14} /> Restock
-                  </button>
-                  {stock.quantity === 0 && (
+                  {/* Row 2: Metrics Grid */}
+                  <div className="grid grid-cols-2 gap-2 mb-3 pl-13">
+                    <div className="p-2 rounded-lg bg-slate-50 border border-slate-100/50">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Stock Level</p>
+                      <p className="text-sm font-bold text-slate-800">{stock.quantity} <span className="text-[10px] text-slate-400 font-medium">{stock.unit}</span></p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-50 border border-slate-100/50">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Value</p>
+                      <p className="text-sm font-bold text-emerald-600">₹{stock.stockValue.toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Actions */}
+                  <div className="flex items-center gap-2 pl-13">
                     <button
-                      onClick={() => handleDeleteProduct(stock)}
-                      className="h-9 w-9 flex items-center justify-center rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50"
+                      onClick={() => handleEditProduct(stock)}
+                      className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-emerald-600 hover:bg-emerald-50 shrink-0"
                     >
-                      <Trash2 size={14} />
+                      <Edit2 size={14} />
                     </button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+                    <button
+                      onClick={() => adjustQty(stock, -1)}
+                      className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50"
+                    >
+                      <Minus size={14} /> Sale
+                    </button>
+                    <button
+                      onClick={() => adjustQty(stock, 1)}
+                      className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg bg-slate-900 text-white font-bold text-xs hover:bg-slate-800"
+                    >
+                      <Plus size={14} /> Restock
+                    </button>
+                    {stock.quantity === 0 && (
+                      <button
+                        onClick={() => handleDeleteProduct(stock)}
+                        className="h-9 w-9 flex items-center justify-center rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
-
 
         {!loading && items.length === 0 && (
           <div className="py-20 sm:py-32 text-center">

@@ -28,6 +28,25 @@ const PanelMotion = ({ children }: { children: React.ReactNode }) => (
   </motion.div>
 );
 
+function InsightsSkeleton() {
+  return (
+    <div className="grid gap-8 sm:gap-12 grid-cols-1 w-full animate-pulse mt-12 sm:mt-20">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-white border border-slate-100 rounded-[2rem] p-5 sm:p-8 shadow-sm">
+          <div className="flex items-center gap-3 mb-6 sm:mb-8">
+            <div className="h-10 w-10 rounded-xl bg-slate-200" />
+            <div className="space-y-2">
+              <div className="h-5 w-40 bg-slate-200 rounded" />
+              <div className="h-2 w-24 bg-slate-200 rounded" />
+            </div>
+          </div>
+          <div className="h-64 sm:h-80 w-full bg-slate-200 rounded-2xl" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function BusinessInsights() {
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
@@ -93,7 +112,9 @@ export default function BusinessInsights() {
         </motion.div>
 
         {/* INSIGHTS GRID */}
-        {!loadingSnapshot && snapshot && (
+        {loadingSnapshot ? (
+          <InsightsSkeleton />
+        ) : snapshot ? (
           <div className="grid gap-8 sm:gap-12 grid-cols-1">
 
             <InsightCard title="Dynamic Stock Alerts" icon={<Activity className="w-4 h-4" />}>
@@ -115,7 +136,7 @@ export default function BusinessInsights() {
             </InsightCard>
 
           </div>
-        )}
+        ) : null}
 
         {/* STRATEGIC ACTION BAR */}
         <div className="sticky bottom-4 sm:bottom-8 z-30 flex justify-center w-full pointer-events-none">

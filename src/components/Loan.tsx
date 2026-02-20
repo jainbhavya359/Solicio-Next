@@ -357,31 +357,31 @@ export default function Loan() {
         </div>
 
         {/* SIMULATOR & GAUGE SECTION */}
-        <div className="grid lg:grid-cols-1 gap-6 sm:gap-16">
+        <div className="w-full min-w-0">
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="bg-white rounded-2xl sm:rounded-[3rem] border border-slate-100 p-4 sm:p-12 shadow-sm sm:shadow-2xl shadow-slate-200/50"
+            className="w-full min-w-0 overflow-hidden bg-white rounded-2xl sm:rounded-[3rem] border border-slate-100 p-5 sm:p-12 shadow-sm sm:shadow-2xl shadow-slate-200/50"
           >
-            <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-start">
-              <div className="text-left space-y-6 sm:space-y-8">
-                <div>
+            <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-start w-full min-w-0">
+              <div className="text-left space-y-6 sm:space-y-8 w-full min-w-0">
+                <div className="w-full min-w-0">
                   <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tightest mb-2 sm:mb-4">Neural <span className="text-emerald-600">Simulator</span></h2>
                   <p className="text-sm sm:text-lg text-slate-500 font-medium">Calibrate your credit variables to project future capital accessibility.</p>
                 </div>
 
-                <div className="grid gap-6 sm:gap-8">
+                <div className="grid gap-6 sm:gap-8 w-full min-w-0">
                   {[
                     { label: "Operational Payment Success (%)", value: paymentHistory, setter: setPaymentHistory, icon: <Zap /> },
                     { label: "Capital Utilization Ratio (%)", value: ratio, setter: setRatio, icon: <Activity /> },
                     { label: "Financial Tenure Depth (Years)", value: year, setter: setYear, icon: <TrendingUp /> },
                     { label: "Strategic Hard Inquiries", value: inquiries, setter: setInquiries, icon: <ShieldCheck /> },
                   ].map((field: any, i) => (
-                    <div key={i} className="group">
-                      <div className="flex justify-between items-center mb-2 sm:mb-3">
+                    <div key={i} className="group w-full min-w-0">
+                      <div className="flex justify-between items-center mb-2 sm:mb-3 w-full min-w-0">
                         <label className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 max-w-[70%] leading-tight sm:max-w-none">{field.label}</label>
-                        <span className="text-xs sm:text-sm font-black text-slate-900 group-focus-within:text-emerald-600 transition-colors">{field.value}</span>
+                        <span className="text-xs sm:text-sm font-black text-slate-900 group-focus-within:text-emerald-600 transition-colors shrink-0">{field.value}</span>
                       </div>
                       <input
                         type="range"
@@ -399,21 +399,21 @@ export default function Loan() {
                   onClick={calculateScore}
                   className="w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white bg-slate-900 hover:bg-slate-800 shadow-xl sm:shadow-2xl transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-3"
                 >
-                  Project Neural Score <Calculator className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Project Neural Score <Calculator className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                 </button>
               </div>
 
-              <div className="h-full">
+              <div className="h-full w-full min-w-0">
                 <AnimatePresence mode="wait">
                   {show ? (
                     <motion.div
                       key="gauge"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="h-full flex flex-col justify-center"
+                      className="h-full flex flex-col justify-center w-full min-w-0"
                     >
                       <CreditGauge score={score} />
-                      <div className="mt-8 p-6 rounded-[2rem] bg-slate-50 border border-slate-100">
+                      <div className="mt-8 p-6 rounded-[2rem] bg-slate-50 border border-slate-100 w-full min-w-0">
                         <p className="text-sm font-bold text-slate-500 uppercase tracking-widest text-center mb-2">Simulation Result Card</p>
                         <p className="text-slate-600 text-sm font-medium leading-relaxed text-center px-4">
                           {scores_rate[index]}
@@ -421,7 +421,7 @@ export default function Loan() {
                       </div>
                     </motion.div>
                   ) : (
-                    <div className="h-full min-h-[400px] border-2 border-dashed border-slate-100 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-300 gap-4">
+                    <div className="h-full min-h-[400px] border-2 border-dashed border-slate-100 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-300 gap-4 w-full min-w-0">
                       <Activity className="w-12 h-12 opacity-20" />
                       <p className="text-sm font-bold uppercase tracking-widest opacity-40">Awaiting Signal Input</p>
                     </div>

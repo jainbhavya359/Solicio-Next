@@ -80,10 +80,10 @@ export default function FinancialReport({ onClose }: FinancialReportProps) {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl shadow-slate-900/30 overflow-hidden flex flex-col max-h-[90vh] print:shadow-none print:rounded-none print:max-h-none print:relative print:scale-100 print:bg-white"
+                className="relative w-full max-w-6xl bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl shadow-slate-900/30 overflow-hidden flex flex-col max-h-[90vh] print:shadow-none print:rounded-none print:max-h-none print:relative print:scale-100 print:bg-white"
             >
                 {/* Header - Hidden on Print */}
-                <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/50 backdrop-blur-sm print:hidden">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 sm:px-8 py-5 sm:py-6 border-b border-slate-100 bg-slate-50/50 backdrop-blur-sm print:hidden gap-4 sm:gap-0">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/10">
                             <FileText className="w-6 h-6" />
@@ -114,7 +114,7 @@ export default function FinancialReport({ onClose }: FinancialReportProps) {
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto p-8 print:p-0 print:overflow-visible bg-white">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 print:p-0 print:overflow-visible bg-white">
                     {loading || !data ? (
                         <div className="py-32 flex flex-col items-center justify-center space-y-4 bg-white">
                             <div className="relative w-16 h-16">
@@ -127,32 +127,32 @@ export default function FinancialReport({ onClose }: FinancialReportProps) {
                         <div className="space-y-12 pb-12 print:pb-0">
 
                             {/* ON-SCREEN FILTERS - Hidden on Print */}
-                            <div className="print:hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-                                <div className="flex items-center gap-6 px-4">
-                                    <div className="flex flex-col">
+                            <div className="print:hidden flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 p-4 sm:p-6 bg-slate-50 rounded-2xl sm:rounded-[2rem] border border-slate-100">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 px-2 sm:px-4 w-full lg:w-auto">
+                                    <div className="flex flex-col w-full sm:w-auto">
                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Audit Start</span>
                                         <input
                                             type="date"
                                             value={from}
                                             onChange={e => setFrom(e.target.value)}
-                                            className="text-sm font-bold text-slate-900 bg-transparent border-none p-0 focus:ring-0 cursor-pointer"
+                                            className="text-sm font-bold text-slate-900 bg-transparent border border-slate-200 sm:border-none rounded-lg sm:rounded-none p-2 sm:p-0 w-full focus:ring-0 cursor-pointer"
                                         />
                                     </div>
-                                    <ArrowRight className="w-4 h-4 text-slate-200" />
-                                    <div className="flex flex-col">
+                                    <ArrowRight className="w-4 h-4 text-slate-200 hidden sm:block" />
+                                    <div className="flex flex-col w-full sm:w-auto">
                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Audit End</span>
                                         <input
                                             type="date"
                                             value={to}
                                             onChange={e => setTo(e.target.value)}
-                                            className="text-sm font-bold text-slate-900 bg-transparent border-none p-0 focus:ring-0 cursor-pointer"
+                                            className="text-sm font-bold text-slate-900 bg-transparent border border-slate-200 sm:border-none rounded-lg sm:rounded-none p-2 sm:p-0 w-full focus:ring-0 cursor-pointer"
                                         />
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={loadReport}
-                                    className="h-12 px-8 rounded-xl bg-white border border-slate-200 text-slate-900 text-[10px] font-black uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-600 transition-all active:scale-95"
+                                    className="h-12 w-full lg:w-auto px-8 rounded-xl bg-white border border-slate-200 text-slate-900 text-[10px] font-black uppercase tracking-widest hover:border-emerald-500 hover:text-emerald-600 transition-all active:scale-95 whitespace-nowrap"
                                 >
                                     Sync Audit Data
                                 </button>
@@ -210,8 +210,8 @@ export default function FinancialReport({ onClose }: FinancialReportProps) {
                                     {/* 1. FINANCIAL SUMMARY SECTION (Trading Account) */}
                                     <section className={(activeView === "summary" ? "block" : "hidden print:block") + " space-y-8"}>
                                         <SectionHeader title="Financial Summary" subtitle="Trading & Profit Loss Distribution" />
-                                        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/40 overflow-hidden">
-                                            <div className="p-10 grid md:grid-cols-2 gap-16">
+                                        <div className="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-xl sm:shadow-2xl shadow-slate-200/40 overflow-hidden">
+                                            <div className="p-5 sm:p-10 grid md:grid-cols-2 gap-8 sm:gap-16">
                                                 <div className="space-y-6">
                                                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-4">Operational Revenue</h4>
                                                     <SummaryRow label="Total Sales (Revenue)" value={data.summary.sales} />
@@ -225,9 +225,9 @@ export default function FinancialReport({ onClose }: FinancialReportProps) {
                                                     <SummaryRow label="Inventory Write-downs" value={data.summary.inventoryWriteDowns} />
                                                 </div>
                                             </div>
-                                            <div className="px-10 py-8 bg-slate-900 flex items-center justify-between print:rounded-b-[2.5rem]">
+                                            <div className="px-5 py-6 sm:px-10 sm:py-8 bg-slate-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 print:rounded-b-[2.5rem]">
                                                 <span className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Audited Net Profit</span>
-                                                <span className="text-4xl font-extrabold text-emerald-400 tracking-tightest">₹{data.summary.netProfit.toLocaleString()}</span>
+                                                <span className="text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tightest">₹{data.summary.netProfit.toLocaleString()}</span>
                                             </div>
                                         </div>
                                     </section>
@@ -284,14 +284,14 @@ export default function FinancialReport({ onClose }: FinancialReportProps) {
                 </div>
 
                 {/* Footer Actions - Hidden on Print */}
-                <div className="px-8 py-6 border-t border-slate-100 bg-white flex items-center justify-between print:hidden">
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
+                <div className="px-5 sm:px-8 py-5 sm:py-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
+                    <p className="text-[9px] sm:text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] text-center sm:text-left leading-tight">
                         Solicio Tactical Audit Hub • Institutional Ledger Verified
                     </p>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
                         <button
                             onClick={onClose}
-                            className="h-12 px-8 rounded-xl bg-slate-50 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
+                            className="h-12 w-full sm:w-auto px-8 rounded-xl bg-slate-50 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
                         >
                             Dismiss Statement
                         </button>

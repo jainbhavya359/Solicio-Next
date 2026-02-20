@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import StockHistory from "@/src/features/stock/StockHistory";
+import Header from "@/src/components/layout/Header";
 
 export default function TransactionsPage() {
     const { user } = useUser();
@@ -32,6 +33,7 @@ export default function TransactionsPage() {
 
     return (
         <main className="min-h-screen bg-[#F7FAF9] font-outfit relative overflow-hidden">
+            <Header />
             {/* Background radial grid */}
             <div className="absolute inset-0 z-0 opacity-[0.4] pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" />

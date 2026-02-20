@@ -172,6 +172,62 @@ const PanelMotion = ({ children }: { children: React.ReactNode }) => (
   </motion.div>
 );
 
+function OverviewSkeleton() {
+  return (
+    <div className="space-y-6 sm:space-y-8 w-full min-w-0 animate-pulse mt-6 sm:mt-8">
+      {/* Date Filter Bar */}
+      <div className="h-16 bg-slate-200 rounded-2xl w-full"></div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 w-full">
+        <div className="h-32 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+        <div className="h-32 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+        <div className="h-32 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+        <div className="h-32 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+      </div>
+
+      {/* Health / Credit / Cash Flow Grids */}
+      <div className="h-40 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+      <div className="grid md:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+        <div className="h-64 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+        <div className="h-64 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+      </div>
+
+      {/* Hero Insight */}
+      <div className="h-80 bg-slate-200 rounded-2xl sm:rounded-3xl w-full mt-10"></div>
+
+      {/* Bottom Insights */}
+      <div className="grid md:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+        <div className="h-60 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+        <div className="h-60 bg-slate-200 rounded-2xl sm:rounded-3xl w-full"></div>
+      </div>
+    </div>
+  );
+}
+
+function InventorySkeleton() {
+  return (
+    <div className="space-y-4 sm:space-y-6 w-full min-w-0 animate-pulse mt-6 sm:mt-8">
+      {/* Stock Report Header block */}
+      <div className="h-64 sm:h-80 bg-slate-200 rounded-2xl border border-stone-200 w-full"></div>
+
+      {/* Sales / Purchase buttons block */}
+      <div className="flex gap-4">
+        <div className="h-12 flex-1 bg-slate-200 rounded-xl"></div>
+        <div className="h-12 flex-1 bg-slate-200 rounded-xl"></div>
+      </div>
+
+      {/* Top Products */}
+      <div className="h-72 bg-slate-200 rounded-2xl border border-stone-200 w-full"></div>
+
+      {/* Stock Alerts */}
+      <div className="h-56 bg-slate-200 rounded-2xl border border-stone-200 w-full"></div>
+
+      {/* Stock Valuation */}
+      <div className="h-60 bg-slate-200 rounded-2xl border border-stone-200 w-full"></div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { user } = useUser();
@@ -424,157 +480,158 @@ export default function Dashboard() {
             {/* OVERVIEW SECTION */}
             {activeSection === "overview" && (
               <section id="overview" className="w-full min-w-0 flex flex-col">
-                <motion.div
-                  variants={staggerContainer}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-4 sm:space-y-6 w-full min-w-0"
-                >
-                  {/* Date Filter Bar */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
-                        {Icons.calendar}
-                      </div>
-                      <h2 className="text-sm font-semibold text-stone-700">Filter Range</h2>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="flex items-center gap-2 flex-1 sm:flex-none">
-                        <span className="text-xs font-medium text-stone-400">From</span>
-                        <input
-                          type="date"
-                          value={fromDate}
-                          onChange={(e) => setFromDate(e.target.value)}
-                          className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2 flex-1 sm:flex-none">
-                        <span className="text-xs font-medium text-stone-400">To</span>
-                        <input
-                          type="date"
-                          value={toDate}
-                          onChange={(e) => setToDate(e.target.value)}
-                          className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Business Health & KPIs */}
-                  <div className="space-y-4 sm:space-y-8">
-                    <KPICards data={dashboardData?.kpis} />
-                    {email && <BusinessHealthCard data={dashboardData?.healthSummary} />}
-                  </div>
-
-                  {/* Two Column Layout */}
-                  <div className="grid md:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
-                    <motion.div variants={fadeInUp} className="h-full min-w-0 w-full">
-                      <CreditGauge score={score} />
-                    </motion.div>
-
-                    <motion.div variants={fadeInUp} className="h-full min-w-0 w-full">
-                      <CashFlowWatch data={dashboardData?.cashFlow} />
-                    </motion.div>
-                  </div>
-                  {loadingInsights ? (
-                    <div className="bg-white rounded-2xl p-10 shadow-sm flex items-center justify-center">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-8 h-8 border-2 border-emerald-200 border-t-emerald-600 rounded-full"
-                      />
-                    </div>
-                  ) : !data ? (
-                    <div className="bg-white rounded-2xl p-10 text-center text-stone-500">
-                      Unable to load insights
-                    </div>
-                  ) : (
-                    <section className="mx-auto max-w-7xl w-full min-w-0 px-0 sm:px-4 py-8 sm:py-20 space-y-6 sm:space-y-10">
-                      {/* 1️⃣ Sales Trend (hero insight) */}
-                      <div className="w-full min-w-0">
-                        <SalesTrendGraphCard data={data} />
-                      </div>
-
-                      {/* 2️⃣ Forward-looking */}
-                      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 w-full min-w-0">
-                        <div className="w-full min-w-0 h-full"><ForecastSummaryCard data={data} /></div>
-                      </div>
-
-                      {/* 4️⃣ Context */}
-                      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 w-full min-w-0">
-                        <div className="w-full min-w-0 h-full">
-                          <TopProductDonut data={data} onViewInventory={() => scrollToSection("inventory")} />
+                {(loadingDashboard || loadingInsights) ? (
+                  <OverviewSkeleton />
+                ) : (
+                  <motion.div
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="space-y-4 sm:space-y-6 w-full min-w-0"
+                  >
+                    {/* Date Filter Bar */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                          {Icons.calendar}
                         </div>
-                        <div className="w-full min-w-0 h-full">
-                          <MarginTrendGraph data={data} />
+                        <h2 className="text-sm font-semibold text-stone-700">Filter Range</h2>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                          <span className="text-xs font-medium text-stone-400">From</span>
+                          <input
+                            type="date"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                            className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                          <span className="text-xs font-medium text-stone-400">To</span>
+                          <input
+                            type="date"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                            className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-stone-50 border-none text-sm font-medium text-stone-700 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none"
+                          />
                         </div>
                       </div>
+                    </div>
 
-                      {/* 5️⃣ Advice */}
-                      <div className="w-full min-w-0">
-                        <ActionSuggestionCard data={data} />
+                    {/* Business Health & KPIs */}
+                    <div className="space-y-4 sm:space-y-8">
+                      <KPICards data={dashboardData?.kpis} />
+                      {email && <BusinessHealthCard data={dashboardData?.healthSummary} />}
+                    </div>
+
+                    {/* Two Column Layout */}
+                    <div className="grid md:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+                      <motion.div variants={fadeInUp} className="h-full min-w-0 w-full">
+                        <CreditGauge score={score} />
+                      </motion.div>
+
+                      <motion.div variants={fadeInUp} className="h-full min-w-0 w-full">
+                        <CashFlowWatch data={dashboardData?.cashFlow} />
+                      </motion.div>
+                    </div>
+                    {/* Insights have already been loaded so render them directly */}
+                    {!data ? (
+                      <div className="bg-white rounded-2xl p-10 text-center text-stone-500 mt-8">
+                        Unable to load insights
                       </div>
-                    </section>
-                  )}
+                    ) : (
+                      <section className="mx-auto max-w-7xl w-full min-w-0 px-0 sm:px-4 py-8 sm:py-20 space-y-6 sm:space-y-10">
+                        {/* 1️⃣ Sales Trend (hero insight) */}
+                        <div className="w-full min-w-0">
+                          <SalesTrendGraphCard data={data} />
+                        </div>
 
-                </motion.div>
+                        {/* 2️⃣ Forward-looking */}
+                        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 w-full min-w-0">
+                          <div className="w-full min-w-0 h-full"><ForecastSummaryCard data={data} /></div>
+                        </div>
+
+                        {/* 4️⃣ Context */}
+                        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 w-full min-w-0">
+                          <div className="w-full min-w-0 h-full">
+                            <TopProductDonut data={data} onViewInventory={() => scrollToSection("inventory")} />
+                          </div>
+                          <div className="w-full min-w-0 h-full">
+                            <MarginTrendGraph data={data} />
+                          </div>
+                        </div>
+
+                        {/* 5️⃣ Advice */}
+                        <div className="w-full min-w-0">
+                          <ActionSuggestionCard data={data} />
+                        </div>
+                      </section>
+                    )}
+
+                  </motion.div>
+                )}
               </section>
             )}
 
             {/* INVENTORY SECTION */}
             {activeSection === "inventory" && (
               <section id="inventory">
-                <motion.div
-                  variants={staggerContainer}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  className="space-y-4 sm:space-y-6"
-                >
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
-                    <StockReport
-                      visible={true}
-                      data={dashboardData?.inventory}
-                      productSetter={setProduct}
-                      saleSetter={setNewSale}
-                      purchaseSetter={setNewPurchase}
-                    />
-                  </motion.div>
-                  {/* FORMS */}
-                  <AnimatePresence mode="wait">
-                    {newPurchase && (
-                      <PanelMotion key="purchase">
-                        <Purchase
-                          visible={true}
-                          preSelectedProduct={product}
-                          reloadSetter={setReload}
-                          reload={reload}
-                        />
-                      </PanelMotion>
-                    )}
+                {loadingDashboard ? (
+                  <InventorySkeleton />
+                ) : (
+                  <motion.div
+                    variants={staggerContainer}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    className="space-y-4 sm:space-y-6"
+                  >
+                    <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
+                      <StockReport
+                        visible={true}
+                        data={dashboardData?.inventory}
+                        productSetter={setProduct}
+                        saleSetter={setNewSale}
+                        purchaseSetter={setNewPurchase}
+                      />
+                    </motion.div>
+                    {/* FORMS */}
+                    <AnimatePresence mode="wait">
+                      {newPurchase && (
+                        <PanelMotion key="purchase">
+                          <Purchase
+                            visible={true}
+                            preSelectedProduct={product}
+                            reloadSetter={setReload}
+                            reload={reload}
+                          />
+                        </PanelMotion>
+                      )}
 
-                    {newSale && (
-                      <PanelMotion key="sale">
-                        <Sale
-                          visible={true}
-                          preSelectedProduct={product}
-                          reloadSetter={setReload}
-                          reload={reload}
-                        />
-                      </PanelMotion>
-                    )}
-                  </AnimatePresence>
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
-                    <TopProductsCard />
+                      {newSale && (
+                        <PanelMotion key="sale">
+                          <Sale
+                            visible={true}
+                            preSelectedProduct={product}
+                            reloadSetter={setReload}
+                            reload={reload}
+                          />
+                        </PanelMotion>
+                      )}
+                    </AnimatePresence>
+                    <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
+                      <TopProductsCard />
+                    </motion.div>
+                    <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
+                      <StockAlertSmart data={dashboardData?.lowStock} />
+                    </motion.div>
+                    <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
+                      <StockValuation />
+                    </motion.div>
                   </motion.div>
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
-                    <StockAlertSmart data={dashboardData?.lowStock} />
-                  </motion.div>
-                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
-                    <StockValuation />
-                  </motion.div>
-                </motion.div>
+                )}
               </section>
             )}
 
