@@ -40,7 +40,7 @@ export default function UniversalSearchBox({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       className={`
-        relative group flex items-center gap-4 px-6 py-4 rounded-2xl
+        relative group flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-3 sm:py-4 rounded-2xl w-full min-w-0
         transition-all duration-300 ease-out
         ${isFocused
           ? "bg-white shadow-xl shadow-emerald-500/10 ring-2 ring-emerald-500/50"
@@ -60,7 +60,7 @@ export default function UniversalSearchBox({
         placeholder={placeholder || "Search ledger records…"}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-        className="flex-1 bg-transparent outline-none text-slate-900 placeholder:text-slate-400 text-base font-medium"
+        className="flex-1 w-full min-w-0 bg-transparent outline-none text-slate-900 placeholder:text-slate-400 text-sm sm:text-base font-medium"
       />
 
       <AnimatePresence>
@@ -84,7 +84,7 @@ export default function UniversalSearchBox({
         whileTap={{ scale: 0.98 }}
         onClick={handleSubmit}
         className={`
-          px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300
+          px-3 sm:px-6 py-1.5 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-300 flex-shrink-0
           ${value
             ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-500"
             : "bg-slate-100 text-slate-400 cursor-not-allowed"

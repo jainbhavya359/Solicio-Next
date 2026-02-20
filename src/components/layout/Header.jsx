@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { TrendingUp } from "lucide-react";
+import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 
 export default function Header() {
   const pathname = usePathname();
@@ -40,7 +42,7 @@ export default function Header() {
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black">
-            S
+            <TrendingUp />
           </div>
           <span className="text-xl font-extrabold text-slate-900">
             Solicio
@@ -72,13 +74,22 @@ export default function Header() {
         </nav>
 
         {/* DESKTOP CTA */}
-        <Link
-          href="/signup"
-          className="hidden md:inline-block px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold
-          hover:bg-emerald-700 transition shadow"
-        >
-          Get Started Free
-        </Link>
+        <SignedOut>
+          <Link
+            href="/signup"
+            className="hidden md:inline-block px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold
+            hover:bg-emerald-700 transition shadow"
+          >
+            Get Started Free
+          </Link>
+        </SignedOut>
+        <SignedIn>
+          <SignOutButton>
+            <button className="hidden md:inline-block px-5 py-2.5 rounded-xl bg-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-300 transition shadow">
+              Log Out
+            </button>
+          </SignOutButton>
+        </SignedIn>
 
         {/* MOBILE HAMBURGER */}
         <button
@@ -118,13 +129,25 @@ export default function Header() {
                 );
               })}
               <hr className="border-slate-100 my-2" />
-              <Link
-                href="/signup"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-center px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold shadow"
-              >
-                Get Started Free
-              </Link>
+              <SignedOut>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-center px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold shadow"
+                >
+                  Get Started Free
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <SignOutButton>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center px-5 py-3 rounded-xl bg-slate-200 text-slate-700 font-semibold shadow"
+                  >
+                    Log Out
+                  </button>
+                </SignOutButton>
+              </SignedIn>
             </nav>
           </motion.div>
         )}

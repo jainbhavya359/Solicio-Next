@@ -9,6 +9,7 @@ import Stock from "@/src/models/stockModel";
 import { TotalStock } from "@/src/models/totalStockModel";
 import { Document } from "@/src/models/DocumentModel";
 import { CompanyProfile } from "@/src/models/CompanyProfileModel";
+import { Party } from "@/src/models/PartyModel";
 
 import { generateVoucherNo } from "@/src/utils/voucher";
 import { computeGST } from "@/src/utils/gst";
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
       date: txDate,
       session,
     });
-    
+
     /* 📦 Stock history */
     await Stock.create(
       [{
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
       }],
       { session }
     );
-    
+
     /* 📒 Ledger */
     const [ledger] = await LedgerEntry.create(
       [{
@@ -65,23 +66,23 @@ export async function POST(req: NextRequest) {
         date: txDate,
         voucherType: "Purchase",
         voucherNo,
-        
+
         partyName: party?.name || "Cash",
         partyType: "Supplier",
 
         itemName: product.name,
         unit: product.unit,
-        
+
         debitQty: product.quantity,
         creditQty: 0,
-        
+
         rate: product.rate,
         amount,
         narration: meta?.notes || "",
       }],
       { session }
     );
-    
+
     /* 📦 FIFO Layer */
     await StockLayer.create(
       [{
@@ -96,14 +97,14 @@ export async function POST(req: NextRequest) {
       }],
       { session }
     );
-    
+
     /* 📦 Product quantity */
     await Products.updateOne(
       { email, name: product.name, unit: product.unit },
       { $inc: { quantity: product.quantity }, $set: { purchasePrice: product.rate } },
       { session }
     );
-    
+
     /* 📊 TotalStock */
     await TotalStock.findOneAndUpdate(
       { email, name: product.name, unit: product.unit },
@@ -116,7 +117,7 @@ export async function POST(req: NextRequest) {
 
     /* 🏢 Company snapshot */
     const company = await CompanyProfile.findOne({ email }).lean();
-    
+
     /* 📄 BILL DOCUMENT */
     const gst = computeGST({
       amount: product.quantity * product.rate,
@@ -140,7 +141,16 @@ export async function POST(req: NextRequest) {
           name: party.name || "Cash",
           taxId: party.taxId,
           address: party.address,
+          state: party.state,
           paymentTerms: party.paymentTerms,
+        },
+
+        company: {
+          name: company?.name,
+          gstin: company?.gstin,
+          state: company?.state,
+          address: company?.address,
+          logoUrl: company?.logoUrl,
         },
 
         item: {
@@ -155,8 +165,8 @@ export async function POST(req: NextRequest) {
         subtotal: product.quantity * product.rate,
         tax: gst.tax,
         taxBreakup: gst.type === "NONE"
-        ? { type: "NONE" }
-        : {
+          ? { type: "NONE" }
+          : {
             type: gst.type,
             ...gst.breakup,
           },
@@ -166,6 +176,28 @@ export async function POST(req: NextRequest) {
       }],
       { session }
     );
+
+    /* 📇 Auto-create Party (Supplier) */
+    if (party?.name && party.name !== "Cash") {
+      await Party.findOneAndUpdate(
+        { email, name: party.name },
+        {
+          $setOnInsert: {
+            email,
+            name: party.name,
+            type: "Supplier",
+            category: party.category || "Individual",
+            gstin: party.taxId,
+            state: party.state,
+            address: party.address,
+            paymentTerms: party.paymentTerms,
+          },
+          $inc: { totalPurchases: amount },
+          $set: { lastTransactionDate: txDate }
+        },
+        { upsert: true, session }
+      );
+    }
 
     await session.commitTransaction();
     return NextResponse.json({ success: true, voucherNo });
@@ -179,20 +211,20 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest){
-    try{
-        const { searchParams } = new URL(request.url);
-        const email = searchParams.get("email");
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
 
-        if(!email){
-            return NextResponse.json({error: "No email Found"},{status: 400});
-        }
-
-        const Stocks = await Stock.find({email}).sort({date: -1, createdAt: -1});
-
-        return NextResponse.json(Stocks);
-    }catch(error){
-        console.log("Error: ",error);
-        return NextResponse.json({error: error}, {status: 500});
+    if (!email) {
+      return NextResponse.json({ error: "No email Found" }, { status: 400 });
     }
+
+    const Stocks = await Stock.find({ email }).sort({ date: -1, createdAt: -1 });
+
+    return NextResponse.json(Stocks);
+  } catch (error) {
+    console.log("Error: ", error);
+    return NextResponse.json({ error: error }, { status: 500 });
+  }
 }

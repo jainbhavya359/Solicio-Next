@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   await connect();
 
   try {
-    const { email, name, unit, sellingPrice } = await request.json();
+    const { email, name, unit, sellingPrice, gstRate } = await request.json();
 
     if (!email || !name || !unit) {
       return NextResponse.json(
@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
           name: normalizedName,
           unit,
           quantity: 0,
-          sellingPrice,
+          sellingPrice: sellingPrice || 0,
+          gstRate: gstRate || 0,
           purchasePrice: 0,
         },
       },
@@ -107,6 +108,48 @@ export async function POST(request: NextRequest) {
     console.error("Product create error:", error);
     return NextResponse.json(
       { error: "Failed to add product" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  await connect();
+
+  try {
+    const { _id, email, sellingPrice, gstRate } = await request.json();
+
+    if (!_id || !email) {
+      return NextResponse.json(
+        { error: "Product ID and Email are required" },
+        { status: 400 }
+      );
+    }
+
+    const updatedProduct = await Products.findOneAndUpdate(
+      { _id, email },
+      {
+        $set: {
+          sellingPrice: sellingPrice || 0,
+          gstRate: gstRate || 0,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Product updated",
+      product: updatedProduct,
+    });
+  } catch (error) {
+    console.error("Product update error:", error);
+    return NextResponse.json(
+      { error: "Failed to update product" },
       { status: 500 }
     );
   }

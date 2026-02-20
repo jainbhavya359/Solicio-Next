@@ -15,7 +15,8 @@ export function computeGST({
   partyState,
   partyGSTIN,
 }: GSTInput) {
-  if (!companyGSTIN || !partyGSTIN || rate === 0) {
+  // If rate is 0, then no tax.
+  if (rate === 0) {
     return {
       type: "NONE",
       tax: 0,
@@ -26,7 +27,14 @@ export function computeGST({
 
   const taxAmount = (amount * rate) / 100;
 
-  if (companyState === partyState) {
+  // If states are present and same, Intra-state (CGST + SGST)
+  // We use case-insensitive comparison for safety
+  const isIntraState =
+    companyState &&
+    partyState &&
+    companyState.toLowerCase() === partyState.toLowerCase();
+
+  if (isIntraState) {
     const half = taxAmount / 2;
 
     return {
@@ -40,6 +48,7 @@ export function computeGST({
     };
   }
 
+  // Default to IGST (Inter-state)
   return {
     type: "IGST",
     tax: taxAmount,

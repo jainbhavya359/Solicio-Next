@@ -28,6 +28,11 @@ export default function Purchase({
   const [showProducts, setShowProducts] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
 
+  // Party Auto-complete states
+  const [parties, setParties] = useState<any[]>([]);
+  const [showParties, setShowParties] = useState(false);
+  const partyRef = useRef<HTMLDivElement | null>(null);
+
   const [showDocModal, setShowDocModal] = useState(false);
   const [lastVoucherNo, setLastVoucherNo] = useState("");
 
@@ -71,18 +76,30 @@ export default function Purchase({
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowProducts(false);
       }
+      if (partyRef.current && !partyRef.current.contains(e.target as Node)) {
+        setShowParties(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  /* ---------------- Fetch Parties ---------------- */
+  useEffect(() => {
+    if (!email) return;
+    axios
+      .get("/api/parties", { params: { email } })
+      .then((res) => setParties(res.data))
+      .catch((err) => console.error("Failed to load parties", err));
+  }, [email]);
+
+  const filteredParties = parties.filter((p) =>
+    p.type === "Supplier" && p.name.toLowerCase().includes(partyName.toLowerCase())
+  );
+
   /* ---------------- Fetch Products ---------------- */
   useEffect(() => {
     if (!email) return;
-
-    if (preSelectedProduct && preSelectedProduct.length !== 0) {
-      setSelectedProduct(preSelectedProduct);
-    }
 
     axios
       .get("/api/products", { params: { email } })
@@ -91,6 +108,22 @@ export default function Purchase({
           ? res.data
           : res.data?.products ?? [];
         setProducts(list);
+
+        // Resolve string preselection
+        if (typeof preSelectedProduct === "string" && preSelectedProduct.length > 0) {
+          const match = list.find((p: any) => p.name.toLowerCase() === preSelectedProduct.toLowerCase());
+          if (match) {
+            setSelectedProduct(match);
+            setPrice(match.purchasePrice ?? match.sellingPrice ?? "");
+            setGstRate(match.gstRate || 0);
+          }
+        }
+        // Resolve object preselection
+        else if (preSelectedProduct && typeof preSelectedProduct === "object" && preSelectedProduct.name) {
+          setSelectedProduct(preSelectedProduct);
+          setPrice(preSelectedProduct.purchasePrice ?? preSelectedProduct.sellingPrice ?? "");
+          setGstRate(preSelectedProduct.gstRate || 0);
+        }
       })
       .catch(() => toast.error("Failed to load products"));
   }, [email, reload, preSelectedProduct]);
@@ -237,6 +270,9 @@ export default function Purchase({
                         onClick={() => {
                           setSelectedProduct(p);
                           setShowProducts(false);
+                          setQuantity(1);
+                          setPrice(p.purchasePrice ?? p.sellingPrice ?? "");
+                          setGstRate(p.gstRate || 0);
                         }}
                         className="
                           w-full px-4 sm:px-5 py-4 sm:py-5 text-left rounded-xl sm:rounded-2xl
@@ -350,14 +386,55 @@ export default function Purchase({
                 </div>
               </div>
 
-              <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-2 sm:space-y-3 relative" ref={partyRef}>
                 <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Counterparty</label>
                 <input
                   placeholder="Supplier Entity"
                   value={partyName}
-                  onChange={e => setPartyName(e.target.value)}
+                  onChange={(e) => {
+                    setPartyName(e.target.value);
+                    setShowParties(true);
+                  }}
+                  onFocus={() => setShowParties(true)}
                   className="w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all outline-none placeholder:text-slate-300"
                 />
+
+                {/* 🔽 Auto-complete Dropdown */}
+                <AnimatePresence>
+                  {showParties && partyName.trim() && filteredParties.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute z-50 w-full mt-2 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden"
+                    >
+                      <div className="max-h-60 overflow-y-auto p-2 space-y-1">
+                        {filteredParties.map((p) => (
+                          <div
+                            key={p._id}
+                            onClick={() => {
+                              setPartyName(p.name);
+                              if (p.category) setPartyCategory(p.category);
+                              if (p.gstin) setTaxId(p.gstin);
+                              if (p.state) setPartyState(p.state);
+                              if (p.paymentTerms) setPaymentTerms(p.paymentTerms);
+                              setShowParties(false);
+                            }}
+                            className="p-3 rounded-xl hover:bg-emerald-50 cursor-pointer transition-colors group flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">{p.name}</p>
+                              {p.gstin && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">GSTIN: {p.gstin}</p>}
+                            </div>
+                            <div className="w-8 h-8 rounded-lg bg-emerald-100/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Plus className="w-4 h-4 text-emerald-600" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <div className="space-y-2 sm:space-y-3">

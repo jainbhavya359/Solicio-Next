@@ -20,7 +20,7 @@ function Card({
   const up = pct >= 0;
 
   return (
-    <div className="group rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-3 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300">
+    <div className="group rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-3 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden min-w-0">
       <div className="flex justify-between items-start mb-2 sm:mb-4">
         <div
           className={`h-8 w-8 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl flex items-center justify-center ${iconBg} transition-transform group-hover:scale-110 duration-300`}

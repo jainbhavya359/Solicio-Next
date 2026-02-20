@@ -13,11 +13,14 @@ interface AddProductModalProps {
     name: string;
     unit: string;
     sellingPrice?: number;
+    gstRate?: number;
     recipe?: any[];
+    _id?: string;
   }) => Promise<void>;
 
   units?: string[];
   products?: any[];
+  initialData?: any; // For editing
 }
 
 export default function AddProductModal({
@@ -26,14 +29,27 @@ export default function AddProductModal({
   onSave,
   units = [],
   products = [],
+  initialData,
 }: AddProductModalProps) {
   const [productType, setProductType] =
-    useState<"simple" | "composite">("simple");
-  const [name, setName] = useState("");
-  const [unit, setUnit] = useState("");
+    useState<"simple" | "composite">(initialData?.productType || "simple");
+  const [name, setName] = useState(initialData?.name || "");
+  const [unit, setUnit] = useState(initialData?.unit || "");
   const [customUnit, setCustomUnit] = useState("");
-  const [sellingPrice, setSellingPrice] = useState("");
-  const [recipe, setRecipe] = useState<any[]>([]);
+  const [sellingPrice, setSellingPrice] = useState(initialData?.sellingPrice || "");
+  // Note: Model saves gstRate, we use it to edit.
+  const [gstRate, setGstRate] = useState<number>(initialData?.gstRate || 0);
+  const [recipe, setRecipe] = useState<any[]>(initialData?.recipe || []);
+
+  const isEditing = !!initialData;
+
+  const GST_RATES = [
+    { label: "No GST", value: 0 },
+    { label: "GST 5%", value: 5 },
+    { label: "GST 12%", value: 12 },
+    { label: "GST 18%", value: 18 },
+    { label: "GST 28%", value: 28 },
+  ];
 
   const safeUnits = Array.isArray(units) ? units : [];
   const safeProducts = Array.isArray(products) ? products : [];
@@ -59,12 +75,14 @@ export default function AddProductModal({
     if (!canSave) return;
 
     await onSave({
+      _id: initialData?._id,
       productType,
       name: name.trim(),
       unit,
       sellingPrice: sellingPrice
         ? Number(sellingPrice)
         : undefined,
+      gstRate,
       recipe:
         productType === "composite"
           ? recipe
@@ -76,6 +94,7 @@ export default function AddProductModal({
     setUnit("");
     setCustomUnit("");
     setSellingPrice("");
+    setGstRate(0);
     setRecipe([]);
     setProductType("simple");
   };
@@ -106,7 +125,7 @@ export default function AddProductModal({
                   Product Index
                 </div>
                 <h3 className="text-3xl font-extrabold text-slate-900 tracking-tightest">
-                  Add New <span className="text-emerald-600">Product</span>
+                  {isEditing ? "Edit" : "Add New"} <span className="text-emerald-600">Product</span>
                 </h3>
               </div>
               <button
@@ -206,20 +225,45 @@ export default function AddProductModal({
                 </motion.div>
               )}
 
-              {/* PRICE */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
-                  Projected Selling Valuta
-                </label>
-                <div className="relative">
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</div>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    value={sellingPrice}
-                    onChange={e => setSellingPrice(e.target.value)}
-                    className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-5 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-                  />
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* PRICE */}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
+                    Projected Selling Valuta
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</div>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      value={sellingPrice}
+                      onChange={e => setSellingPrice(e.target.value)}
+                      className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-5 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* GST RATE */}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
+                    Fiscal Rate (GST)
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={gstRate}
+                      onChange={e => setGstRate(Number(e.target.value))}
+                      className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+                    >
+                      {GST_RATES.map(rate => (
+                        <option key={rate.value} value={rate.value}>
+                          {rate.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <ChevronRight className="w-4 h-4 rotate-90" />
+                    </div>
+                  </div>
                 </div>
               </div>
 

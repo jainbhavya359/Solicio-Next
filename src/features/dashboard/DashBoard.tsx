@@ -25,6 +25,7 @@ import KPICards from "./KPICards";
 import TopProductsCard from "../Insights/TopProductCard";
 import Purchase from "../stock/Purchase";
 import Sale from "../stock/Sale";
+import PartiesDirectory from "../parties/PartiesDirectory";
 import { Toaster } from "react-hot-toast";
 import { fetchDashboardData } from "@/src/lib/api/dashboard";
 
@@ -112,6 +113,11 @@ const Icons = {
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
   ),
+  parties: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ),
 };
 
 
@@ -150,6 +156,7 @@ const navItems = [
   { id: "finance", label: "Finance", icon: Icons.finance },
   { id: "ledger", label: "Ledger", icon: Icons.ledger },
   { id: "loans", label: "Loans", icon: Icons.loans },
+  { id: "parties", label: "Parties", icon: Icons.parties },
   { id: "alerts", label: "Alerts", icon: Icons.alerts },
   { id: "settings", label: "Settings", icon: Icons.settings },
 ];
@@ -237,6 +244,7 @@ export default function Dashboard() {
     finance: { title: "Finance", subtitle: "Profitability & cash movement" },
     ledger: { title: "Ledger", subtitle: "Purchase & sales history" },
     loans: { title: "Loans & Licenses", subtitle: "Active loans & lending profile" },
+    parties: { title: "Parties Directory", subtitle: "Manage customers and suppliers" },
     alerts: { title: "Alerts & Insights", subtitle: "System-generated recommendations" },
     settings: { title: "Settings", subtitle: "Manage your account preferences" },
   };
@@ -387,7 +395,7 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-[280px] min-h-screen pt-16 lg:pt-0 [zoom:0.85] lg:[zoom:1]">
+      <main className="flex-1 min-w-0 w-full lg:ml-[280px] min-h-screen pt-16 lg:pt-0 [zoom:0.85] lg:[zoom:1]">
         {/* Top Header Bar */}
         {email && activeSection === "overview" && (
           <div className="p-4 sm:p-6 w-full max-w-full overflow-hidden">
@@ -396,7 +404,7 @@ export default function Dashboard() {
         )}
 
         {/* Page Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8 w-full min-w-0 flex flex-col">
           {/* Page Title */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -415,12 +423,12 @@ export default function Dashboard() {
           <div className="space-y-6 sm:space-y-8">
             {/* OVERVIEW SECTION */}
             {activeSection === "overview" && (
-              <section id="overview">
+              <section id="overview" className="w-full min-w-0 flex flex-col">
                 <motion.div
                   variants={staggerContainer}
                   initial="hidden"
                   animate="visible"
-                  className="space-y-4 sm:space-y-6"
+                  className="space-y-4 sm:space-y-6 w-full min-w-0"
                 >
                   {/* Date Filter Bar */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
@@ -460,12 +468,12 @@ export default function Dashboard() {
                   </div>
 
                   {/* Two Column Layout */}
-                  <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                    <motion.div variants={fadeInUp} className="h-full">
+                  <div className="grid md:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+                    <motion.div variants={fadeInUp} className="h-full min-w-0 w-full">
                       <CreditGauge score={score} />
                     </motion.div>
 
-                    <motion.div variants={fadeInUp} className="h-full">
+                    <motion.div variants={fadeInUp} className="h-full min-w-0 w-full">
                       <CashFlowWatch data={dashboardData?.cashFlow} />
                     </motion.div>
                   </div>
@@ -482,23 +490,31 @@ export default function Dashboard() {
                       Unable to load insights
                     </div>
                   ) : (
-                    <section className="mx-auto max-w-7xl px-0 sm:px-4 py-8 sm:py-20 space-y-6 sm:space-y-10">
+                    <section className="mx-auto max-w-7xl w-full min-w-0 px-0 sm:px-4 py-8 sm:py-20 space-y-6 sm:space-y-10">
                       {/* 1️⃣ Sales Trend (hero insight) */}
-                      <SalesTrendGraphCard data={data} />
+                      <div className="w-full min-w-0">
+                        <SalesTrendGraphCard data={data} />
+                      </div>
 
                       {/* 2️⃣ Forward-looking */}
-                      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                        <ForecastSummaryCard data={data} />
+                      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 w-full min-w-0">
+                        <div className="w-full min-w-0 h-full"><ForecastSummaryCard data={data} /></div>
                       </div>
 
                       {/* 4️⃣ Context */}
-                      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                        <TopProductDonut data={data} onViewInventory={() => scrollToSection("inventory")} />
-                        <MarginTrendGraph data={data} />
+                      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 w-full min-w-0">
+                        <div className="w-full min-w-0 h-full">
+                          <TopProductDonut data={data} onViewInventory={() => scrollToSection("inventory")} />
+                        </div>
+                        <div className="w-full min-w-0 h-full">
+                          <MarginTrendGraph data={data} />
+                        </div>
                       </div>
 
                       {/* 5️⃣ Advice */}
-                      <ActionSuggestionCard data={data} />
+                      <div className="w-full min-w-0">
+                        <ActionSuggestionCard data={data} />
+                      </div>
                     </section>
                   )}
 
@@ -595,6 +611,21 @@ export default function Dashboard() {
                   <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <LedgerEntries />
                   </motion.div>
+                </motion.div>
+              </section>
+            )}
+
+            {/* PARTIES SECTION */}
+            {activeSection === "parties" && (
+              <section id="parties">
+                <motion.div
+                  variants={staggerContainer}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  className="h-full"
+                >
+                  <PartiesDirectory />
                 </motion.div>
               </section>
             )}

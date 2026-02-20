@@ -23,6 +23,7 @@ const ProductSchema = new Schema(
     quantity: { type: Number, default: 0 },
     purchasePrice: { type: Number, default: 0 },
     sellingPrice: { type: Number, default: 0 },
+    gstRate: { type: Number, default: 0 }, // Added GST Rate
     lastSaleAt: { type: Date, default: null },
     lastMovedAt: { type: Date, default: null },
 

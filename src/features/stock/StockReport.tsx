@@ -12,10 +12,10 @@ import {
   Layers,
   TrendingUp,
   AlertTriangle,
-  ChevronRight,
   Search,
   Sparkles,
-  Trash2
+  Trash2,
+  Edit2
 } from "lucide-react";
 import AddProductModal from "./AddProductForm";
 import { UNITS } from "../../utils/store";
@@ -65,6 +65,7 @@ export default function StockReport({
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<StockItem | null>(null);
+  const [itemToEdit, setItemToEdit] = useState<any | null>(null);
   const [products, setProducts] = useState<any[]>([]);
 
   const summary = data?.summary;
@@ -115,6 +116,16 @@ export default function StockReport({
   const handleDeleteProduct = (stock: StockItem) => {
     setItemToDelete(stock);
     setShowDeleteModal(true);
+  };
+
+  const handleEditProduct = (stock: StockItem) => {
+    const p = products.find((p) => p.name === stock.product && p.unit === stock.unit);
+    if (p) {
+      setItemToEdit(p);
+      setShowAddProduct(true);
+    } else {
+      toast.error("Original product details not found in local cache. Try refreshing.");
+    }
   };
 
   const confirmDelete = async () => {
@@ -295,6 +306,12 @@ export default function StockReport({
                       <td className="px-8 py-6">
                         <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                           <ActionButton
+                            onClick={() => handleEditProduct(stock)}
+                            title="Edit Product"
+                          >
+                            <Edit2 size={16} />
+                          </ActionButton>
+                          <ActionButton
                             onClick={() => adjustQty(stock, -1)}
                             title="Quick Sale"
                           >
@@ -368,6 +385,12 @@ export default function StockReport({
                 {/* Row 3: Actions */}
                 <div className="flex items-center gap-2 pl-13">
                   <button
+                    onClick={() => handleEditProduct(stock)}
+                    className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-emerald-600 hover:bg-emerald-50 shrink-0"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                  <button
                     onClick={() => adjustQty(stock, -1)}
                     className="flex-1 h-9 flex items-center justify-center gap-2 rounded-lg border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50"
                   >
@@ -405,34 +428,51 @@ export default function StockReport({
         )}
       </div>
 
-      {/* ADD PRODUCT MODAL */}
       <AnimatePresence>
         {showAddProduct && (
           <AddProductModal
             open={showAddProduct}
-            onClose={() => setShowAddProduct(false)}
+            onClose={() => {
+              setShowAddProduct(false);
+              setItemToEdit(null);
+            }}
+            initialData={itemToEdit}
             units={UNITS}
             products={products}
             onSave={async (payload: any) => {
               try {
-                const res = await axios.post(
-                  payload.productType === "simple"
-                    ? "/api/products"
-                    : "/api/composite-product",
-                  {
+                if (payload._id) {
+                  // EDIT MODE
+                  await axios.put("/api/products", {
+                    _id: payload._id,
                     email,
-                    name: payload.name,
-                    unit: payload.unit,
                     sellingPrice: payload.sellingPrice,
-                    recipe: payload.recipe,
-                  }
-                );
+                    gstRate: payload.gstRate
+                  });
+                  toast.success("Product Updated");
+                } else {
+                  // CREATE MODE
+                  await axios.post(
+                    payload.productType === "simple"
+                      ? "/api/products"
+                      : "/api/composite-product",
+                    {
+                      email,
+                      name: payload.name,
+                      unit: payload.unit,
+                      sellingPrice: payload.sellingPrice,
+                      gstRate: payload.gstRate,
+                      recipe: payload.recipe,
+                    }
+                  );
+                  toast.success("Product Created");
+                }
 
-                toast.success("Operational Hub Synchronized");
                 setShowAddProduct(false);
+                setItemToEdit(null);
                 if (reloadSetter) reloadSetter(Date.now());
               } catch {
-                toast.error("Cloud Sync Failed");
+                toast.error("Operation Failed");
               }
             }}
           />

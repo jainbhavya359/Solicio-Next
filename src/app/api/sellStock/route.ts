@@ -9,6 +9,7 @@ import Stock from "@/src/models/stockModel";
 import { TotalStock } from "@/src/models/totalStockModel";
 import { Document } from "@/src/models/DocumentModel";
 import { CompanyProfile } from "@/src/models/CompanyProfileModel";
+import { Party } from "@/src/models/PartyModel";
 
 import { calculateCompositeStock } from "@/src/utils/compositeStock";
 import { calculateFIFO } from "@/src/utils/fifo";
@@ -214,7 +215,16 @@ export async function POST(req: NextRequest) {
           name: party.name || "Cash",
           taxId: party.taxId,
           address: party.address,
+          state: party.state,
           paymentTerms: party.paymentTerms,
+        },
+
+        company: {
+          name: company?.name,
+          gstin: company?.gstin,
+          state: company?.state,
+          address: company?.address,
+          logoUrl: company?.logoUrl,
         },
 
         item: {
@@ -240,6 +250,28 @@ export async function POST(req: NextRequest) {
       }],
       { session }
     );
+
+    /* 📇 Auto-create Party (Customer) */
+    if (party?.name && party.name !== "Cash") {
+      await Party.findOneAndUpdate(
+        { email, name: party.name },
+        {
+          $setOnInsert: {
+            email,
+            name: party.name,
+            type: "Customer",
+            category: party.category || "Individual",
+            gstin: party.taxId,
+            state: party.state,
+            address: party.address,
+            paymentTerms: party.paymentTerms,
+          },
+          $inc: { totalSales: amount },
+          $set: { lastTransactionDate: txDate }
+        },
+        { upsert: true, session }
+      );
+    }
 
     await session.commitTransaction();
     return NextResponse.json({ success: true, voucherNo });
