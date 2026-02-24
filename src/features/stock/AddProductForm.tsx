@@ -38,7 +38,7 @@ export default function AddProductModal({
   const [customUnit, setCustomUnit] = useState("");
   const [sellingPrice, setSellingPrice] = useState(initialData?.sellingPrice || "");
   // Note: Model saves gstRate, we use it to edit.
-  const [gstRate, setGstRate] = useState<number>(initialData?.gstRate || 0);
+  const [gstRate, setGstRate] = useState<number>(initialData?.gstRate ?? 0);
   const [recipe, setRecipe] = useState<any[]>(initialData?.recipe || []);
 
   const isEditing = !!initialData;
@@ -192,7 +192,8 @@ export default function AddProductModal({
                     <select
                       value={unit}
                       onChange={e => setUnit(e.target.value)}
-                      className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-5 text-sm font-medium focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+                      disabled={isEditing}
+                      className={`h-14 w-full rounded-2xl border border-slate-200 bg-white px-5 text-sm font-medium focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none cursor-pointer ${isEditing ? "opacity-60 cursor-not-allowed bg-slate-50" : ""}`}
                     >
                       <option value="">Select unit</option>
                       {safeUnits.map(u => (

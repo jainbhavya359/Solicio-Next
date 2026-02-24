@@ -177,7 +177,7 @@ export function SalesTrendGraphCard({ data }: { data: any }) {
           <div>
             <h3 className="text-xl font-bold text-slate-900">Sales Trend</h3>
             <p className="text-sm text-slate-500 mt-1">
-              Forecast: <span className="font-semibold text-slate-700">₹{totalForecast.toLocaleString()}</span> next {data.forecast.horizonDays} days
+              Forecast: <span className="font-semibold text-slate-700">₹{totalForecast.toLocaleString('en-IN')}</span> next {data.forecast.horizonDays} days
             </p>
           </div>
         </div>

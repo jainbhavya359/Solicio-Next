@@ -67,6 +67,7 @@ export default function StockReport({
   const [itemToDelete, setItemToDelete] = useState<StockItem | null>(null);
   const [itemToEdit, setItemToEdit] = useState<any | null>(null);
   const [products, setProducts] = useState<any[]>([]);
+  const [localReload, setLocalReload] = useState(0);
 
   const summary = data?.summary;
   const items: StockItem[] = data?.breakdown || [];
@@ -82,7 +83,7 @@ export default function StockReport({
         setProducts(list);
       })
       .catch(() => console.error("Failed to sync products for builder context"));
-  }, [email, visible, reloadKey]);
+  }, [email, visible, reloadKey, localReload]);
 
   if (!visible) return null;
 
@@ -144,6 +145,7 @@ export default function StockReport({
         toast.success("Asset decommissioned");
         setShowDeleteModal(false);
         setItemToDelete(null);
+        setLocalReload(c => c + 1);
         if (reloadSetter) reloadSetter(Date.now());
       }
     } catch (err: any) {
@@ -196,7 +198,7 @@ export default function StockReport({
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           <Kpi
             label="Total Stock Value"
-            value={`₹${summary.totalStockValue.toLocaleString()}`}
+            value={`₹${summary.totalStockValue.toLocaleString('en-IN')}`}
             icon={TrendingUp}
             variant="emerald"
             description="Locked Capital"
@@ -210,7 +212,7 @@ export default function StockReport({
           />
           <Kpi
             label="Total Units"
-            value={summary.totalQuantity.toLocaleString()}
+            value={summary.totalQuantity.toLocaleString('en-IN')}
             icon={Layers}
             variant="slate"
             description="Physical Count"
@@ -291,7 +293,7 @@ export default function StockReport({
                       </td>
                       <td className="px-8 py-6 text-sm font-bold text-slate-600">₹{stock.price}</td>
                       <td className="px-8 py-6 text-right">
-                        <span className="text-lg font-extrabold text-emerald-600 tracking-tight">₹{stock.stockValue.toLocaleString()}</span>
+                        <span className="text-lg font-extrabold text-emerald-600 tracking-tight">₹{stock.stockValue.toLocaleString('en-IN')}</span>
                       </td>
                       <td className="px-8 py-6">
                         <DaysLeft days={stock.daysSinceLastSale} />
@@ -410,7 +412,7 @@ export default function StockReport({
                     </div>
                     <div className="p-2 rounded-lg bg-slate-50 border border-slate-100/50">
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Value</p>
-                      <p className="text-sm font-bold text-emerald-600">₹{stock.stockValue.toLocaleString()}</p>
+                      <p className="text-sm font-bold text-emerald-600">₹{stock.stockValue.toLocaleString('en-IN')}</p>
                     </div>
                   </div>
 
@@ -463,6 +465,7 @@ export default function StockReport({
       <AnimatePresence>
         {showAddProduct && (
           <AddProductModal
+            key={itemToEdit?._id ?? "new"}
             open={showAddProduct}
             onClose={() => {
               setShowAddProduct(false);
@@ -478,6 +481,8 @@ export default function StockReport({
                   await axios.put("/api/products", {
                     _id: payload._id,
                     email,
+                    name: payload.name,
+                    unit: payload.unit,
                     sellingPrice: payload.sellingPrice,
                     gstRate: payload.gstRate
                   });
@@ -502,6 +507,7 @@ export default function StockReport({
 
                 setShowAddProduct(false);
                 setItemToEdit(null);
+                setLocalReload(c => c + 1);
                 if (reloadSetter) reloadSetter(Date.now());
               } catch {
                 toast.error("Operation Failed");

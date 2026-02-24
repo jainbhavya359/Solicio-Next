@@ -17,22 +17,29 @@ import {
   Search
 } from "lucide-react";
 import ProfitLossWheel from "./ProfitLossWheel";
+import FinancialEntryModal from "./FinancialEntryModal";
+import { Plus } from "lucide-react";
 
 export default function ProfitLossReport() {
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
 
-  const [from, setFrom] = useState("2026-01-01");
-  const [to, setTo] = useState("2026-01-31");
+  const curr = new Date();
+  const firstDay = new Date(curr.getFullYear(), curr.getMonth(), 1).toISOString().split('T')[0];
+  const lastDay = new Date(curr.getFullYear(), curr.getMonth() + 1, 0).toISOString().split('T')[0];
+
+  const [from, setFrom] = useState(firstDay);
+  const [to, setTo] = useState(lastDay);
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [financialModalType, setFinancialModalType] = useState<"Expense" | "TaxPayment" | "StockWriteOff" | null>(null);
 
   const load = async () => {
     if (!email) return;
     setLoading(true);
     try {
       const res = await axios.get("/api/profit-loss", {
-        params: { email, from, to },
+        params: { email, from, to, t: Date.now() },
       });
       setData(res.data);
     } catch (err) {
@@ -171,8 +178,9 @@ export default function ProfitLossReport() {
             </div>
 
             <div className="space-y-1">
-              <LedgerRow label="Operating Expenses" value={s.expenses} icon={DollarSign} />
-              <LedgerRow label="Inventory Write-downs" value={s.inventoryWriteDowns} icon={Archive} />
+              <LedgerRow label="Operating Expenses" value={s.expenses} icon={DollarSign} onAdd={() => setFinancialModalType("Expense")} />
+              <LedgerRow label="Taxes Paid" value={s.taxesPaid || 0} icon={DollarSign} onAdd={() => setFinancialModalType("TaxPayment")} />
+              <LedgerRow label="Inventory Write-downs" value={s.inventoryWriteDowns} icon={Archive} onAdd={() => setFinancialModalType("StockWriteOff")} />
               <div className="py-2 sm:py-4"><div className="h-px bg-slate-200 border-dashed border-t" /></div>
               <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-emerald-50 border border-emerald-100">
                 <LedgerRow label="Net Profit" value={s.netProfit} highlight="net" icon={TrendingUp} noBorder />
@@ -185,6 +193,13 @@ export default function ProfitLossReport() {
           <ProfitLossWheel summary={s} />
         </div>
       </div>
+
+      <FinancialEntryModal
+        isOpen={financialModalType !== null}
+        onClose={() => setFinancialModalType(null)}
+        type={financialModalType || "Expense"}
+        onSuccess={load}
+      />
     </motion.section>
   );
 }
@@ -198,7 +213,8 @@ function LedgerRow({
   subtle,
   highlight,
   icon: Icon,
-  noBorder
+  noBorder,
+  onAdd
 }: {
   label: string;
   value: number | string;
@@ -207,6 +223,7 @@ function LedgerRow({
   highlight?: "profit" | "net";
   icon?: any;
   noBorder?: boolean;
+  onAdd?: () => void;
 }) {
   return (
     <div className={`group/row flex items-center justify-between py-2 sm:py-3 transition-all ${!noBorder ? "border-b border-transparent hover:border-slate-50" : ""}`}>
@@ -229,18 +246,29 @@ function LedgerRow({
         </span>
       </div>
 
-      <span
-        className={`${highlight === "profit"
-          ? "font-bold text-indigo-600 text-sm sm:text-lg"
-          : highlight === "net"
-            ? "font-black text-emerald-700 text-lg sm:text-2xl"
-            : "font-bold text-slate-900 text-xs sm:text-sm"
-          }`}
-      >
-        {typeof value === "number"
-          ? `₹${value.toLocaleString()}`
-          : value}
-      </span>
+      <div className="flex items-center gap-3">
+        <span
+          className={`${highlight === "profit"
+            ? "font-bold text-indigo-600 text-sm sm:text-lg"
+            : highlight === "net"
+              ? "font-black text-emerald-700 text-lg sm:text-2xl"
+              : "font-bold text-slate-900 text-xs sm:text-sm"
+            }`}
+        >
+          {typeof value === "number"
+            ? `₹${value.toLocaleString('en-IN')}`
+            : value}
+        </span>
+        {onAdd && (
+          <button
+            onClick={onAdd}
+            className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all opacity-0 group-hover/row:opacity-100 shadow-sm"
+            title="Manage Entries"
+          >
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

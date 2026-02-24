@@ -35,6 +35,7 @@ export async function fetchDashboardData(email: string, from?: string, to?: stri
     healthSummary,
     lowStock,
     slowMoving,
+    stockHistory,
   ] = await Promise.all([
     axios.get("/api/loans", { params: { email } }),
     axios.get("/api/insights/sales-trend", {
@@ -54,6 +55,7 @@ export async function fetchDashboardData(email: string, from?: string, to?: stri
     axios.get("/api/health/summary", { params: { email } }),
     axios.get("/api/low-stock", { params: { email } }),
     axios.get("/api/health/stock-movement", { params: { email } }),
+    axios.get("/api/stock", { params: { email } }),
   ]);
 
   /* ---------------- KPI CALCULATIONS ---------------- */
@@ -101,5 +103,6 @@ export async function fetchDashboardData(email: string, from?: string, to?: stri
     lowStock: lowStock.data,
     slowMoving: slowMoving.data,
     inventory: inventoryNow.data,
+    stockHistory: stockHistory.data,
   };
 }

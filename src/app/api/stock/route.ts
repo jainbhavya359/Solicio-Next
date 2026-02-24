@@ -10,12 +10,14 @@ import { TotalStock } from "@/src/models/totalStockModel";
 import { Document } from "@/src/models/DocumentModel";
 import { CompanyProfile } from "@/src/models/CompanyProfileModel";
 import { Party } from "@/src/models/PartyModel";
+import { Payment } from "@/src/models/PaymentModel";
 
 import { generateVoucherNo } from "@/src/utils/voucher";
 import { computeGST } from "@/src/utils/gst";
 
 export async function POST(req: NextRequest) {
   await connect();
+  await Payment.createCollection().catch(() => { }); // Ensure collection exists before transaction
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -177,8 +179,10 @@ export async function POST(req: NextRequest) {
       { session }
     );
 
-    /* 📇 Auto-create Party (Supplier) */
+    /* 📇 Auto-create Party (Supplier) & Handle Immediate Payments */
     if (party?.name && party.name !== "Cash") {
+      const isImmediate = party.paymentTerms === "IMMEDIATE";
+
       await Party.findOneAndUpdate(
         { email, name: party.name },
         {
@@ -192,11 +196,31 @@ export async function POST(req: NextRequest) {
             address: party.address,
             paymentTerms: party.paymentTerms,
           },
-          $inc: { totalPurchases: amount },
+          $inc: {
+            totalPurchases: amount,
+            ...(isImmediate ? { totalPaid: amount } : {})
+          },
           $set: { lastTransactionDate: txDate }
         },
         { upsert: true, session }
       );
+
+      // Auto-generate Payment History if terms are IMMEDIATE
+      if (isImmediate) {
+        await Payment.create(
+          [{
+            email,
+            partyName: party.name,
+            type: "PAY", // Purchase = We pay supplier
+            amount,
+            date: txDate,
+            notes: "Immediate settlement against Purchase",
+            voucherNo: `PMT-${voucherNo}`,
+            sourceTransaction: voucherNo
+          }],
+          { session }
+        );
+      }
     }
 
     await session.commitTransaction();

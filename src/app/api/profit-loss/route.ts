@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connect from "@/src/dbConfig/dbConnection";
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
 import { StockLayer } from "@/src/models/StockLayerModel";
+import { Document } from "@/src/models/DocumentModel";
 
 async function stockValueAsOf(email: string, date: Date) {
   const layers = await StockLayer.find({
@@ -15,6 +16,8 @@ async function stockValueAsOf(email: string, date: Date) {
     0
   );
 }
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   await connect();
@@ -64,6 +67,31 @@ export async function GET(req: NextRequest) {
     0
   );
 
+  /* ---------- TAXES PAID ---------- */
+  // 1️⃣ Manual Tax Payments
+  const taxEntries = await LedgerEntry.find({
+    email,
+    voucherType: "TaxPayment",
+    date: { $gte: fromDate, $lte: toDate },
+  }).lean();
+
+  const manualTaxesPaid = taxEntries.reduce(
+    (s, r) => s + (r.amount || 0),
+    0
+  );
+
+  // 2️⃣ GST Paid/Collected on Purchases & Sales
+  const docs = await Document.find({
+    email,
+    sourceVoucher: { $in: ["Purchase", "Sale"] },
+    date: { $gte: fromDate, $lte: toDate },
+  }).lean();
+
+  const gstFromTransactions = docs.reduce((sum: number, doc: any) => sum + (doc.tax || 0), 0);
+
+  // Total Taxes Paid
+  const taxesPaid = manualTaxesPaid + gstFromTransactions;
+
   /* ---------- EXPENSES ---------- */
   const expenses = await LedgerEntry.find({
     email,
@@ -99,14 +127,15 @@ export async function GET(req: NextRequest) {
   const netProfit =
     grossProfit -
     totalExpenses -
+    taxesPaid -
     inventoryWriteDowns;
 
   const grossMarginPct =
     totalSales === 0
       ? 0
       : Number(
-          ((grossProfit / totalSales) * 100).toFixed(2)
-        );
+        ((grossProfit / totalSales) * 100).toFixed(2)
+      );
 
   return NextResponse.json({
     period: { from, to },
@@ -119,6 +148,7 @@ export async function GET(req: NextRequest) {
       grossProfit,
       grossMarginPct,
       expenses: totalExpenses,
+      taxesPaid,
       inventoryWriteDowns,
       netProfit,
     },

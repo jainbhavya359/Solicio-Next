@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   Package,
   ShoppingCart,
@@ -55,9 +55,9 @@ export default function KPICards({ data }: { data: any }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
       <Card
-        icon={DollarSign}
+        icon={IndianRupee}
         title="Total Revenue"
-        value={`₹${data.revenue.value.toLocaleString()}`}
+        value={`₹${data.revenue.value.toLocaleString('en-IN')}`}
         pct={data.revenue.pct}
         iconBg="bg-indigo-50"
         iconColor="text-indigo-600"
@@ -66,7 +66,7 @@ export default function KPICards({ data }: { data: any }) {
       <Card
         icon={TrendingUp}
         title="Net Profit"
-        value={`₹${data.profit.value.toLocaleString()}`}
+        value={`₹${data.profit.value.toLocaleString('en-IN')}`}
         pct={data.profit.pct}
         iconBg="bg-emerald-50"
         iconColor="text-emerald-600"
@@ -75,7 +75,7 @@ export default function KPICards({ data }: { data: any }) {
       <Card
         icon={Package}
         title="Total Inventory"
-        value={data.inventory.value}
+        value={typeof data.inventory.value === 'number' ? data.inventory.value.toLocaleString('en-IN') : data.inventory.value}
         pct={data.inventory.pct}
         iconBg="bg-violet-50"
         iconColor="text-violet-600"
@@ -84,7 +84,7 @@ export default function KPICards({ data }: { data: any }) {
       <Card
         icon={ShoppingCart}
         title="Total Orders"
-        value={data.orders.value}
+        value={typeof data.orders.value === 'number' ? data.orders.value.toLocaleString('en-IN') : data.orders.value}
         pct={data.orders.pct}
         iconBg="bg-orange-50"
         iconColor="text-orange-600"

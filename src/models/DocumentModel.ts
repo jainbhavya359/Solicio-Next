@@ -84,7 +84,7 @@ const DocumentSchema = new Schema(
 
     sourceVoucher: {
       type: String,
-      enum: ["Sale", "Purchase"],
+      enum: ["Sale", "Purchase", "Expense", "TaxPayment", "StockWriteOff"],
       required: true,
     },
   },
@@ -92,6 +92,10 @@ const DocumentSchema = new Schema(
 );
 
 DocumentSchema.index({ email: 1, voucherNo: 1 });
+
+if (process.env.NODE_ENV !== "production") {
+  delete models.Document;
+}
 
 export const Document =
   models.Document || model("Document", DocumentSchema);

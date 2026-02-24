@@ -8,7 +8,7 @@ const LedgerEntrySchema = new Schema(
 
     voucherType: {
       type: String,
-      enum: ["Purchase", "Sale", "PurchaseReturn", "SaleReturn"],
+      enum: ["Purchase", "Sale", "PurchaseReturn", "SaleReturn", "Expense", "TaxPayment", "StockWriteOff"],
       required: true,
     },
 

@@ -28,6 +28,9 @@ import Sale from "../stock/Sale";
 import PartiesDirectory from "../parties/PartiesDirectory";
 import { Toaster } from "react-hot-toast";
 import { fetchDashboardData } from "@/src/lib/api/dashboard";
+import CompanyProfileForm from "./CompanyProfileForm";
+import StockHistory from "../stock/StockHistory";
+import SalesReport from "../stock/SalesReport";
 
 
 // Icons as inline SVGs
@@ -668,6 +671,12 @@ export default function Dashboard() {
                   <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
                     <LedgerEntries />
                   </motion.div>
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
+                    <StockHistory data={dashboardData?.stockHistory} />
+                  </motion.div>
+                  <motion.div variants={fadeInUp} className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
+                    <SalesReport />
+                  </motion.div>
                 </motion.div>
               </section>
             )}
@@ -735,9 +744,13 @@ export default function Dashboard() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
-                  className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm"
+                  className="space-y-6"
                 >
-                  <UserProfile routing="hash" />
+                  {email && <CompanyProfileForm email={email} />}
+
+                  <div className="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-sm">
+                    <UserProfile routing="hash" />
+                  </div>
                 </motion.div>
               </section>
             )}

@@ -11,6 +11,16 @@ import AddProductModal from "./AddProductForm";
 import DocumentModal from "../documents/DocumentModal";
 import { UNITS } from "../../utils/store";
 
+const formatIndianNumber = (value: string | number) => {
+  if (value === null || value === undefined || value === "") return "";
+  const strValue = value.toString();
+  const parts = strValue.split(".");
+  if (parts[0] && parts[0] !== "-") {
+    parts[0] = Number(parts[0]).toLocaleString('en-IN');
+  }
+  return parts.join(".");
+};
+
 export default function Purchase({
   visible,
   preSelectedProduct,
@@ -94,7 +104,7 @@ export default function Purchase({
   }, [email]);
 
   const filteredParties = parties.filter((p) =>
-    p.type === "Supplier" && p.name.toLowerCase().includes(partyName.toLowerCase())
+    p.name.toLowerCase().includes(partyName.toLowerCase())
   );
 
   /* ---------------- Fetch Products ---------------- */
@@ -114,19 +124,32 @@ export default function Purchase({
           const match = list.find((p: any) => p.name.toLowerCase() === preSelectedProduct.toLowerCase());
           if (match) {
             setSelectedProduct(match);
-            setPrice(match.purchasePrice ?? match.sellingPrice ?? "");
-            setGstRate(match.gstRate || 0);
+            setPrice(match.purchasePrice?.toString() ?? match.sellingPrice?.toString() ?? "");
+            setGstRate(match.gstRate ?? 0);
           }
         }
         // Resolve object preselection
         else if (preSelectedProduct && typeof preSelectedProduct === "object" && preSelectedProduct.name) {
           setSelectedProduct(preSelectedProduct);
-          setPrice(preSelectedProduct.purchasePrice ?? preSelectedProduct.sellingPrice ?? "");
-          setGstRate(preSelectedProduct.gstRate || 0);
+          setPrice(preSelectedProduct.purchasePrice?.toString() ?? preSelectedProduct.sellingPrice?.toString() ?? "");
+          // Look up full product from the fetched list to get gstRate,
+          // since preSelectedProduct (from StockReport) may not include it.
+          const fullMatch = list.find((p: any) =>
+            p.name?.toLowerCase() === preSelectedProduct.name?.toLowerCase() &&
+            p.unit === preSelectedProduct.unit
+          );
+          setGstRate(fullMatch?.gstRate ?? preSelectedProduct.gstRate ?? 0);
         }
       })
       .catch(() => toast.error("Failed to load products"));
   }, [email, reload, preSelectedProduct]);
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/,/g, "");
+    if (/^\d*\.?\d*$/.test(raw)) {
+      setPrice(raw);
+    }
+  };
 
   /* ---------------- Submit ---------------- */
   const addStock = async () => {
@@ -271,8 +294,8 @@ export default function Purchase({
                           setSelectedProduct(p);
                           setShowProducts(false);
                           setQuantity(1);
-                          setPrice(p.purchasePrice ?? p.sellingPrice ?? "");
-                          setGstRate(p.gstRate || 0);
+                          setPrice(p.purchasePrice?.toString() ?? p.sellingPrice?.toString() ?? "");
+                          setGstRate(p.gstRate ?? 0);
                         }}
                         className="
                           w-full px-4 sm:px-5 py-4 sm:py-5 text-left rounded-xl sm:rounded-2xl
@@ -440,19 +463,38 @@ export default function Purchase({
               <div className="space-y-2 sm:space-y-3">
                 <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Unit Capital (₹)</label>
                 <input
-                  type="number"
+                  type="text"
                   placeholder="Rate/Unit"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  value={formatIndianNumber(price)}
+                  onChange={handlePriceChange}
                   className="w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all outline-none placeholder:text-slate-300"
                 />
+              </div>
+
+              {/* Always-visible Fiscal Rate */}
+              <div className="space-y-2 sm:space-y-3">
+                <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Fiscal Rate (GST)</label>
+                <div className="relative">
+                  <select
+                    value={gstRate}
+                    onChange={e => setGstRate(Number(e.target.value))}
+                    className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 outline-none focus:border-emerald-500 appearance-none focus:bg-white transition-all"
+                  >
+                    {GST_RATES.map(r => (
+                      <option key={r.value} value={r.value}>
+                        {r.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
 
               {partyCategory === "Company" && (
                 <motion.div
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="md:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6"
+                  className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6"
                 >
                   <div className="space-y-2 sm:space-y-3">
                     <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">GSTIN</label>
@@ -471,23 +513,6 @@ export default function Purchase({
                       onChange={e => setPartyState(e.target.value)}
                       className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 outline-none focus:border-emerald-500 focus:bg-white transition-all"
                     />
-                  </div>
-                  <div className="space-y-2 sm:space-y-3">
-                    <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Fiscal Rate</label>
-                    <div className="relative">
-                      <select
-                        value={gstRate}
-                        onChange={e => setGstRate(Number(e.target.value))}
-                        className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 outline-none focus:border-emerald-500 appearance-none focus:bg-white transition-all"
-                      >
-                        {GST_RATES.map(r => (
-                          <option key={r.value} value={r.value}>
-                            {r.label}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
                   </div>
                   <div className="space-y-2 sm:space-y-3">
                     <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Settlement</label>

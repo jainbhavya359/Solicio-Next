@@ -117,7 +117,7 @@ export async function PUT(request: NextRequest) {
   await connect();
 
   try {
-    const { _id, email, sellingPrice, gstRate } = await request.json();
+    const { _id, email, name, sellingPrice, gstRate } = await request.json();
 
     if (!_id || !email) {
       return NextResponse.json(
@@ -126,14 +126,22 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const updateFields: Record<string, any> = {
+      sellingPrice: sellingPrice ?? 0,
+      gstRate: gstRate ?? 0,
+    };
+
+    if (name && name.trim()) {
+      updateFields.name = name.trim().toLowerCase();
+    }
+
+    // NOTE: unit is not updated — it is immutable in the schema.
+    // Attempting to $set an immutable field causes Mongoose to
+    // throw and abort the entire update.
+
     const updatedProduct = await Products.findOneAndUpdate(
       { _id, email },
-      {
-        $set: {
-          sellingPrice: sellingPrice || 0,
-          gstRate: gstRate || 0,
-        },
-      },
+      { $set: updateFields },
       { new: true }
     );
 

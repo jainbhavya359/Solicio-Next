@@ -195,6 +195,7 @@ export default function LedgerSearchBox({ email }: { email: string }) {
 
                   {/* ROWS */}
                   <motion.div
+                    key={page}
                     initial="hidden"
                     animate="visible"
                     variants={{

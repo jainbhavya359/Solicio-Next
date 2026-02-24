@@ -155,7 +155,7 @@ export default function TopProductsCard() {
                           {p._id}
                         </p>
                         <p className="text-[10px] sm:text-xs font-medium text-slate-400 uppercase tracking-widest">
-                          {p.qty.toLocaleString()} units sold
+                          {p.qty.toLocaleString('en-IN')} units sold
                         </p>
                       </div>
                     </div>

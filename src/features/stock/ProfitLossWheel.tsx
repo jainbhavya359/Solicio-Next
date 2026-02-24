@@ -85,7 +85,7 @@ export default function ProfitLossWheel({
             </Pie>
             <Tooltip
               contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
-              formatter={(v) => `₹${Number(v ?? 0).toLocaleString()}`}
+              formatter={(v) => `₹${Number(v ?? 0).toLocaleString('en-IN')}`}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -116,7 +116,7 @@ export default function ProfitLossWheel({
             </div>
 
             <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-              ₹{d.value.toLocaleString()}
+              ₹{d.value.toLocaleString('en-IN')}
             </span>
 
             <div className="mt-1 sm:mt-2 h-1 w-full bg-slate-200 rounded-full overflow-hidden">

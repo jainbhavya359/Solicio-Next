@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Building2, User, Phone, Mail, MapPin, Hash, CheckCircle2, AlertTriangle } from "lucide-react";
+import { X, Building2, User, Phone, Mail, MapPin, Hash, CheckCircle2, AlertTriangle, ChevronDown } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -32,7 +32,15 @@ export default function PartyModal({ open, onClose, onSave, email, initialData }
         city: "",
         state: "",
         pincode: "",
+        paymentTerms: "",
     });
+
+    const PAYMENT_TERMS = [
+        { label: "Immediate", value: "Immediate" },
+        { label: "Net 7", value: "Net 7" },
+        { label: "Net 15", value: "Net 15" },
+        { label: "Net 30", value: "Net 30" },
+    ];
 
     // Populate form if editing
     useEffect(() => {
@@ -51,6 +59,7 @@ export default function PartyModal({ open, onClose, onSave, email, initialData }
                     city: initialData.city || "",
                     state: initialData.state || "",
                     pincode: initialData.pincode || "",
+                    paymentTerms: initialData.paymentTerms || "",
                 });
             } else {
                 // Reset for new entry
@@ -67,6 +76,7 @@ export default function PartyModal({ open, onClose, onSave, email, initialData }
                     city: "",
                     state: "",
                     pincode: "",
+                    paymentTerms: "",
                 });
             }
         }
@@ -271,6 +281,27 @@ export default function PartyModal({ open, onClose, onSave, email, initialData }
                                         />
                                     </div>
                                 </div>
+                                {formData.category === "Company" && (
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Settlement Terms</label>
+                                        <div className="relative">
+                                            <select
+                                                name="paymentTerms"
+                                                value={formData.paymentTerms}
+                                                onChange={handleChange}
+                                                className="w-full h-12 pl-4 pr-12 rounded-xl border border-slate-200 bg-slate-50/50 font-bold text-slate-900 focus:bg-white focus:border-emerald-500 outline-none transition-all appearance-none cursor-pointer"
+                                            >
+                                                <option value="">Standard Terms</option>
+                                                {PAYMENT_TERMS.map((p) => (
+                                                    <option key={p.value} value={p.value}>
+                                                        {p.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="sm:col-span-2">
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Full Address</label>
                                     <textarea

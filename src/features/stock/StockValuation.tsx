@@ -276,14 +276,14 @@ export default function StockValuationComparison() {
                       </td>
 
                       <td className="px-8 py-5 text-right">
-                        <span className="text-sm font-medium text-slate-500">₹{r.openValue.toLocaleString()}</span>
+                        <span className="text-sm font-medium text-slate-500">₹{r.openValue.toLocaleString('en-IN')}</span>
                       </td>
 
                       <td className="px-8 py-5 text-right">
                         <div className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider ${r.deltaValue >= 0 ? "text-emerald-600 bg-emerald-50" : "text-rose-600 bg-rose-50"
                           } px-2.5 py-1 rounded-lg`}>
                           {r.deltaValue >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                          ₹{Math.abs(r.deltaValue).toLocaleString()}
+                          ₹{Math.abs(r.deltaValue).toLocaleString('en-IN')}
                         </div>
                       </td>
                     </motion.tr>
@@ -330,7 +330,7 @@ export default function StockValuationComparison() {
                     </div>
                     <div className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${r.deltaValue >= 0 ? "text-emerald-600 bg-emerald-50" : "text-rose-600 bg-rose-50"} px-2 py-0.5 rounded-md`}>
                       {r.deltaValue >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                      ₹{Math.abs(r.deltaValue).toLocaleString()}
+                      ₹{Math.abs(r.deltaValue).toLocaleString('en-IN')}
                     </div>
                   </div>
 
@@ -345,7 +345,7 @@ export default function StockValuationComparison() {
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Opening Val</p>
-                      <p className="text-xs font-medium text-slate-500">₹{r.openValue.toLocaleString()}</p>
+                      <p className="text-xs font-medium text-slate-500">₹{r.openValue.toLocaleString('en-IN')}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -394,7 +394,7 @@ function SummaryCard({
           ? isPositive ? "text-emerald-600" : "text-rose-600"
           : "text-slate-900"
           }`}>
-          ₹{value.toLocaleString()}
+          ₹{value.toLocaleString('en-IN')}
         </p>
         <p className="text-[10px] sm:text-xs font-medium text-slate-400 mt-1 uppercase tracking-widest line-clamp-1">
           {description}

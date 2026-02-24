@@ -51,14 +51,14 @@ export default function CashFlowWatch({ data }: { data: CashFlowData }) {
         <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100">
           <p className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-2">Inflow</p>
           <p className="text-sm sm:text-lg font-bold text-emerald-600 truncate">
-            ₹{data.sales.toLocaleString()}
+            ₹{data.sales.toLocaleString('en-IN')}
           </p>
         </div>
 
         <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100">
           <p className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-2">Outflow</p>
           <p className="text-sm sm:text-lg font-bold text-rose-600 truncate">
-            ₹{data.purchases.toLocaleString()}
+            ₹{data.purchases.toLocaleString('en-IN')}
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export default function CashFlowWatch({ data }: { data: CashFlowData }) {
             Net Cash
           </p>
           <p className={`text-base sm:text-lg font-bold ${isHealthy ? "text-emerald-700" : "text-amber-700"}`}>
-            {net >= 0 ? "+" : "-"}₹{Math.abs(net).toLocaleString()}
+            {net >= 0 ? "+" : "-"}₹{Math.abs(net).toLocaleString('en-IN')}
           </p>
         </div>
       </div>

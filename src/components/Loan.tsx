@@ -10,6 +10,16 @@ import { useCreditStore } from "../store/useCreditStore";
 import { scores_rate } from "../utils/store";
 import { calculateEMI } from "../utils/emiCal";
 
+const formatIndianNumber = (value: string | number) => {
+  if (value === null || value === undefined || value === "") return "";
+  const strValue = value.toString();
+  const parts = strValue.split(".");
+  if (parts[0] && parts[0] !== "-") {
+    parts[0] = Number(parts[0]).toLocaleString('en-IN');
+  }
+  return parts.join(".");
+};
+
 /* -------------------------------------------------------------------------- */
 /*                              Animated Score                                */
 /* -------------------------------------------------------------------------- */
@@ -142,12 +152,33 @@ function AddLoanCard({ email, name }: any) {
   const [loanType, setLoanType] = useState("");
   const [lender, setLender] = useState("");
   const [principal, setPrincipal] = useState<number | "">("");
-  const [interestRate, setInterestRate] = useState<number>(12);
-  const [tenure, setTenure] = useState<number>(12);
+  const [interestRate, setInterestRate] = useState<number | "">("");
+  const [tenure, setTenure] = useState<number | "">("");
   const [tenureUnit, setTenureUnit] = useState("months");
   const [startDate, setStartDate] = useState("");
 
-  const tenureMonths = tenureUnit === "years" ? tenure * 12 : tenure;
+  const handlePrincipalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/,/g, "");
+    if (/^\d*\.?\d*$/.test(raw)) {
+      setPrincipal(raw ? Number(raw) : "");
+    }
+  };
+
+  const handleInterestRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/,/g, "");
+    if (/^\d*\.?\d*$/.test(raw)) {
+      setInterestRate(raw ? Number(raw) : "");
+    }
+  };
+
+  const handleTenureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/,/g, "");
+    if (/^\d*$/.test(raw)) {
+      setTenure(raw ? Number(raw) : "");
+    }
+  };
+
+  const tenureMonths = tenureUnit === "years" ? Number(tenure) * 12 : Number(tenure);
   const emi = calculateEMI({
     principal: Number(principal),
     annualRate: Number(interestRate),
@@ -206,18 +237,18 @@ function AddLoanCard({ email, name }: any) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 text-left">
           <div>
             <label className={labelClass}>Principal Amount (₹)</label>
-            <input type="number" value={principal} onChange={(e) => setPrincipal(e.target.value === "" ? "" : +e.target.value)} className={inputClass} min={0} />
+            <input type="text" value={formatIndianNumber(principal)} onChange={handlePrincipalChange} className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Interest Formula (% p.a.)</label>
-            <input type="number" value={interestRate} onChange={(e) => setInterestRate(+e.target.value)} className={inputClass} min={0} max={100} step={0.1} />
+            <input type="text" value={interestRate} onChange={handleInterestRateChange} className={inputClass} placeholder="e.g. 12" />
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4 sm:gap-8 text-left">
           <div className="col-span-2">
             <label className={labelClass}>Time Horizon</label>
-            <input type="number" value={tenure} onChange={(e) => setTenure(+e.target.value)} className={inputClass} min={1} />
+            <input type="text" value={tenure} onChange={handleTenureChange} className={inputClass} placeholder="e.g. 12" />
           </div>
           <div>
             <label className={labelClass}>Temporal Unit</label>

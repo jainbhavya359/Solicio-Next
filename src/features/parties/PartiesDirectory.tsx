@@ -1,12 +1,13 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, User, Building2, MapPin, Phone, Mail, Hash, Layers } from "lucide-react";
+import { Search, Plus, User, Building2, MapPin, Phone, Mail, Hash, Layers, Calendar, TrendingUp, TrendingDown, FileText, Edit2, History } from "lucide-react";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import PartyModal from "./PartyModal";
+import PaymentModal from "./PaymentModal";
+import PartyLedgerModal from "./PartyLedgerModal";
 
 export default function PartiesDirectory() {
     const { user } = useUser();
@@ -16,13 +17,15 @@ export default function PartiesDirectory() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [showLedgerModal, setShowLedgerModal] = useState(false);
 
     const fetchParties = async () => {
         if (!email) return;
         setLoading(true);
         try {
             const res = await axios.get("/api/parties", {
-                params: { email, search }
+                params: { email, search, t: Date.now() } // Cache-buster to ensure updated balances
             });
             setParties(res.data);
         } catch (err) {
@@ -52,6 +55,55 @@ export default function PartiesDirectory() {
         setSelectedParty(null);
     };
 
+    const handleSettle = (party: any) => {
+        setSelectedParty(party);
+        setShowPaymentModal(true);
+    };
+
+    const handleHistory = (party: any) => {
+        setSelectedParty(party);
+        setShowLedgerModal(true);
+    };
+
+    // Helper to calculate credit status
+    const getCreditStatus = (lastTxDate: string | Date | undefined, terms: string | undefined, totalAmount: number) => {
+        if (!terms || terms === "Immediate" || terms === "Standard Terms" || totalAmount === 0 || !lastTxDate) {
+            return null;
+        }
+
+        const match = terms.match(/Net (\d+)/);
+        if (!match) return null;
+
+        const creditDays = parseInt(match[1]);
+        const txDate = new Date(lastTxDate);
+        const dueDate = new Date(txDate.getTime() + creditDays * 24 * 60 * 60 * 1000);
+        const today = new Date();
+
+        // strip time from today for accurate diff
+        today.setHours(0, 0, 0, 0);
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffTime = dueDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            return { overdue: true, text: `Overdue by ${Math.abs(diffDays)} Days`, color: 'bg-rose-100 text-rose-700 border-rose-200' };
+        } else if (diffDays === 0) {
+            return { overdue: false, text: `Due Today`, color: 'bg-amber-100 text-amber-700 border-amber-200' };
+        } else {
+            return { overdue: false, text: `${diffDays} Days Left`, color: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+        }
+    };
+
+    const totalToTake = parties.reduce((sum, party) => sum + ((party.totalSales || 0) - (party.totalReceived || 0)), 0);
+    const totalToGive = parties.reduce((sum, party) => sum + ((party.totalPurchases || 0) - (party.totalPaid || 0)), 0);
+    const netBalance = totalToTake - totalToGive;
+
+    // Calculate total money received vs paid to determine "Current Balance" (Cash proxy)
+    const totalReceived = parties.reduce((sum, party) => sum + (party.totalReceived || 0), 0);
+    const totalPaid = parties.reduce((sum, party) => sum + (party.totalPaid || 0), 0);
+    const currentBalance = totalReceived - totalPaid;
+
     return (
         <div className="space-y-8 font-outfit">
             {/* ... Header ... */}
@@ -80,6 +132,38 @@ export default function PartiesDirectory() {
                         <Plus className="w-4 h-4" />
                         <span>New Contact</span>
                     </button>
+                </div>
+            </div>
+
+            {/* Overview Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                <div className="bg-white p-5 lg:p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1 flex items-center gap-1.5"><TrendingUp className="w-3 h-3 text-emerald-500" /> Total to take</p>
+                        <h3 className="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight">₹{totalToTake.toLocaleString('en-IN')}</h3>
+                    </div>
+                </div>
+                <div className="bg-white p-5 lg:p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1 flex items-center gap-1.5"><TrendingDown className="w-3 h-3 text-rose-500" /> Total to give</p>
+                        <h3 className="text-2xl lg:text-3xl font-black text-rose-600 tracking-tight">₹{totalToGive.toLocaleString('en-IN')}</h3>
+                    </div>
+                </div>
+                <div className="bg-white border text-slate-900 border-indigo-200 p-5 lg:p-6 rounded-3xl shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1 flex items-center gap-1.5"><Layers className="w-3 h-3 text-indigo-500" /> Net Credit/Debit</p>
+                        <h3 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900">
+                            {netBalance >= 0 ? '+' : '-'}₹{Math.abs(netBalance).toLocaleString('en-IN')}
+                        </h3>
+                    </div>
+                </div>
+                <div className="bg-slate-900 p-5 lg:p-6 rounded-3xl shadow-xl shadow-slate-900/10 flex items-center justify-between text-white ring-4 ring-slate-900/20">
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1 flex items-center gap-1.5"><FileText className="w-3 h-3 text-emerald-400" /> Current Balance</p>
+                        <h3 className="text-2xl lg:text-3xl font-black tracking-tight text-white">
+                            ₹{currentBalance.toLocaleString('en-IN')}
+                        </h3>
+                    </div>
                 </div>
             </div>
 
@@ -152,25 +236,60 @@ export default function PartiesDirectory() {
                                                 {party.state}
                                             </div>
                                         )}
+                                        {party.category === 'Company' && (
+                                            <div className="flex items-center gap-2 pt-2">
+                                                {getCreditStatus(party.lastTransactionDate, party.paymentTerms, party.type === 'Customer' ? party.totalSales : party.totalPurchases) ? (
+                                                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest ${getCreditStatus(party.lastTransactionDate, party.paymentTerms, party.type === 'Customer' ? party.totalSales : party.totalPurchases)?.color}`}>
+                                                        <Calendar className="w-3.5 h-3.5" />
+                                                        {getCreditStatus(party.lastTransactionDate, party.paymentTerms, party.type === 'Customer' ? party.totalSales : party.totalPurchases)?.text}
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                                        Settled / No terms
+                                                    </div>
+                                                )}
+                                                {party.paymentTerms && party.paymentTerms !== "Standard Terms" && (
+                                                    <span className="text-[10px] font-bold text-slate-400">({party.paymentTerms})</span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="mt-6 pt-6 border-t border-slate-100 flex justify-between items-end">
+                                    <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 gap-4">
                                         <div>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Volume</p>
-                                            <p className="text-xl font-black text-slate-900 tracking-tight">₹{Number(party.totalSales + party.totalPurchases).toLocaleString('en-IN')}</p>
+                                            <p className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                                <TrendingUp className="w-3 h-3 text-emerald-500" /> To Take
+                                            </p>
+                                            <p className="text-lg font-black text-slate-900 tracking-tight">₹{Number((party.totalSales || 0) - (party.totalReceived || 0)).toLocaleString('en-IN')}</p>
                                         </div>
-                                        <div className="text-right">
-                                            <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest ${party.type === 'Customer' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
-                                                {party.type}
-                                            </span>
+                                        <div>
+                                            <p className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                                <TrendingDown className="w-3 h-3 text-rose-500" /> To Give
+                                            </p>
+                                            <p className="text-lg font-black text-slate-900 tracking-tight">₹{Number((party.totalPurchases || 0) - (party.totalPaid || 0)).toLocaleString('en-IN')}</p>
                                         </div>
                                     </div>
 
-                                    {/* Edit Hint Overlay */}
-                                    <div className="absolute inset-0 bg-slate-900/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
-                                        <div className="px-4 py-2 bg-white rounded-xl shadow-lg text-xs font-bold uppercase tracking-widest text-slate-900">
-                                            Edit Contact
-                                        </div>
+                                    {/* Action Hover Overlay */}
+                                    <div className="absolute inset-0 bg-slate-900/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[1px] p-4">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleHistory(party); }}
+                                            className="flex flex-col items-center justify-center gap-1.5 w-16 h-16 bg-white hover:bg-slate-50 rounded-2xl shadow-lg border border-slate-100 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-all hover:scale-105 active:scale-95"
+                                        >
+                                            <History className="w-5 h-5" /> Hist
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleEdit(party); }}
+                                            className="flex flex-col items-center justify-center gap-1.5 w-16 h-16 bg-white hover:bg-slate-50 rounded-2xl shadow-lg border border-slate-100 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-emerald-600 transition-all hover:scale-105 active:scale-95"
+                                        >
+                                            <Edit2 className="w-5 h-5" /> Edit
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleSettle(party); }}
+                                            className="flex flex-col items-center justify-center gap-1.5 w-16 h-16 bg-slate-900 hover:bg-emerald-600 rounded-2xl shadow-lg shadow-slate-900/10 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-all hover:scale-105 active:scale-95"
+                                        >
+                                            <FileText className="w-5 h-5" /> Pay
+                                        </button>
                                     </div>
                                 </div>
                             </motion.div>
@@ -190,6 +309,29 @@ export default function PartiesDirectory() {
                 onSave={fetchParties}
                 initialData={selectedParty}
             />
+
+            <AnimatePresence>
+                {showPaymentModal && selectedParty && (
+                    <PaymentModal
+                        open={showPaymentModal}
+                        onClose={() => setShowPaymentModal(false)}
+                        party={selectedParty}
+                        email={email || ""}
+                        onSave={fetchParties}
+                    />
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {showLedgerModal && selectedParty && (
+                    <PartyLedgerModal
+                        open={showLedgerModal}
+                        onClose={() => setShowLedgerModal(false)}
+                        party={selectedParty}
+                        email={email || ""}
+                    />
+                )}
+            </AnimatePresence>
 
 
         </div>

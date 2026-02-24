@@ -3,6 +3,8 @@ import connect from "@/src/dbConfig/dbConnection";
 import { Party } from "@/src/models/PartyModel";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
     try {
         await connect();

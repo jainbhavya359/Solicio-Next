@@ -39,6 +39,11 @@ const PartySchema = new Schema(
         /* 📈 Aggregates (Updated via transactions) */
         totalSales: { type: Number, default: 0 },
         totalPurchases: { type: Number, default: 0 },
+
+        /* 💸 Payment Tracking */
+        totalReceived: { type: Number, default: 0 }, // Money received from this party
+        totalPaid: { type: Number, default: 0 }, // Money paid to this party
+
         outstandingBalance: { type: Number, default: 0 }, // +ve = Receivable, -ve = Payable
 
         lastTransactionDate: Date,
@@ -49,4 +54,9 @@ const PartySchema = new Schema(
 // Compound index to prevent duplicate names for the same user
 PartySchema.index({ email: 1, name: 1 }, { unique: true });
 
-export const Party = models.Party || model("Party", PartySchema);
+// Force Mongoose to re-register the schema so newly added fields during dev won't be dropped
+if (models.Party) {
+    delete models.Party;
+}
+
+export const Party = model("Party", PartySchema);
