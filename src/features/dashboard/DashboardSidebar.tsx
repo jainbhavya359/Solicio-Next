@@ -23,19 +23,19 @@ export default function DashboardSidebar() {
   const { user } = useUser();
 
   return (
-    <aside className="w-64 bg-[#f7f2ea] border-r border-black/5 px-4 py-6 flex flex-col">
+    <aside className="group w-20 hover:w-64 transition-all duration-300 ease-in-out bg-[#f7f2ea] border-r border-black/5 px-4 py-6 flex flex-col overflow-x-hidden shrink-0">
       {/* Logo */}
-      <div className="flex items-center gap-3 mb-8 px-2">
-        <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold">
+      <div className="flex items-center gap-3 mb-8 shrink-0">
+        <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold shrink-0 ml-1">
           ↗
         </div>
-        <div>
+        <div className="transition-opacity duration-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden">
           <p className="font-semibold text-slate-900">Solicio</p>
           <p className="text-xs text-slate-500">Business Dashboard</p>
         </div>
       </div>
 
-      <p className="text-xs font-semibold text-slate-400 mb-3 px-2">
+      <p className="text-xs font-semibold text-slate-400 mb-3 px-2 transition-opacity duration-300 opacity-0 group-hover:opacity-100 whitespace-nowrap">
         MENU
       </p>
 
@@ -51,22 +51,30 @@ export default function DashboardSidebar() {
               }
             `}
           >
-            <Icon className="w-4 h-4" />
-            {label}
+            <Icon className="w-5 h-5 shrink-0" />
+            <span className="transition-opacity duration-300 opacity-0 group-hover:opacity-100 whitespace-nowrap">
+              {label}
+            </span>
           </div>
         ))}
       </nav>
 
       {/* User Card */}
-      <div className="mt-auto bg-[#efe8dc] p-3 rounded-2xl">
-        <p className="font-medium text-sm text-slate-900">
-          {user?.fullName}
-        </p>
-        <p className="text-xs text-slate-500 mb-2">
-          {user?.primaryEmailAddress?.emailAddress}
-        </p>
-        <div className="text-xs text-slate-600 hover:underline" >
-          <SignOutButton />
+      <div className="mt-auto flex items-center gap-3 bg-[#efe8dc] p-2 rounded-2xl overflow-hidden shrink-0">
+        <div className="w-8 h-8 shrink-0 rounded-full bg-emerald-600 flex items-center justify-center text-white font-medium overflow-hidden">
+          {user?.imageUrl ? (
+            <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            user?.fullName?.charAt(0) || "U"
+          )}
+        </div>
+        <div className="flex flex-col min-w-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden">
+          <p className="font-medium text-sm text-slate-900 truncate">
+            {user?.fullName || "User"}
+          </p>
+          <div className="text-xs text-slate-600 hover:underline cursor-pointer flex items-center gap-1 mt-0.5">
+            <SignOutButton />
+          </div>
         </div>
       </div>
     </aside>

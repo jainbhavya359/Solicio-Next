@@ -36,7 +36,7 @@ export default function Header() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: show ? 0 : -120, opacity: show ? 1 : 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200"
+      className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 transition-colors duration-300"
     >
       <header className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* LOGO */}
@@ -44,7 +44,7 @@ export default function Header() {
           <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black">
             <TrendingUp />
           </div>
-          <span className="text-xl font-extrabold text-slate-900">
+          <span className="text-xl font-extrabold text-slate-900 dark:text-white">
             Solicio
           </span>
         </Link>
@@ -59,8 +59,8 @@ export default function Header() {
                 href={link.href}
                 className={`relative text-sm font-semibold transition
                   ${active
-                    ? "text-emerald-600"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                   }
                 `}
               >
@@ -85,7 +85,7 @@ export default function Header() {
         </SignedOut>
         <SignedIn>
           <SignOutButton>
-            <button className="hidden md:inline-block px-5 py-2.5 rounded-xl bg-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-300 transition shadow">
+            <button className="hidden md:inline-block px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-300 dark:hover:bg-slate-700 transition shadow">
               Log Out
             </button>
           </SignOutButton>
@@ -93,7 +93,7 @@ export default function Header() {
 
         {/* MOBILE HAMBURGER */}
         <button
-          className="md:hidden p-2 text-slate-600"
+          className="md:hidden p-2 text-slate-600 dark:text-slate-300"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? (
@@ -111,7 +111,7 @@ export default function Header() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden overflow-hidden bg-white border-b border-slate-200"
+            className="md:hidden overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-300"
           >
             <nav className="flex flex-col p-6 gap-4">
               {links.map((link) => {
@@ -121,14 +121,14 @@ export default function Header() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`text-lg font-semibold ${active ? "text-emerald-600" : "text-slate-600"
+                    className={`text-lg font-semibold ${active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400"
                       }`}
                   >
                     {link.label}
                   </Link>
                 );
               })}
-              <hr className="border-slate-100 my-2" />
+              <hr className="border-slate-100 dark:border-slate-800 my-2" />
               <SignedOut>
                 <Link
                   href="/signup"
@@ -142,7 +142,7 @@ export default function Header() {
                 <SignOutButton>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-center px-5 py-3 rounded-xl bg-slate-200 text-slate-700 font-semibold shadow"
+                    className="w-full text-center px-5 py-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold shadow transition-colors"
                   >
                     Log Out
                   </button>

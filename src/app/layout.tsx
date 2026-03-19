@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import Header from "@/src/components/layout/Header"
 import Footer from "@/src/components/layout/Footer"
 import { ClerkProvider } from "@clerk/nextjs"
+import ThemeProvider from "@/src/components/ThemeProvider";
 
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -25,8 +26,10 @@ export default function RootLayout({
   return (
     <ClerkProvider >
       <html lang="en">
-        <body className={`${outfit.variable} font-sans bg-white text-slate-900 antialiased`}>
-          {children}
+        <body className={`${outfit.variable} font-sans bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased`}>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

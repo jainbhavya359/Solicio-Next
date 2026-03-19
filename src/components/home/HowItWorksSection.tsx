@@ -36,7 +36,7 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section className="py-28 bg-slate-100">
+    <section className="py-28 bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <motion.div
@@ -50,12 +50,12 @@ export function HowItWorksSection() {
             Simple Process
           </div>
 
-          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 dark:text-white mb-6">
             Get Started in{" "}
-            <span className="text-emerald-600">Four Easy Steps</span>
+            <span className="text-emerald-600 dark:text-emerald-400">Four Easy Steps</span>
           </h2>
 
-          <p className="text-lg text-slate-600">
+          <p className="text-lg text-slate-600 dark:text-slate-300">
             From sign-up to insights in minutes. No training needed, no complex
             setup. Just clarity.
           </p>
@@ -64,7 +64,7 @@ export function HowItWorksSection() {
         {/* Steps */}
         <div className="relative grid lg:grid-cols-4 gap-12">
           {/* Connector line */}
-          <div className="hidden lg:block absolute top-12 left-0 right-0 h-[2px] bg-slate-200" />
+          <div className="hidden lg:block absolute top-12 left-0 right-0 h-[2px] bg-slate-200 dark:bg-slate-700" />
 
           {steps.map((step, i) => (
             <motion.div
@@ -77,9 +77,9 @@ export function HowItWorksSection() {
             >
               {/* Icon */}
               <div className="relative z-10 flex justify-center mb-8">
-                <div className="w-24 h-24 rounded-full bg-emerald-50 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <step.icon className="w-8 h-8 text-emerald-600" />
+                <div className="w-24 h-24 rounded-full bg-emerald-50 dark:bg-slate-800 flex items-center justify-center transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-slate-700 flex items-center justify-center transition-colors">
+                    <step.icon className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
 
@@ -90,15 +90,15 @@ export function HowItWorksSection() {
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
                 {step.title}
               </h3>
 
-              <p className="text-slate-600 max-w-xs mx-auto mb-4">
+              <p className="text-slate-600 dark:text-slate-400 max-w-xs mx-auto mb-4">
                 {step.description}
               </p>
 
-              <span className="inline-flex px-4 py-1.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600">
+              <span className="inline-flex px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors">
                 {step.tag}
               </span>
             </motion.div>

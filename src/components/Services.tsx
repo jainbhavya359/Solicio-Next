@@ -68,10 +68,10 @@ export default function Services({
   service_data = defaultServices,
 }: { service_data?: ServiceItem[] }): React.ReactElement {
   return (
-    <section className="bg-white min-h-screen relative overflow-hidden flex flex-col items-center font-outfit">
+    <section className="bg-white dark:bg-slate-950 min-h-screen relative overflow-hidden flex flex-col items-center font-outfit transition-colors duration-300">
       {/* Background radial grid */}
-      <div className="absolute inset-0 z-0 opacity-[0.4] pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" />
+      <div className="absolute inset-0 z-0 opacity-[0.4] dark:opacity-[0.1] pointer-events-none transition-opacity duration-300">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 space-y-24">
@@ -83,14 +83,14 @@ export default function Services({
           viewport={{ once: true }}
           className="max-w-4xl"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-widest mb-6 border border-slate-200/50">
-            <Layout className="w-3 h-3 text-emerald-600" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 text-[10px] font-bold uppercase tracking-widest mb-6 border border-slate-200/50 dark:border-slate-700/50">
+            <Layout className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
             Neural Service Ecosystem
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tightest leading-none">
-            Unified Modules <span className="text-emerald-600">for Business</span>
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tightest leading-none">
+            Unified Modules <span className="text-emerald-600 dark:text-emerald-400">for Business</span>
           </h1>
-          <p className="mt-8 text-xl md:text-2xl text-slate-500 leading-relaxed font-medium max-w-2xl">
+          <p className="mt-8 text-xl md:text-2xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium max-w-2xl">
             A synchronized tactical suite designed to automate logistics, clarify financial metadata, and accelerate MSME growth velocity.
           </p>
         </motion.div>
@@ -106,10 +106,10 @@ export default function Services({
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
               whileHover={{ y: -8 }}
-              className="group bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:border-emerald-200 transition-all duration-500 relative overflow-hidden flex flex-col"
+              className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 dark:shadow-emerald-900/10 hover:shadow-2xl hover:border-emerald-200 dark:hover:border-emerald-500/50 transition-all duration-500 relative overflow-hidden flex flex-col"
             >
               {/* Decorative background element */}
-              <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03] dark:opacity-[0.05] group-hover:opacity-[0.08] dark:group-hover:opacity-[0.1] transition-opacity duration-500 pointer-events-none">
                 <div className="w-48 h-48 rotate-12 flex items-center justify-center">
                   {item.icon ? item.icon : (
                     item.img && <img src={item.img} alt={item.title} className="w-24 h-24" />
@@ -119,27 +119,22 @@ export default function Services({
 
               <div className="flex items-center justify-between mb-8">
                 {item.tag && (
-                  <div className="px-3 py-1 rounded-full bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-slate-100 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                  <div className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-widest border border-slate-100 dark:border-slate-700 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/10 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {item.tag}
                   </div>
                 )}
-                {/* <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg group-hover:bg-emerald-600 transition-all duration-500">
-                  {item.icon ? item.icon : (
-                    item.img && <img src={item.img} alt={item.title} className="w-7 h-7" />
-                  )}
-                </div> */}
               </div>
 
-              <h3 className="text-2xl font-extrabold text-slate-900 mb-4 tracking-tightest group-hover:text-emerald-700 transition-colors">
+              <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tightest group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                 {item.title}
               </h3>
 
-              <p className="text-slate-500 leading-relaxed font-medium mb-10 flex-grow group-hover:text-slate-600 transition-colors">
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium mb-10 flex-grow group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
                 {item.description}
               </p>
 
-              <div className="mt-auto flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-900 group-hover:gap-3 transition-all duration-300">
-                Initialize Module <ChevronRight className="w-4 h-4 text-emerald-600" />
+              <div className="mt-auto flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 group-hover:gap-3 transition-all duration-300">
+                Initialize Module <ChevronRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               </div>
             </MotionLink>
           ))}
@@ -150,7 +145,7 @@ export default function Services({
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="bg-slate-900 rounded-[3rem] p-12 md:p-16 shadow-2xl shadow-slate-900/40 relative overflow-hidden text-white"
+          className="bg-slate-900 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-[3rem] p-12 md:p-16 shadow-2xl shadow-slate-900/40 dark:shadow-emerald-900/20 relative overflow-hidden text-white transition-colors duration-500"
         >
           {/* Decorative background neural patterns */}
           <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-emerald-600/10 rounded-full blur-[100px] -mr-48 -mt-48 pointer-events-none opacity-50" />
@@ -180,7 +175,7 @@ export default function Services({
         </motion.div>
 
         {/* FOOTER STRIP */}
-        <div className="pt-20 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 opacity-40">
+        <div className="pt-20 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-8 opacity-40 dark:opacity-60 transition-opacity">
           <div className="flex items-center gap-3">
             <Zap className="w-5 h-5 text-emerald-600" />
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">Ecosystem Status: Synchronized</span>

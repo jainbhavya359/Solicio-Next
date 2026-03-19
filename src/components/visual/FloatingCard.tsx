@@ -20,7 +20,7 @@ export default function FloatingCard({
         y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: delay / 1000 },
       }}
       className={clsx(
-        "absolute bg-white rounded-2xl shadow-lg border border-slate-200 p-4",
+        "absolute bg-white dark:bg-slate-800 rounded-2xl shadow-lg dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] border border-slate-200 dark:border-slate-700 p-4 text-slate-900 dark:text-slate-100 transition-colors duration-300",
         className
       )}
     >

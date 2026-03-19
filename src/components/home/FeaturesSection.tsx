@@ -59,7 +59,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-28 bg-white">
+    <section className="py-28 bg-white dark:bg-slate-950 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <motion.div
@@ -68,33 +68,33 @@ export function FeaturesSection() {
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 border border-emerald-200 dark:border-emerald-500/20 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm font-medium mb-6">
             <Lightbulb className="w-4 h-4" />
             Powerful Features
           </div>
 
-          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 dark:text-white mb-6">
             Everything You Need to{" "}
-            <span className="text-emerald-600">Grow Your Business</span>
+            <span className="text-emerald-600 dark:text-emerald-400">Grow Your Business</span>
           </h2>
 
-          <p className="text-lg text-slate-600 mb-8">
+          <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
             Inspired by Tally &amp; Khatabook — without the complexity.
             Simple tools that give you clarity, not confusion.
           </p>
 
           {/* Highlights */}
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600">
+          <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-emerald-600" />
+              <Zap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               Setup in 5 minutes
             </div>
             <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-emerald-600" />
+              <Bell className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               Smart notifications
             </div>
             <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-emerald-600" />
+              <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               Bank-grade security
             </div>
           </div>
@@ -109,19 +109,19 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-lg transition"
+              className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-8 hover:shadow-lg dark:hover:shadow-emerald-900/10 transition-all duration-300"
             >
               <div
-                className={`w-12 h-12 rounded-xl ${f.bg} flex items-center justify-center mb-6`}
+                className={`w-12 h-12 rounded-xl ${f.bg} dark:bg-slate-800 shadow-sm dark:shadow-inner flex items-center justify-center mb-6`}
               >
-                <f.icon className={`w-6 h-6 ${f.color}`} />
+                <f.icon className={`w-6 h-6 ${f.color} dark:text-emerald-400`} />
               </div>
 
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
                 {f.title}
               </h3>
 
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                 {f.desc}
               </p>
             </motion.div>

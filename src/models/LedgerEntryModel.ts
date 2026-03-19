@@ -15,7 +15,7 @@ const LedgerEntrySchema = new Schema(
     voucherNo: {
       type: String,
       required: true,
-      unique: true, // ✅ correct place for uniqueness
+      unique: true,
     },
 
     partyName: {

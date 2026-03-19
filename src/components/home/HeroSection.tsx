@@ -8,11 +8,11 @@ import { SignedIn, SignOutButton } from "@clerk/clerk-react";
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-white">
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-white dark:bg-slate-950 transition-colors duration-300">
       {/* BACKGROUND */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.08),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.05),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.08),transparent_55%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.15),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.05),transparent_55%)] dark:bg-[radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.1),transparent_55%)]" />
         <svg
           className="absolute inset-0 w-full h-full opacity-[0.035]"
           xmlns="http://www.w3.org/2000/svg"
@@ -46,7 +46,7 @@ export default function HeroSection() {
             {/* Badge */}
             <motion.div
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-sm font-medium w-fit"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 text-sm font-medium w-fit"
             >
               ✨ Smart Insights for Smarter Decisions
             </motion.div>
@@ -54,16 +54,16 @@ export default function HeroSection() {
             {/* Heading */}
             <motion.h1
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white"
             >
               Run Your Business,{" "}
-              <span className="text-emerald-600">Not Just Record It</span>
+              <span className="text-emerald-600 dark:text-emerald-400">Not Just Record It</span>
             </motion.h1>
 
             {/* Subtext */}
             <motion.p
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-              className="text-lg text-slate-600 max-w-xl leading-relaxed"
+              className="text-lg text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed"
             >
               Stock, sales, money &amp; decisions — all in one powerful,
               easy-to-use platform. Get insights that actually help you grow.
@@ -83,12 +83,12 @@ export default function HeroSection() {
               </SignedOut>
               <SignedIn>
                 <SignOutButton>
-                  <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg border border-slate-300 hover:bg-slate-100 transition">
+                  <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition">
                     Logout
                   </button>
                 </SignOutButton>
               </SignedIn>
-              <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg border border-slate-300 hover:bg-slate-100 transition">
+              <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition">
                 ▶ Watch Demo
               </button>
             </motion.div>
@@ -96,25 +96,25 @@ export default function HeroSection() {
             {/* Stats */}
             <motion.div
               variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-              className="grid grid-cols-3 gap-4 sm:gap-8 pt-8 border-t border-slate-200"
+              className="grid grid-cols-3 gap-4 sm:gap-8 pt-8 border-t border-slate-200 dark:border-slate-800"
             >
               <div>
-                <div className="text-2xl font-bold text-slate-900">
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">
                   <AnimatedCounter end={10000} suffix="+" />
                 </div>
-                <div className="text-sm text-slate-500">Active Users</div>
+                <div className="text-sm text-slate-500 dark:text-slate-400">Active Users</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-slate-900">
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">
                   <AnimatedCounter end={50} suffix="L+" />
                 </div>
-                <div className="text-sm text-slate-500">Transactions</div>
+                <div className="text-sm text-slate-500 dark:text-slate-400">Transactions</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-slate-900">
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">
                   <AnimatedCounter end={4} suffix=".9" />
                 </div>
-                <div className="text-sm text-slate-500">User Rating</div>
+                <div className="text-sm text-slate-500 dark:text-slate-400">User Rating</div>
               </div>
             </motion.div>
           </motion.div>
@@ -125,26 +125,26 @@ export default function HeroSection() {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7 }}
-              className="relative w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl p-6"
+              className="relative w-full max-w-lg bg-white dark:bg-slate-900/80 dark:backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl dark:shadow-[0_0_50px_-12px_rgba(16,185,129,0.3)] p-6 transition-all duration-300"
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-sm text-slate-500">Good morning</p>
-                  <h3 className="text-xl font-semibold text-slate-900">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Good morning</p>
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                     Business Overview
                   </h3>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
                   👋
                 </div>
               </div>
 
               {/* Chart */}
-              <div className="bg-slate-50 rounded-2xl p-4 mb-4">
+              <div className="bg-slate-50 dark:bg-slate-950/50 rounded-2xl p-4 mb-4 border border-transparent dark:border-slate-800/50 transition-colors duration-300">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium">Revenue Trend</span>
-                  <span className="text-xs text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full">
+                  <span className="text-sm font-medium text-slate-900 dark:text-slate-200">Revenue Trend</span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/20 px-2 py-1 rounded-full">
                     +23%
                   </span>
                 </div>
@@ -168,13 +168,13 @@ export default function HeroSection() {
 
               {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-50 rounded-xl p-3">
-                  <p className="text-xs text-slate-500 mb-1">Profit</p>
-                  <p className="text-lg font-semibold">₹2,45,000</p>
+                <div className="bg-slate-50 dark:bg-slate-950/50 rounded-xl p-3 border border-transparent dark:border-slate-800/50 transition-colors duration-300">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Profit</p>
+                  <p className="text-lg font-semibold text-slate-900 dark:text-white">₹2,45,000</p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-3">
-                  <p className="text-xs text-slate-500 mb-1">Stock Value</p>
-                  <p className="text-lg font-semibold">₹8,32,500</p>
+                <div className="bg-slate-50 dark:bg-slate-950/50 rounded-xl p-3 border border-transparent dark:border-slate-800/50 transition-colors duration-300">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Stock Value</p>
+                  <p className="text-lg font-semibold text-slate-900 dark:text-white">₹8,32,500</p>
                 </div>
               </div>
             </motion.div>

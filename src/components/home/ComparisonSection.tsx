@@ -18,7 +18,7 @@ const rows = [
 
 export function ComparisonSection() {
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-white dark:bg-slate-900 transition-colors duration-300">
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <motion.div
@@ -27,18 +27,18 @@ export function ComparisonSection() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 mb-4">
-            Solicio vs <span className="text-slate-400">Others</span>
+          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 dark:text-white mb-4">
+            Solicio vs <span className="text-slate-400 dark:text-slate-500">Others</span>
           </h2>
-          <p className="text-lg text-slate-600">
+          <p className="text-lg text-slate-600 dark:text-slate-300">
             See why thousands of small businesses are switching to Solicio
           </p>
         </motion.div>
 
         {/* Table Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden transition-colors duration-300">
           {/* Header Row */}
-          <div className="grid grid-cols-3 px-8 py-5 border-b border-slate-200 text-sm font-medium text-slate-600">
+          <div className="grid grid-cols-3 px-8 py-5 border-b border-slate-200 dark:border-slate-700/50 text-sm font-medium text-slate-600 dark:text-slate-400">
             <div>Feature</div>
             <div className="flex justify-center">
               <span className="px-4 py-1 rounded-full bg-emerald-600 text-white text-sm font-semibold">
@@ -46,7 +46,7 @@ export function ComparisonSection() {
               </span>
             </div>
             <div className="flex justify-center">
-              <span className="px-4 py-1 rounded-full bg-slate-100 text-slate-600 text-sm font-semibold">
+              <span className="px-4 py-1 rounded-full bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 text-sm font-semibold">
                 Tally / Khatabook
               </span>
             </div>
@@ -60,7 +60,7 @@ export function ComparisonSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="grid grid-cols-3 px-8 py-5 border-b last:border-0 border-slate-100 text-slate-700"
+              className="grid grid-cols-3 px-8 py-5 border-b last:border-0 border-slate-100 dark:border-slate-700/50 text-slate-700 dark:text-slate-300"
             >
               {/* Feature */}
               <div className="font-medium">{row[0]}</div>
@@ -68,11 +68,11 @@ export function ComparisonSection() {
               {/* Solicio */}
               <div className="flex justify-center">
                 {row[1] === true ? (
-                  <span className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-emerald-600" />
+                  <span className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </span>
                 ) : (
-                  <span className="text-emerald-600 font-medium">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                     {row[1]}
                   </span>
                 )}
@@ -81,11 +81,11 @@ export function ComparisonSection() {
               {/* Others */}
               <div className="flex justify-center">
                 {row[2] === false ? (
-                  <span className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
-                    <X className="w-4 h-4 text-slate-400" />
+                  <span className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
+                    <X className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                   </span>
                 ) : (
-                  <span className="text-slate-600">{row[2]}</span>
+                  <span className="text-slate-600 dark:text-slate-400">{row[2]}</span>
                 )}
               </div>
             </motion.div>
