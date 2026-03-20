@@ -6,7 +6,6 @@ import { fetchInventorySnapshot } from "@/src/lib/api/inventory";
 import { AnimatePresence, motion } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
-import { Package, Activity, Sparkles, Layout, ChevronRight, Zap, TrendingUp, FileText } from "lucide-react";
 
 import Purchase from "../features/stock/Purchase";
 import Sale from "../features/stock/Sale";
@@ -16,12 +15,19 @@ import StockHistory from "../features/stock/StockHistory";
 import ProfitLossReport from "../features/stock/ProfitLossReport";
 import FinancialReport from "../features/stock/FinancialReport";
 
+// PREMIUM COMPONENTS
+import InventoryHero from "./Inventory/InventoryHero";
+import InventoryActionBar from "./Inventory/InventoryActionBar";
+import AIInsightPanel from "./Insights/AIInsightPanel";
+import CollapsibleSection from "./Inventory/CollapsibleSection";
+
 const PanelMotion = ({ children }: { children: React.ReactNode }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: 20 }}
     transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+    className="w-full relative z-10"
   >
     {children}
   </motion.div>
@@ -32,33 +38,23 @@ export default function Inventory() {
   const [showFinancialModal, setShowFinancialModal] = useState(false);
   const [reload, setReload] = useState(false);
   const [product, setProduct] = useState("");
-
   const [snapshot, setSnapshot] = useState<any>(null);
   const [loadingSnapshot, setLoadingSnapshot] = useState(true);
 
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
-
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const action = searchParams.get("action");
     const preSelectedProduct = searchParams.get("product");
-
-    if (action === "sale") {
-      setActiveTab("sale");
-    } else if (action === "purchase") {
-      setActiveTab("purchase");
-    }
-
-    if (preSelectedProduct) {
-      setProduct(preSelectedProduct);
-    }
+    if (action === "sale") setActiveTab("sale");
+    else if (action === "purchase") setActiveTab("purchase");
+    if (preSelectedProduct) setProduct(preSelectedProduct);
   }, [searchParams]);
 
   useEffect(() => {
     if (!email) return;
-
     const load = async () => {
       setLoadingSnapshot(true);
       try {
@@ -70,153 +66,121 @@ export default function Inventory() {
         setLoadingSnapshot(false);
       }
     };
-
     load();
   }, [email, reload]);
 
-  // Compatibility helpers for nested components
   const setNewPurchase = (v: boolean) => v && setActiveTab("purchase");
   const setNewSale = (v: boolean) => v && setActiveTab("sale");
 
-  return (
-    <section className="bg-white min-h-screen relative overflow-hidden flex flex-col items-center font-outfit">
-      {/* Background radial grid */}
-      <div className="absolute inset-0 z-0 opacity-[0.4] pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" />
-      </div>
+  // Single contextual AI insight — informed by real alert data
+  const criticalCount = snapshot?.lowStock?.length ?? 0;
+  const insightText = criticalCount > 0
+    ? `⚠️ ${criticalCount} item${criticalCount > 1 ? "s" : ""} need immediate restocking. Review the alerts above and dispatch a purchase to prevent revenue loss.`
+    : "All inventory levels are within healthy bounds. No critical stock alerts detected in the current cycle.";
 
+  return (
+    <section className="w-full bg-[#050505] min-h-screen relative overflow-hidden flex flex-col items-center">
       <Toaster />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 space-y-24">
+      {/* ─── HERO: Only show on the Report tab ────────────── */}
+      {activeTab === "report" && (
+        <InventoryHero summary={snapshot?.inventory?.summary} loading={loadingSnapshot} />
+      )}
 
-        {/* HERO HEADER - StockReport/Homepage Alignment */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-widest mb-6 border border-slate-200/50">
-            <Package className="w-3 h-3 text-emerald-600" />
-            Logistics Analysis Hub
+      {/* ─── COMPACT TOP-BAR: Show on action tabs ─────────── */}
+      {activeTab !== "report" && (
+        <div className="w-full pt-24 pb-6 px-4 sm:px-6 max-w-[1400px] mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+              {activeTab === "purchase" ? "Dispatch Purchase" : "Execute Sale"}
+            </span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tightest leading-none">
-            Inventory <span className="text-emerald-600">& Operations</span>
-          </h1>
-          <p className="mt-8 text-xl md:text-2xl text-slate-500 leading-relaxed font-medium max-w-3xl">
-            Unified logistics control center for tactical stock monitoring, high-velocity procurement, and capital deployment tracking.
-          </p>
-        </motion.div>
-
-        {/* STRATEGIC COMMAND CENTER - Action Bar */}
-        <div className="sticky bottom-4 sm:bottom-8 z-50 flex justify-center w-full pointer-events-none px-4 sm:px-0">
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2.5rem] p-1.5 sm:p-2.5 shadow-2xl flex items-center gap-1 sm:gap-2 pointer-events-auto max-w-full overflow-x-auto"
-          >
-            <ActionButton
-              active={activeTab === "purchase"}
-              icon={<Sparkles className="w-4 h-4" />}
-              onClick={() => setActiveTab("purchase")}
-            >
-              <span className="hidden sm:inline">Dispatch Purchase</span>
-              <span className="sm:hidden">Buy</span>
-            </ActionButton>
-
-            <ActionButton
-              active={activeTab === "sale"}
-              icon={<Zap className="w-4 h-4" />}
-              onClick={() => setActiveTab("sale")}
-            >
-              <span className="hidden sm:inline">Execute Sale</span>
-              <span className="sm:hidden">Sell</span>
-            </ActionButton>
-
-            <div className="w-px h-6 sm:h-8 bg-white/10 mx-0.5 sm:mx-1" />
-
-            <ActionButton
-              variant="secondary"
-              active={activeTab === "report"}
-              icon={<Layout className="w-4 h-4" />}
-              onClick={() => setActiveTab("report")}
-            >
-              <span className="hidden sm:inline">Inventory Report</span>
-              <span className="sm:hidden">Report</span>
-            </ActionButton>
-
-            <div className="w-px h-6 sm:h-8 bg-white/10 mx-0.5 sm:mx-1" />
-
-            <ActionButton
-              variant="secondary"
-              active={showFinancialModal}
-              icon={<FileText className="w-4 h-4" />}
-              onClick={() => setShowFinancialModal(true)}
-            >
-              <span className="hidden sm:inline">Financial Audit</span>
-              <span className="sm:hidden">Audit</span>
-            </ActionButton>
-          </motion.div>
         </div>
+      )}
 
-        {/* TACTICAL PANELS */}
-        <div className="relative">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 pb-28">
+        <div className="relative w-full">
           <AnimatePresence mode="wait">
+
+            {/* ── ACTION PANELS ──────────────────────────── */}
             {activeTab === "purchase" && (
               <PanelMotion key="purchase">
-                <div className="w-full">
-                  <Purchase
-                    visible={true}
-                    preSelectedProduct={product}
-                    reloadSetter={() => setReload(!reload)}
-                    reload={reload}
-                  />
-                </div>
+                <Purchase
+                  visible={true}
+                  preSelectedProduct={product}
+                  reloadSetter={() => setReload(!reload)}
+                  reload={reload}
+                />
               </PanelMotion>
             )}
 
             {activeTab === "sale" && (
               <PanelMotion key="sale">
-                <div className="w-full">
-                  <Sale
-                    visible={true}
-                    preSelectedProduct={product}
-                    reloadSetter={() => setReload(!reload)}
-                    reload={reload}
-                  />
-                </div>
+                <Sale
+                  visible={true}
+                  preSelectedProduct={product}
+                  reloadSetter={() => setReload(!reload)}
+                  reload={reload}
+                />
               </PanelMotion>
             )}
 
             {activeTab === "report" && (
               <PanelMotion key="report">
-                <div className="space-y-24">
-                  {/* MAIN STOCK REPORT */}
-                  <StockReport
-                    visible={true}
-                    data={snapshot?.inventory}
-                    productSetter={setProduct}
-                    purchaseSetter={setNewPurchase}
-                    saleSetter={setNewSale}
-                    reloadKey={reload ? 1 : 0}
-                    reloadSetter={() => setReload(!reload)}
-                  />
+                <div className="flex flex-col w-full space-y-10">
 
-                  {/* HIGH-VISIBILITY INSIGHTS STACK - BusinessInsights Alignment */}
-                  <section className="space-y-16">
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap px-1">Tactical Analysis Stack</span>
-                      <div className="h-px w-full bg-slate-100" />
+                  {/* ─── LAYER 2: ALERTS ───────────────────────── */}
+                  {/* Show problems first — operator needs to act on these ASAP */}
+                  {criticalCount > 0 && (
+                    <div className="w-full">
+                      <StockAlertSmart data={snapshot.lowStock} />
                     </div>
+                  )}
 
-                    <div className="grid grid-cols-1 gap-12">
-                      <StockAlertSmart data={snapshot?.lowStock} />
-                      <StockHistory data={snapshot?.stockHistory} />
-                      <ProfitLossReport />
-                    </div>
-                  </section>
+                  {/* ─── LAYER 3: SINGLE CONTEXTUAL INSIGHT ─────── */}
+                  {/* One focused message — alerts or all-clear, never redundant */}
+                  <AIInsightPanel text={insightText} />
+
+                  {/* ─── LAYER 4: STOCK TABLE ─────────────────────── */}
+                  {/* Primary data — risk-sorted by default (dead → warning → slow → fast) */}
+                  <div className="w-full">
+                    <StockReport
+                      visible={true}
+                      data={snapshot?.inventory}
+                      productSetter={setProduct}
+                      purchaseSetter={setNewPurchase}
+                      saleSetter={setNewSale}
+                      reloadKey={reload ? 1 : 0}
+                      reloadSetter={() => setReload(!reload)}
+                    />
+                  </div>
+
+                  {/* ─── LAYER 5: MOVEMENT (COLLAPSIBLE) ─────────── */}
+                  {/* Secondary data — collapsed by default to reduce first-load noise */}
+                  <CollapsibleSection
+                    title="Fiscal Manifest"
+                    subtitle="Inbound acquisitions & outbound deployments"
+                    badge={snapshot?.stockHistory?.length ? `${snapshot.stockHistory.length} entries` : undefined}
+                    defaultOpen={false}
+                  >
+                    <StockHistory data={snapshot?.stockHistory} />
+                  </CollapsibleSection>
+
+                  {/* ─── LAYER 6: FINANCIALS (COLLAPSIBLE) ───────── */}
+                  {/* Reference data — shown only when operator explicitly needs it */}
+                  <CollapsibleSection
+                    title="Profit & Loss Statement"
+                    subtitle="Revenue, costs, and net profit for the period"
+                    defaultOpen={false}
+                  >
+                    <ProfitLossReport />
+                  </CollapsibleSection>
+
                 </div>
               </PanelMotion>
             )}
+
           </AnimatePresence>
 
           <AnimatePresence>
@@ -225,49 +189,14 @@ export default function Inventory() {
             )}
           </AnimatePresence>
         </div>
-
-        {/* FOOTER STATS SLIVER */}
-        <div className="pt-20 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 opacity-50">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="w-5 h-5 text-emerald-600" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Inventory Synchronicity: Nominal</span>
-          </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Solicio Tactical Edge v2.0</p>
-        </div>
-
       </div>
+
+      {/* ─── STICKY CONTROL BAR — always accessible ───── */}
+      <InventoryActionBar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        setShowFinancialModal={setShowFinancialModal}
+      />
     </section>
-  );
-}
-
-/* ---------- UI Components ---------- */
-
-function ActionButton({
-  children,
-  onClick,
-  icon,
-  active = false,
-  variant = "primary",
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  icon?: React.ReactNode;
-  active?: boolean;
-  variant?: "primary" | "secondary";
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        flex items-center gap-1.5 sm:gap-2.5 px-3 py-2.5 sm:px-6 sm:py-3.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all duration-300 whitespace-nowrap
-        ${active
-          ? variant === "primary" ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/40" : "bg-white text-slate-900 shadow-lg shadow-white/20"
-          : "text-slate-400 hover:text-white hover:bg-white/5"
-        }
-      `}
-    >
-      {icon && <span className={`${active ? "opacity-100 animate-pulse" : "opacity-50"}`}>{icon}</span>}
-      {children}
-    </button>
   );
 }

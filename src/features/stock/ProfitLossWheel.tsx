@@ -16,6 +16,12 @@ const COLORS = [
   "#10B981", // Net profit - emerald
 ];
 
+const DARK_BG_STYLES = [
+  { bg: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400", dot: "bg-indigo-500" },
+  { bg: "bg-amber-500/10 border-amber-500/20 text-amber-400", dot: "bg-amber-500" },
+  { bg: "bg-rose-500/10 border-rose-500/20 text-rose-400", dot: "bg-rose-500" },
+  { bg: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", dot: "bg-emerald-500" },
+];
 
 type ProfitSummary = {
   cogs: number;
@@ -31,38 +37,38 @@ export default function ProfitLossWheel({
   summary: ProfitSummary;
 }) {
   const data = [
-    {
-      name: "COGS",
-      value: summary.cogs,
-    },
-    {
-      name: "Operating Expenses",
-      value: summary.expenses,
-    },
-    {
-      name: "Inventory Write-downs",
-      value: summary.inventoryWriteDowns,
-    },
-    {
-      name: "Net Profit",
-      value: Math.max(summary.netProfit, 0),
-    },
+    { name: "COGS", value: summary.cogs },
+    { name: "Operating Expenses", value: summary.expenses },
+    { name: "Inventory Write-downs", value: summary.inventoryWriteDowns },
+    { name: "Net Profit", value: Math.max(summary.netProfit, 0) },
   ];
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-[#111]/90 backdrop-blur-md border border-white/10 rounded-xl p-3 text-white text-xs shadow-xl">
+          <p className="font-bold">{payload[0].name}</p>
+          <p className="text-emerald-400 font-black">₹{Number(payload[0].value ?? 0).toLocaleString('en-IN')}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <motion.section
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="rounded-2xl sm:rounded-[2rem] border border-slate-200 bg-white p-4 sm:p-8 shadow-sm h-full flex flex-col"
+      className="bg-[#0A0A0A] rounded-[2rem] border border-white/10 p-6 sm:p-8 h-full flex flex-col hover:border-white/20 transition-all"
     >
-      <div className="flex items-center justify-between mb-4 sm:mb-8">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h3 className="text-lg sm:text-xl font-bold text-slate-900">Profit Distribution</h3>
-          <p className="text-[10px] sm:text-xs font-medium text-slate-400 uppercase tracking-widest mt-0.5 sm:mt-1">Resource Allocation</p>
+          <h3 className="text-xl font-bold text-white">Profit Distribution</h3>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Resource Allocation</p>
         </div>
       </div>
 
-      <div className="relative h-[250px] sm:h-[320px] w-full mb-4 sm:mb-8 flex-shrink-0">
+      <div className="relative h-[260px] w-full mb-8 flex-shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -71,7 +77,7 @@ export default function ProfitLossWheel({
               nameKey="name"
               innerRadius="60%"
               outerRadius="90%"
-              paddingAngle={5}
+              paddingAngle={4}
               stroke="none"
               cornerRadius={6}
             >
@@ -79,56 +85,58 @@ export default function ProfitLossWheel({
                 <Cell
                   key={i}
                   fill={COLORS[i % COLORS.length]}
-                  className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
+                  opacity={0.85}
+                  className="hover:opacity-100 transition-opacity cursor-pointer outline-none"
                 />
               ))}
             </Pie>
-            <Tooltip
-              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
-              formatter={(v) => `₹${Number(v ?? 0).toLocaleString('en-IN')}`}
-            />
+            <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-0.5 sm:mb-1">Total Sales</p>
-          <p className="text-xl sm:text-3xl font-black text-slate-900">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Total Revenue</p>
+          <p className="text-3xl font-black text-white">
             ₹{(summary.sales / 1000).toFixed(1)}k
           </p>
         </div>
       </div>
 
       {/* LEGEND */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-4 mt-auto">
-        {data.map((d, i) => (
-          <div
-            key={d.name}
-            className="group flex flex-col p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-md transition-all cursor-default"
-          >
-            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-              <span
-                className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full flex-shrink-0"
-                style={{ backgroundColor: COLORS[i] }}
-              />
-              <span className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">
-                {d.name}
+      <div className="grid grid-cols-2 gap-3 mt-auto">
+        {data.map((d, i) => {
+          const pct = summary.sales > 0 ? Math.min((d.value / summary.sales) * 100, 100) : 0;
+          const style = DARK_BG_STYLES[i];
+          return (
+            <div
+              key={d.name}
+              className={`group flex flex-col p-4 rounded-2xl border ${style.bg} hover:scale-[1.01] transition-all cursor-default`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`h-2 w-2 rounded-full flex-shrink-0 shadow-[0_0_8px_currentColor] ${style.dot}`} style={{ color: COLORS[i] }} />
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">
+                  {d.name}
+                </span>
+              </div>
+
+              <span className="text-sm font-black text-white mb-2">
+                ₹{d.value.toLocaleString('en-IN')}
               </span>
-            </div>
 
-            <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-              ₹{d.value.toLocaleString('en-IN')}
-            </span>
-
-            <div className="mt-1 sm:mt-2 h-1 w-full bg-slate-200 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min((d.value / summary.sales) * 100, 100)}%` }}
-                className="h-full rounded-full"
-                style={{ backgroundColor: COLORS[i] }}
-              />
+              {/* Progress bar */}
+              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 1, ease: "easeOut", delay: i * 0.1 }}
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: COLORS[i] }}
+                />
+              </div>
+              <p className="text-[9px] font-bold text-slate-600 mt-1.5">{pct.toFixed(1)}% of revenue</p>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </motion.section>
   );

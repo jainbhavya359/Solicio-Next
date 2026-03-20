@@ -5,10 +5,9 @@ import {
   History,
   TrendingUp,
   ShoppingBag,
-  ArrowRight,
-  Sparkles,
   Layers,
-  Activity
+  Activity,
+  Sparkles,
 } from "lucide-react";
 import StockHistoryTable from "./StockHistoryTable";
 
@@ -28,9 +27,9 @@ export default function StockHistory({
 }) {
   if (!data) {
     return (
-      <section className="rounded-[2.5rem] border border-slate-200 bg-white p-12 shadow-sm border-dashed flex flex-col items-center justify-center min-h-[400px]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-100 border-t-emerald-600 mb-4" />
-        <p className="text-xs font-black text-slate-400 uppercase tracking-widest">
+      <section className="rounded-[2.5rem] border border-white/10 bg-[#0A0A0A] p-12 flex flex-col items-center justify-center min-h-[400px]">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-white/10 border-t-emerald-400 mb-4" />
+        <p className="text-xs font-black text-slate-500 uppercase tracking-widest">
           Synchronizing Audit Logs...
         </p>
       </section>
@@ -44,76 +43,73 @@ export default function StockHistory({
   const totalSaleValue = sales.reduce((sum, r) => sum + (r.quantity * r.price), 0);
 
   return (
-    <div className="space-y-12 font-sans">
+    <div className="space-y-8 font-sans w-full">
       {/* HERO HEADER */}
       <motion.div
         variants={fadeInUp}
         initial="hidden"
         animate="visible"
-        className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6"
+        className="bg-[#0A0A0A] border border-white/10 rounded-3xl p-6 sm:p-8 relative overflow-hidden"
       >
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-3">
-            <History className="w-3 h-3" />
-            Audit Protocol
-          </div>
-          <div className="hidden sm:block">
-            <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter">
-              Fiscal <span className="text-emerald-600">Manifest</span>
+        {/* Background Glow */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full mix-blend-screen pointer-events-none" />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-3 border border-blue-500/20">
+              <History className="w-3 h-3" />
+              Audit Protocol
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tighter">
+              Fiscal <span className="text-blue-400">Manifest</span>
             </h2>
-            <p className="text-lg text-slate-500 mt-2 max-w-2xl font-medium">
+            <p className="text-sm text-[#A1A1AA] mt-2 max-w-xl font-medium leading-relaxed">
               A high-fidelity ledger tracing every asset deployment and revenue event within your inventory ecosystem.
             </p>
           </div>
-          {/* Mobile Title */}
-          <h2 className="block sm:hidden text-2xl font-black text-slate-900 tracking-tighter">
-            Fiscal <span className="text-emerald-600">Manifest</span>
-          </h2>
-        </div>
 
-        <div className="flex items-center gap-3 bg-white px-4 py-2 sm:px-5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group self-start sm:self-auto">
-          <div className="absolute inset-0 bg-emerald-500/5 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-          <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 relative z-10" />
-          <div className="relative z-10">
-            <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Log Density</p>
-            <p className="text-xs sm:text-base font-black text-slate-900 mt-0.5 sm:mt-1">{data.length} Transactions</p>
+          <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/5 border border-white/10 self-start md:self-auto">
+            <Activity className="w-5 h-5 text-blue-400" />
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Log Density</p>
+              <p className="text-base font-black text-white">{data.length} Transactions</p>
+            </div>
           </div>
         </div>
       </motion.div>
 
-      {/* KPI STRIP - Dense 2x2 Grid on Mobile */}
+      {/* KPI STRIP */}
       <motion.div
         variants={fadeInUp}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
       >
-        <Kpi
+        <ManifestKpi
           label="Total Acquisition"
-          value={`₹${totalPurchaseValue.toLocaleString()}`}
+          value={`₹${totalPurchaseValue.toLocaleString('en-IN')}`}
           icon={ShoppingBag}
-          variant="slate"
+          color="emerald"
           description="Inbound asset value"
         />
-        <Kpi
+        <ManifestKpi
           label="Total Deployment"
-          value={`₹${totalSaleValue.toLocaleString()}`}
+          value={`₹${totalSaleValue.toLocaleString('en-IN')}`}
           icon={TrendingUp}
-          variant="emerald"
+          color="blue"
           description="Outbound revenue value"
         />
-        <Kpi
+        <ManifestKpi
           label="Log Entries"
           value={data.length}
           icon={Layers}
-          variant="slate"
+          color="indigo"
           description="Total records processed"
         />
-        <Kpi
+        <ManifestKpi
           label="Audit Integrity"
           value="Verified"
           icon={Sparkles}
-          variant="emerald"
+          color="cyan"
           description="Neural-ledger verified"
         />
       </motion.div>
@@ -123,7 +119,7 @@ export default function StockHistory({
         variants={fadeInUp}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
         <StockHistoryTable
           title="Inbound Acquisitions"
@@ -142,43 +138,45 @@ export default function StockHistory({
   );
 }
 
-function Kpi({
+function ManifestKpi({
   label,
   value,
   icon: Icon,
-  variant = "slate",
+  color,
   description
 }: {
   label: string;
   value: string | number;
   icon: any;
-  variant?: "emerald" | "slate";
+  color: "emerald" | "blue" | "indigo" | "cyan";
   description?: string;
 }) {
-  return (
-    <div className="group rounded-2xl sm:rounded-3xl border border-slate-100 p-4 sm:p-6 bg-white transition-all hover:shadow-xl hover:border-emerald-200 cursor-default relative overflow-hidden h-full">
-      <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 bg-slate-50 rounded-full -mr-8 -mt-8 sm:-mr-12 sm:-mt-12 group-hover:bg-emerald-50 transition-colors" />
+  const styles = {
+    emerald: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+    blue: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+    indigo: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
+    cyan: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
+  };
 
-      <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-4">
-        <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[70%]">{label}</span>
-        <div className={`p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl ${variant === 'emerald' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-slate-50 text-slate-400'} transition-all group-hover:scale-110`}>
-          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+  const textStyles = {
+    emerald: "text-emerald-400",
+    blue: "text-blue-400",
+    indigo: "text-indigo-400",
+    cyan: "text-cyan-400",
+  };
+
+  return (
+    <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all duration-300 group">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
+        <div className={`p-2 rounded-xl border ${styles[color]} group-hover:scale-110 transition-all`}>
+          <Icon className="w-4 h-4" />
         </div>
       </div>
-
-      <div className="relative z-10">
-        <p className={`text-xl sm:text-3xl font-black tracking-tighter leading-none ${variant === 'emerald' ? 'text-emerald-600' : 'text-slate-900'}`}>
-          {value}
-        </p>
-        {description && (
-          <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 mt-1 sm:mt-2 uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity truncate">
-            {description}
-          </p>
-        )}
-      </div>
+      <p className={`text-2xl font-black tracking-tight ${textStyles[color]}`}>{value}</p>
+      {description && (
+        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1">{description}</p>
+      )}
     </div>
   );
 }
-
-
-

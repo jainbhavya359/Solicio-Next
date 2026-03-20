@@ -33,7 +33,7 @@ const containerVars = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05,
+      staggerChildren: 0.04,
     },
   },
 };
@@ -51,167 +51,126 @@ export default function StockHistoryTable({
 }: Props) {
   const isPurchase = type === "Purchase";
   const Icon = isPurchase ? ArrowUpRight : ArrowDownRight;
-  const accentColor = isPurchase ? "text-emerald-600" : "text-rose-600";
-  const bgAccent = isPurchase ? "bg-emerald-50" : "bg-rose-50";
+  const colorClass = isPurchase ? "text-emerald-400" : "text-rose-400";
+  const bgClass = isPurchase ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-400";
+  const rowAccent = isPurchase ? "hover:border-emerald-500" : "hover:border-rose-500";
 
   return (
-    <div className="flex flex-col h-full font-sans">
+    <div className="flex flex-col h-full font-sans bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] overflow-hidden hover:border-white/20 transition-all duration-500">
       {/* HEADER */}
-      <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4">
-        <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl ${bgAccent} ${accentColor} flex items-center justify-center shadow-sm border border-white/50`}>
-          <Icon size={20} className="sm:w-6 sm:h-6" />
+      <div className="p-6 border-b border-white/5 flex items-center gap-4">
+        <div className={`h-11 w-11 rounded-2xl flex items-center justify-center border ${bgClass} flex-shrink-0`}>
+          <Icon size={20} />
         </div>
         <div>
-          <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none">
+          <h3 className="text-lg font-black text-white tracking-tight leading-none">
             {title}
           </h3>
-          <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 sm:mt-1.5">
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">
             {subtitle}
           </p>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl sm:rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-        {/* TABLE HEADER - Hidden on Mobile */}
-        <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-4 bg-slate-50/50 border-b border-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
-          <div className="col-span-1">Date</div>
-          <div className="col-span-4">Asset Identification</div>
-          <div className="col-span-2 text-right">Qty</div>
-          <div className="col-span-2 text-right">Value (₹)</div>
-          <div className="col-span-3 text-right">Identifier</div>
-        </div>
-
-        {rows.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center py-10 sm:py-20 px-6 text-center">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-slate-50 text-slate-200 flex items-center justify-center mb-3 sm:mb-4">
-              <Package size={24} className="sm:w-8 sm:h-8" />
-            </div>
-            <p className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">
-              Zero records detected
-            </p>
-          </div>
-        ) : (
-          <motion.div
-            variants={containerVars}
-            initial="hidden"
-            animate="visible"
-            className="divide-y divide-slate-50 overflow-y-auto max-h-[500px] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent"
-          >
-            {rows.map((row) => (
-              <motion.div
-                key={row._id}
-                variants={itemVars}
-                className="
-                  flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-6 sm:py-4 sm:items-center 
-                  hover:bg-slate-50/50 transition-colors group cursor-default
-                "
-              >
-                {/* Mobile Top Row: Date + Identifier */}
-                <div className="flex sm:hidden items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-slate-900">
-                      {new Date(row.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                    </span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                      {new Date(row.date).getFullYear()}
-                    </span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-500">
-                    <Hash size={10} />
-                    <span className="text-[9px] font-bold uppercase tracking-tight">
-                      {row.entryNo}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Mobile Main Row: Product + Value */}
-                <div className="flex sm:hidden items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center">
-                      <Box size={14} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-900 capitalize truncate max-w-[150px]">
-                        {row.name}
-                      </p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                        {row.quantity} {row.unit}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className={`block text-sm font-black tabular-nums ${accentColor}`}>
-                      ₹{(row.quantity * row.price).toLocaleString()}
-                    </span>
-                    <span className="block text-[9px] font-bold text-slate-400 tabular-nums">
-                      @ {row.price}
-                    </span>
-                  </div>
-                </div>
-
-
-                {/* Desktop: Date */}
-                <div className="hidden sm:block col-span-1">
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-black text-slate-900">
-                      {new Date(row.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                    </span>
-                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">
-                      {new Date(row.date).getFullYear()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Desktop: Product */}
-                <div className="hidden sm:block col-span-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all">
-                      <Box size={14} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-900 capitalize truncate max-w-[120px]">
-                        {row.name}
-                      </p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        {row.unit}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Desktop: Qty */}
-                <div className="hidden sm:block col-span-2 text-right">
-                  <span className="text-sm font-black text-slate-900 tabular-nums">
-                    {row.quantity}
-                  </span>
-                </div>
-
-                {/* Desktop: Value */}
-                <div className="hidden sm:block col-span-2 text-right">
-                  <div className="flex flex-col items-end">
-                    <span className={`text-sm font-black tabular-nums ${accentColor}`}>
-                      ₹{(row.quantity * row.price).toLocaleString()}
-                    </span>
-                    <span className="text-[9px] font-bold text-slate-400 tabular-nums">
-                      @ {row.price}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Desktop: Identifier */}
-                <div className="hidden sm:block col-span-3 text-right">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 text-white shadow-sm">
-                    <Hash size={10} className="text-slate-500" />
-                    <span className="text-[10px] font-black tracking-tighter uppercase whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px]">
-                      {row.entryNo}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+      {/* TABLE HEADER */}
+      <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-white/5 border-b border-white/5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">
+        <div className="col-span-2">Date</div>
+        <div className="col-span-4">Asset</div>
+        <div className="col-span-2 text-right">Qty</div>
+        <div className="col-span-2 text-right">Value</div>
+        <div className="col-span-2 text-right">ID</div>
       </div>
+
+      {rows.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 px-6 text-center flex-1">
+          <div className="w-14 h-14 rounded-3xl bg-white/5 text-slate-600 border border-white/10 flex items-center justify-center mb-4">
+            <Package size={24} />
+          </div>
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
+            Zero records detected
+          </p>
+        </div>
+      ) : (
+        <motion.div
+          variants={containerVars}
+          initial="hidden"
+          animate="visible"
+          className="divide-y divide-white/5 overflow-y-auto max-h-[420px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+        >
+          {rows.map((row) => (
+            <motion.div
+              key={row._id}
+              variants={itemVars}
+              className={`
+                flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-6 sm:py-4 sm:items-center 
+                hover:bg-white/5 transition-all duration-200 group cursor-default border-l-2 border-transparent ${rowAccent}
+              `}
+            >
+              {/* Mobile row */}
+              <div className="flex sm:hidden items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black text-white">
+                    {new Date(row.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                  </span>
+                  <span className="text-[9px] font-bold text-slate-500 uppercase">{new Date(row.date).getFullYear()}</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-400">
+                  <Hash size={9} />
+                  <span className="text-[9px] font-bold uppercase tracking-tight">{row.entryNo}</span>
+                </div>
+              </div>
+
+              <div className="flex sm:hidden items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 text-slate-400 flex items-center justify-center">
+                    <Box size={13} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-white capitalize truncate max-w-[150px]">{row.name}</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{row.quantity} {row.unit}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className={`block text-sm font-black tabular-nums ${colorClass}`}>₹{(row.quantity * row.price).toLocaleString('en-IN')}</span>
+                  <span className="block text-[9px] font-bold text-slate-500 tabular-nums">@ {row.price}</span>
+                </div>
+              </div>
+
+              {/* Desktop cells */}
+              <div className="hidden sm:flex col-span-2 flex-col">
+                <span className="text-[11px] font-black text-white">{new Date(row.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-tight">{new Date(row.date).getFullYear()}</span>
+              </div>
+
+              <div className="hidden sm:flex col-span-4 items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 text-slate-500 flex items-center justify-center group-hover:border-white/20 transition-all">
+                  <Box size={13} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white capitalize truncate max-w-[120px]">{row.name}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{row.unit}</p>
+                </div>
+              </div>
+
+              <div className="hidden sm:flex col-span-2 justify-end">
+                <span className="text-sm font-black text-white tabular-nums">{row.quantity}</span>
+              </div>
+
+              <div className="hidden sm:flex col-span-2 flex-col items-end">
+                <span className={`text-sm font-black tabular-nums ${colorClass}`}>₹{(row.quantity * row.price).toLocaleString('en-IN')}</span>
+                <span className="text-[9px] font-bold text-slate-500 tabular-nums">@ {row.price}</span>
+              </div>
+
+              <div className="hidden sm:flex col-span-2 justify-end">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-400">
+                  <Hash size={9} className="text-slate-600" />
+                  <span className="text-[9px] font-black tracking-tighter uppercase whitespace-nowrap overflow-hidden text-ellipsis max-w-[70px]">{row.entryNo}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }

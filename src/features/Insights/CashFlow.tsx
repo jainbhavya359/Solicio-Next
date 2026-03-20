@@ -13,7 +13,7 @@ export default function CashFlowWatch({ data }: { data: CashFlowData }) {
   const net = data.sales - data.purchases;
 
   return (
-    <section className="h-full bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+    <section className="h-full bg-transparent flex flex-col">
       {/* HEADER */}
       <div className="flex items-start justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-3 sm:gap-4">
@@ -25,15 +25,15 @@ export default function CashFlowWatch({ data }: { data: CashFlowData }) {
             )}
           </div>
           <div className="hidden sm:block">
-            <h3 className="text-xl font-bold text-slate-900">Cash Flow</h3>
-            <p className="text-sm text-slate-500 mt-1">
+            <h3 className="text-xl font-bold text-white">Cash Flow</h3>
+            <p className="text-sm text-slate-400 mt-1">
               Net {isHealthy ? "positive" : "negative"} for {data.period.toLowerCase()}
             </p>
           </div>
           {/* Mobile Text */}
           <div className="block sm:hidden">
-            <h3 className="text-sm font-bold text-slate-900 leading-tight">Cash Analysis</h3>
-            <p className="text-[10px] text-slate-500 font-medium">{isHealthy ? "Net Positive" : "Net Negative"}</p>
+            <h3 className="text-sm font-bold text-white leading-tight">Cash Analysis</h3>
+            <p className="text-[10px] text-slate-400 font-medium">{isHealthy ? "Net Positive" : "Net Negative"}</p>
           </div>
         </div>
 
@@ -48,14 +48,14 @@ export default function CashFlowWatch({ data }: { data: CashFlowData }) {
 
       {/* METRICS */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-6">
-        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100">
+        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10">
           <p className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-2">Inflow</p>
           <p className="text-sm sm:text-lg font-bold text-emerald-600 truncate">
             ₹{data.sales.toLocaleString('en-IN')}
           </p>
         </div>
 
-        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100">
+        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10">
           <p className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-2">Outflow</p>
           <p className="text-sm sm:text-lg font-bold text-rose-600 truncate">
             ₹{data.purchases.toLocaleString('en-IN')}
