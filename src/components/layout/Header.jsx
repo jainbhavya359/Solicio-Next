@@ -4,24 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Menu, X, Moon } from "lucide-react";
 import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 
 export default function Header() {
   const pathname = usePathname();
-  const [show, setShow] = useState(true);
-  const [lastScroll, setLastScroll] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      const current = window.scrollY;
-      setShow(current < lastScroll || current < 80);
-      setLastScroll(current);
+      setIsScrolled(window.scrollY > 40);
     };
     window.addEventListener("scroll", handleScroll);
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScroll]);
+  }, []);
 
   const links = [
     { href: "/", label: "Home" },
@@ -32,127 +30,181 @@ export default function Header() {
   ];
 
   return (
-    <motion.div
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: show ? 0 : -120, opacity: show ? 1 : 0 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 transition-colors duration-300"
-    >
-      <header className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* LOGO */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black">
-            <TrendingUp />
-          </div>
-          <span className="text-xl font-extrabold text-slate-900 dark:text-white">
-            Solicio
-          </span>
-        </Link>
-
-        {/* DESKTOP NAV */}
-        <nav className="hidden md:flex gap-8">
-          {links.map((link) => {
-            const active = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`relative text-sm font-semibold transition
-                  ${active
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                  }
-                `}
-              >
-                {link.label}
-                {active && (
-                  <span className="absolute -bottom-2 left-0 w-full h-[2px] bg-emerald-600 rounded-full" />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* DESKTOP CTA */}
-        <SignedOut>
-          <Link
-            href="/signup"
-            className="hidden md:inline-block px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold
-            hover:bg-emerald-700 transition shadow"
-          >
-            Get Started Free
-          </Link>
-        </SignedOut>
-        <SignedIn>
-          <SignOutButton>
-            <button className="hidden md:inline-block px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-300 dark:hover:bg-slate-700 transition shadow">
-              Log Out
-            </button>
-          </SignOutButton>
-        </SignedIn>
-
-        {/* MOBILE HAMBURGER */}
-        <button
-          className="md:hidden p-2 text-slate-600 dark:text-slate-300"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+    <>
+      <div
+        className={`fixed z-50 left-0 right-0 flex justify-center transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          isScrolled ? "top-4 px-4" : "top-0 px-0"
+        }`}
+      >
+        <header
+          style={{ maxWidth: isScrolled ? "896px" : "100%" }}
+          className={`w-full flex items-center justify-between overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            isScrolled
+              ? "rounded-full border border-white/10 bg-[#111111]/90 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.8)] px-4 py-2.5"
+              : "px-6 md:px-12 2xl:px-24 py-5 bg-[#050505]/70 backdrop-blur-2xl border-b border-white/5"
+          }`}
         >
-          {mobileMenuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></svg>
-          )}
-        </button>
-      </header>
+          {/* LOGO */}
+          <Link href="/" className="flex items-center group shrink-0">
+            <div className={`flex items-center justify-center text-emerald-400 font-black rounded-xl bg-white/5 border border-white/10 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/50 transition-all duration-500 ${
+              isScrolled ? "w-8 h-8 rounded-lg border-transparent" : "w-10 h-10 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+            }`}>
+              <TrendingUp strokeWidth={2.5} className={isScrolled ? "w-4 h-4 text-white" : "w-5 h-5"} />
+            </div>
+            
+            <span 
+              className={`font-extrabold text-white tracking-tight whitespace-nowrap overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                isScrolled ? "w-0 opacity-0 text-[0px] ml-0" : "w-[65px] opacity-100 text-xl ml-3"
+              }`}
+            >
+              Solicio
+            </span>
+          </Link>
 
-      {/* MOBILE MENU */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="md:hidden overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-300"
+          {/* DESKTOP NAV */}
+          <nav
+            className={`hidden md:flex items-center transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] text-sm rounded-full ${
+              isScrolled
+                ? "gap-6 px-0 py-0 bg-transparent border-transparent"
+                : "gap-8 px-6 py-2.5 bg-white/5 border border-white/5"
+            }`}
           >
-            <nav className="flex flex-col p-6 gap-4">
-              {links.map((link) => {
-                const active = pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`text-lg font-semibold ${active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400"
-                      }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-              <hr className="border-slate-100 dark:border-slate-800 my-2" />
-              <SignedOut>
+            {links.map((link) => {
+              const active = pathname === link.href;
+              return (
                 <Link
-                  href="/signup"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-center px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold shadow"
+                  key={link.href}
+                  href={link.href}
+                  className={`font-medium transition-colors whitespace-nowrap ${
+                    active ? "text-white" : "text-[#A1A1AA] hover:text-white"
+                  }`}
                 >
-                  Get Started Free
+                  {link.label}
                 </Link>
-              </SignedOut>
-              <SignedIn>
-                <SignOutButton>
-                  <button
+              );
+            })}
+          </nav>
+
+          {/* DESKTOP CTA */}
+          <div className="hidden md:flex items-center justify-end transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] shrink-0 gap-4">
+            <SignedOut>
+              <Link
+                href="/login"
+                className={`font-medium text-[#A1A1AA] hover:text-white transition-all duration-500 ${
+                  isScrolled ? "text-xs" : "text-sm"
+                }`}
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className={`flex items-center justify-center rounded-full bg-emerald-500 text-black font-semibold transition-all duration-500 hover:bg-emerald-400 ${
+                  isScrolled
+                    ? "px-4 py-1.5 text-xs shadow-none border border-emerald-400 whitespace-nowrap"
+                    : "px-5 py-2.5 text-sm shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] whitespace-nowrap"
+                }`}
+              >
+                Get Started
+                
+                {/* Expandable Arrow */}
+                <span className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] flex items-center ${
+                  isScrolled ? "max-w-[10px] opacity-100 ml-1" : "max-w-0 opacity-0 ml-0"
+                }`}>
+                  <span className="text-[10px] leading-none mb-[1px]">›</span>
+                </span>
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <SignOutButton>
+                <button className={`whitespace-nowrap rounded-full border border-white/10 bg-white/5 text-white font-medium hover:bg-white/10 transition-all duration-500 flex items-center justify-center ${
+                  isScrolled ? "px-3 py-1.5 text-xs" : "px-5 py-2 text-sm"
+                }`}>
+                  Log Out
+                </button>
+              </SignOutButton>
+            </SignedIn>
+
+            {/* Expandable Moon Icon */}
+            <div className={`overflow-hidden flex items-center transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              isScrolled ? "w-6 opacity-100 ml-1" : "w-0 opacity-0 ml-0"
+            }`}>
+              <button className="w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[#A1A1AA] hover:text-white transition-colors">
+                <Moon className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* MOBILE HAMBURGER */}
+          <button
+            className="md:hidden p-2 text-slate-300 hover:text-white transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+        </header>
+
+        {/* MOBILE MENU */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="fixed top-full left-0 w-full md:hidden overflow-hidden bg-[#0A0A0A] border-b border-white/5 rounded-b-2xl mt-1 z-50"
+            >
+              <nav className="flex flex-col p-6 gap-4">
+                {links.map((link) => {
+                  const active = pathname === link.href;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`text-lg font-medium p-2 rounded-lg transition-colors ${active
+                          ? "text-emerald-400 bg-emerald-500/10"
+                          : "text-[#A1A1AA] hover:bg-white/5 hover:text-white"
+                        }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+                <hr className="border-white/5 my-2" />
+                <SignedOut>
+                  <Link
+                    href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-center px-5 py-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold shadow transition-colors"
+                    className="text-center p-3 rounded-xl border border-white/10 text-white font-medium"
                   >
-                    Log Out
-                  </button>
-                </SignOutButton>
-              </SignedIn>
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-center p-3 rounded-xl bg-emerald-500 text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.2)] mt-2"
+                  >
+                    Get Started Free
+                  </Link>
+                </SignedOut>
+                <SignedIn>
+                  <SignOutButton>
+                    <button
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full text-center p-3 rounded-xl border border-white/10 bg-white/5 text-white font-medium"
+                    >
+                      Log Out
+                    </button>
+                  </SignOutButton>
+                </SignedIn>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
-

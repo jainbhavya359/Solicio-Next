@@ -8,36 +8,38 @@ const steps = [
     icon: UserPlus,
     title: "Sign Up in Seconds",
     description:
-      "Create your free account with just your phone number. No complex forms, no credit card needed.",
-    tag: "Takes less than 2 minutes",
+      "Create your free account instantly. No complex forms, no credit card needed.",
+    tag: "Takes < 2 minutes",
   },
   {
     icon: Package,
-    title: "Add Your Inventory",
+    title: "Add Inventory",
     description:
-      "Import your existing data or start fresh. Add products, set prices, and track stock levels easily.",
+      "Import existing data or start fresh. Set prices and track stock levels.",
     tag: "Bulk import supported",
   },
   {
     icon: BarChart3,
-    title: "Record Transactions",
+    title: "Record Sales",
     description:
-      "Log sales and purchases with a few taps. Everything syncs automatically across all your devices.",
+      "Log sales and purchases seamlessly. Syncs automatically across devices.",
     tag: "Works offline too",
   },
   {
     icon: Sparkles,
-    title: "Get Smart Insights",
+    title: "Get Insights",
     description:
-      "Watch Solicio analyze your data and surface actionable insights to help you make better decisions.",
-    tag: "AI-powered recommendations",
+      "Watch Solicio analyze data and surface actionable insights.",
+    tag: "AI recommendations",
   },
 ];
 
 export function HowItWorksSection() {
   return (
-    <section className="py-28 bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-28 bg-[#0a0a0a] relative overflow-hidden transition-colors duration-300">
+      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] bg-repeat pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -45,60 +47,60 @@ export function HowItWorksSection() {
           viewport={{ once: true }}
           className="text-center max-w-3xl mx-auto mb-24"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-8 backdrop-blur shadow-[0_0_20px_rgba(16,185,129,0.1)]">
             <Sparkles className="w-4 h-4" />
             Simple Process
           </div>
 
-          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 dark:text-white mb-6">
+          <h2 className="text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
             Get Started in{" "}
-            <span className="text-emerald-600 dark:text-emerald-400">Four Easy Steps</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">Four Easy Steps</span>
           </h2>
 
-          <p className="text-lg text-slate-600 dark:text-slate-300">
+          <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">
             From sign-up to insights in minutes. No training needed, no complex
-            setup. Just clarity.
+            setup. Just raw clarity.
           </p>
         </motion.div>
 
         {/* Steps */}
-        <div className="relative grid lg:grid-cols-4 gap-12">
-          {/* Connector line */}
-          <div className="hidden lg:block absolute top-12 left-0 right-0 h-[2px] bg-slate-200 dark:bg-slate-700" />
+        <div className="relative grid lg:grid-cols-4 gap-8 md:gap-12">
+          {/* Connector line (Desktop) */}
+          <div className="hidden lg:block absolute top-[44px] left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
 
           {steps.map((step, i) => (
             <motion.div
               key={step.title}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="relative text-center"
+              transition={{ delay: i * 0.15, duration: 0.5 }}
+              className="relative flex flex-col items-center text-center group"
             >
-              {/* Icon */}
+              {/* Icon Container */}
               <div className="relative z-10 flex justify-center mb-8">
-                <div className="w-24 h-24 rounded-full bg-emerald-50 dark:bg-slate-800 flex items-center justify-center transition-colors">
-                  <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-slate-700 flex items-center justify-center transition-colors">
-                    <step.icon className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-[88px] h-[88px] rounded-full bg-[#111] border border-white/10 flex items-center justify-center transition-all duration-300 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center transition-all duration-300">
+                    <step.icon className="w-7 h-7 text-emerald-400" />
                   </div>
                 </div>
 
-                {/* Step number */}
-                <div className="absolute -top-2 right-[calc(50%-12px)] translate-x-12 w-7 h-7 rounded-full bg-emerald-600 text-white text-sm font-medium flex items-center justify-center">
+                {/* Step number badge */}
+                <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-emerald-500 text-black text-sm font-bold flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.5)]">
                   {i + 1}
                 </div>
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
+              <h3 className="text-xl font-bold tracking-tight text-white mb-3">
                 {step.title}
               </h3>
 
-              <p className="text-slate-600 dark:text-slate-400 max-w-xs mx-auto mb-4">
+              <p className="text-slate-400 max-w-xs mx-auto mb-6 font-light leading-relaxed">
                 {step.description}
               </p>
 
-              <span className="inline-flex px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors">
+              <span className="inline-flex px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-slate-300 transition-colors">
                 {step.tag}
               </span>
             </motion.div>
@@ -108,4 +110,3 @@ export function HowItWorksSection() {
     </section>
   );
 }
-

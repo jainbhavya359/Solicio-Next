@@ -12,41 +12,37 @@ import {
 const insights = [
   {
     icon: AlertTriangle,
-    iconBg: "bg-amber-100 dark:bg-amber-500/10",
-    iconColor: "text-amber-600 dark:text-amber-400",
+    iconBg: "bg-amber-500/10 border-amber-500/20",
+    iconColor: "text-amber-400",
     title: "Low Stock Alert",
-    message:
-      "Basmati Rice running low. Only 15 units left. Reorder soon!",
+    message: "Basmati Rice running low. Only 15 units left. Reorder soon!",
     action: "Order Now",
     time: "2 min ago",
   },
   {
     icon: Lightbulb,
-    iconBg: "bg-emerald-100 dark:bg-emerald-500/10",
-    iconColor: "text-emerald-600 dark:text-emerald-400",
+    iconBg: "bg-emerald-500/10 border-emerald-500/20",
+    iconColor: "text-emerald-400",
     title: "Profit Opportunity",
-    message:
-      "Sugar prices dropped 8%. Good time to stock up for festival season.",
+    message: "Sugar prices dropped 8%. Good time to stock up for festival season.",
     action: "View Details",
     time: "15 min ago",
   },
   {
     icon: TrendingUp,
-    iconBg: "bg-emerald-100 dark:bg-emerald-500/10",
-    iconColor: "text-emerald-600 dark:text-emerald-400",
+    iconBg: "bg-cyan-500/10 border-cyan-500/20",
+    iconColor: "text-cyan-400",
     title: "Sales Trending Up",
-    message:
-      "Cooking oil sales up 34% this week. Consider increasing stock.",
+    message: "Cooking oil sales up 34% this week. Consider increasing stock.",
     action: "See Trend",
     time: "1 hour ago",
   },
   {
     icon: TrendingDown,
-    iconBg: "bg-rose-100 dark:bg-rose-500/10",
-    iconColor: "text-rose-600 dark:text-rose-400",
+    iconBg: "bg-red-500/10 border-red-500/20",
+    iconColor: "text-red-400",
     title: "Slow Moving Stock",
-    message:
-      "Premium Tea sitting idle for 45 days. Consider a discount sale.",
+    message: "Premium Tea sitting idle for 45 days. Consider a discount sale.",
     action: "Take Action",
     time: "3 hours ago",
   },
@@ -54,65 +50,69 @@ const insights = [
 
 export function InsightsSection() {
   return (
-    <section className="py-24 bg-white dark:bg-slate-950 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-28 bg-[#050505] relative overflow-hidden transition-colors duration-300">
+      {/* Ambient glow */}
+      <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-emerald-600/10 blur-[150px] rounded-full point-events-none" />
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* LEFT */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-8 backdrop-blur shadow-[0_0_20px_rgba(16,185,129,0.1)]">
               <Lightbulb className="w-4 h-4" />
-              Our USP
+              Our Core Engine
             </div>
 
-            <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 dark:text-white mb-6">
+            <h2 className="text-5xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
               Insights That Actually{" "}
-              <span className="text-emerald-600 dark:text-emerald-400">Help You Grow</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">Help You Grow</span>
             </h2>
 
-            <p className="text-lg text-slate-600 dark:text-slate-300 mb-10 max-w-xl">
-              Solicio doesn’t just store your data — it analyzes it.
+            <p className="text-xl text-slate-400 font-light mb-12 max-w-xl leading-relaxed">
+              Solicio doesn’t just store your data — it understands it.
               Get real-time alerts, spot opportunities, and make decisions
-              with confidence. This is what sets us apart.
+              with relentless confidence.
             </p>
 
             {/* STATS */}
             <div className="grid grid-cols-3 gap-6">
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 text-center border border-transparent dark:border-slate-700/50 transition-colors duration-300">
-                <div className="text-2xl font-semibold text-slate-900 dark:text-white">
+              <div className="bg-[#0a0a0a] rounded-2xl p-6 text-center border border-white/5 hover:border-emerald-500/30 transition-colors duration-300">
+                <div className="text-3xl font-bold text-white mb-2">
                   ₹2.3L
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
+                <div className="text-sm font-medium text-slate-500 tracking-wide uppercase">
                   Cash Recovered
                 </div>
-                <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                <div className="text-xs font-bold text-emerald-400 mt-2 bg-emerald-500/10 py-1 rounded-md">
                   +23%
                 </div>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 text-center border border-transparent dark:border-slate-700/50 transition-colors duration-300">
-                <div className="text-2xl font-semibold text-slate-900 dark:text-white">
+              <div className="bg-[#0a0a0a] rounded-2xl p-6 text-center border border-white/5 hover:border-emerald-500/30 transition-colors duration-300">
+                <div className="text-3xl font-bold text-white mb-2">
                   340
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
+                <div className="text-sm font-medium text-slate-500 tracking-wide uppercase">
                   Stock Optimized
                 </div>
-                <div className="text-xs text-slate-500 mt-1">
+                <div className="text-xs font-medium text-slate-400 mt-2 bg-white/5 py-1 rounded-md">
                   items
                 </div>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 text-center border border-transparent dark:border-slate-700/50 transition-colors duration-300">
-                <div className="text-2xl font-semibold text-slate-900 dark:text-white">
-                  12hrs
+              <div className="bg-[#0a0a0a] rounded-2xl p-6 text-center border border-white/5 hover:border-emerald-500/30 transition-colors duration-300">
+                <div className="text-3xl font-bold text-white mb-2">
+                  12h
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
+                <div className="text-sm font-medium text-slate-500 tracking-wide uppercase">
                   Time Saved
                 </div>
-                <div className="text-xs text-slate-500 mt-1">
+                <div className="text-xs font-medium text-slate-400 mt-2 bg-white/5 py-1 rounded-md">
                   / week
                 </div>
               </div>
@@ -120,40 +120,43 @@ export function InsightsSection() {
           </motion.div>
 
           {/* RIGHT */}
-          <div className="relative space-y-5">
+          <div className="relative space-y-4 perspective-[1000px]">
+             {/* Background glow behind notifications */}
+             <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent blur-[60px] -z-10" />
+
             {insights.map((i, idx) => (
               <motion.div
                 key={i.title}
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, x: 40, rotateY: 10 }}
+                whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.08 }}
-                className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 shadow-sm hover:shadow-md dark:hover:shadow-emerald-900/10 transition-all duration-300"
+                transition={{ delay: idx * 0.1, duration: 0.5, type: "spring", stiffness: 100 }}
+                className="bg-[#111]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 hover:border-emerald-500/50 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] transition-all duration-300 group"
               >
                 <div className="flex gap-4">
                   <div
-                    className={`w-11 h-11 rounded-xl ${i.iconBg} flex items-center justify-center`}
+                    className={`w-12 h-12 rounded-xl border ${i.iconBg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}
                   >
-                    <i.icon className={`w-5 h-5 ${i.iconColor}`} />
+                    <i.icon className={`w-6 h-6 ${i.iconColor}`} />
                   </div>
 
                   <div className="flex-1">
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-semibold text-slate-900 dark:text-white">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-bold tracking-tight text-white text-lg">
                         {i.title}
                       </h4>
-                      <span className="text-xs text-slate-400 dark:text-slate-500">
+                      <span className="text-xs font-medium text-slate-500">
                         {i.time}
                       </span>
                     </div>
 
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                    <p className="text-sm text-slate-400 font-light mb-4 leading-relaxed">
                       {i.message}
                     </p>
 
-                    <button className="text-sm font-medium text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-1 hover:underline">
+                    <button className="text-sm font-semibold text-emerald-400 inline-flex items-center gap-1 hover:text-emerald-300 transition-colors group/btn">
                       {i.action}
-                      <ArrowUpRight className="w-4 h-4" />
+                      <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -161,11 +164,18 @@ export function InsightsSection() {
             ))}
 
             {/* Floating badge */}
-            <div className="absolute -bottom-6 right-0">
-              <span className="px-5 py-2 rounded-full bg-emerald-600 text-white text-sm font-medium shadow-md">
+            <motion.div 
+               initial={{ opacity:0, scale:0.8 }}
+               whileInView={{ opacity:1, scale:1 }}
+               viewport={{ once:true }}
+               transition={{ delay: 0.6 }}
+               className="absolute -bottom-5 right-4 z-20"
+            >
+              <span className="px-6 py-2.5 rounded-full bg-emerald-500 text-black text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                 Real-time updates
               </span>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

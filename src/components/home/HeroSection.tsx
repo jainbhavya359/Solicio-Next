@@ -1,196 +1,230 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { AnimatedCounter } from "../visual/AnimatedCounter";
-import FloatingCard from "../visual/FloatingCard";
-import { SignedOut, SignUpButton } from "@clerk/nextjs";
-import { SignedIn, SignOutButton } from "@clerk/clerk-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, Play, Sparkles, LayoutDashboard, Users, Receipt, FileText, Package, Bell } from "lucide-react";
+
+const SLIDES = [
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    icon: LayoutDashboard,
+    image: "/hero/slide-1.png",
+    caption: "Real-time Analytics",
+    description: "Monitor stock and cash flow instantly.",
+  },
+  {
+    id: "inventory",
+    title: "Inventory",
+    icon: Package,
+    image: "/hero/slide-2.png",
+    caption: "Smart Management",
+    description: "Track staff and hours efficiently.",
+  },
+  {
+    id: "paperwork",
+    title: "Paperwork",
+    icon: FileText,
+    image: "/hero/slide-3.png",
+    caption: "Document Sync",
+    description: "Never lose a receipt again.",
+  },
+  {
+    id: "alerts",
+    title: "Alerts",
+    icon: Bell,
+    image: "/hero/slide-4.png",
+    caption: "Automated Alerts",
+    description: "Get notified about low stock and other important updates.",
+  },
+];
+
+const AUTOPLAY_DELAY = 4000;
 
 export default function HeroSection() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  // Auto-play logic
+  useEffect(() => {
+    if (isHovered) return;
+
+    const interval = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % SLIDES.length);
+      setProgress(0); // reset progress bar on slide change
+    }, AUTOPLAY_DELAY);
+
+    // Progress bar animation
+    const progressInterval = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 100) return 0;
+        return p + (100 / (AUTOPLAY_DELAY / 50));
+      });
+    }, 50);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(progressInterval);
+    };
+  }, [isHovered, activeSlide]);
+
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-white dark:bg-slate-950 transition-colors duration-300">
-      {/* BACKGROUND */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.08),transparent_55%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.15),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.05),transparent_55%)] dark:bg-[radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.1),transparent_55%)]" />
-        <svg
-          className="absolute inset-0 w-full h-full opacity-[0.035]"
-          xmlns="http://www.w3.org/2000/svg"
+    <section className="relative min-h-[90vh] bg-[#050505] flex items-center justify-center pt-32 pb-20 overflow-hidden font-sans">
+
+      {/* AMBIENT BACKGROUND EFFECTS */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-600/20 blur-[150px] rounded-full mix-blend-screen pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/10 blur-[180px] rounded-full mix-blend-screen pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] bg-repeat pointer-events-none" />
+
+      {/* FULL WIDTH CONTAINER */}
+      <div className="w-full px-6 md:px-12 2xl:px-24 mx-auto relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-12">
+
+        {/* LEFT: TEXT CONTENT */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="flex-1 max-w-[45rem] text-center lg:text-left"
         >
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path
-                d="M 40 0 L 0 0 0 40"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* LEFT */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.12 } },
-            }}
-            className="space-y-8"
-          >
-            {/* Badge */}
-            <motion.div
-              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 text-sm font-medium w-fit"
-            >
-              ✨ Smart Insights for Smarter Decisions
-            </motion.div>
-
-            {/* Heading */}
-            <motion.h1
-              variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white"
-            >
-              Run Your Business,{" "}
-              <span className="text-emerald-600 dark:text-emerald-400">Not Just Record It</span>
-            </motion.h1>
-
-            {/* Subtext */}
-            <motion.p
-              variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-              className="text-lg text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed"
-            >
-              Stock, sales, money &amp; decisions — all in one powerful,
-              easy-to-use platform. Get insights that actually help you grow.
-            </motion.p>
-
-            {/* CTA */}
-            <motion.div
-              variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-              className="flex flex-col sm:flex-row gap-4"
-            >
-              <SignedOut>
-                <SignUpButton>
-                  <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition">
-                    Start Free Trial →
-                  </button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <SignOutButton>
-                  <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition">
-                    Logout
-                  </button>
-                </SignOutButton>
-              </SignedIn>
-              <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition">
-                ▶ Watch Demo
-              </button>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div
-              variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-              className="grid grid-cols-3 gap-4 sm:gap-8 pt-8 border-t border-slate-200 dark:border-slate-800"
-            >
-              <div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                  <AnimatedCounter end={10000} suffix="+" />
-                </div>
-                <div className="text-sm text-slate-500 dark:text-slate-400">Active Users</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                  <AnimatedCounter end={50} suffix="L+" />
-                </div>
-                <div className="text-sm text-slate-500 dark:text-slate-400">Transactions</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                  <AnimatedCounter end={4} suffix=".9" />
-                </div>
-                <div className="text-sm text-slate-500 dark:text-slate-400">User Rating</div>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* RIGHT — DASHBOARD */}
-          <div className="relative flex justify-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7 }}
-              className="relative w-full max-w-lg bg-white dark:bg-slate-900/80 dark:backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl dark:shadow-[0_0_50px_-12px_rgba(16,185,129,0.3)] p-6 transition-all duration-300"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Good morning</p>
-                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-                    Business Overview
-                  </h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-                  👋
-                </div>
-              </div>
-
-              {/* Chart */}
-              <div className="bg-slate-50 dark:bg-slate-950/50 rounded-2xl p-4 mb-4 border border-transparent dark:border-slate-800/50 transition-colors duration-300">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-200">Revenue Trend</span>
-                  <span className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/20 px-2 py-1 rounded-full">
-                    +23%
-                  </span>
-                </div>
-                <div className="flex items-end gap-1 h-28">
-                  {[30, 55, 40, 70, 55, 80, 65, 90, 75, 100, 85, 110].map(
-                    (h, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 bg-emerald-200 rounded-t"
-                        style={{ height: `${h}%` }}
-                      >
-                        <div
-                          className="w-full bg-emerald-600 rounded-t"
-                          style={{ height: `${h}%` }}
-                        />
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-50 dark:bg-slate-950/50 rounded-xl p-3 border border-transparent dark:border-slate-800/50 transition-colors duration-300">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Profit</p>
-                  <p className="text-lg font-semibold text-slate-900 dark:text-white">₹2,45,000</p>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-950/50 rounded-xl p-3 border border-transparent dark:border-slate-800/50 transition-colors duration-300">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Stock Value</p>
-                  <p className="text-lg font-semibold text-slate-900 dark:text-white">₹8,32,500</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Floating Cards */}
-            <FloatingCard className="hidden lg:block top-6 -left-12" delay={400}>
-              Today’s Sales ₹42,500
-            </FloatingCard>
-            <FloatingCard className="hidden lg:block bottom-24 -right-10" delay={700}>
-              Rice stock running low
-            </FloatingCard>
-            <FloatingCard className="hidden lg:block bottom-6 -left-8" delay={900}>
-              Pending ₹15,200
-            </FloatingCard>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-sm font-semibold mb-8 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+            <Sparkles className="w-4 h-4" />
+            AI-Powered Productivity
           </div>
-        </div>
+
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-bold tracking-tighter text-white mb-6 leading-[1.05]">
+            Run Your Business.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Not Your Software.</span>
+          </h1>
+
+          <p className="text-lg sm:text-xl text-[#A1A1AA] font-light max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
+            The premier AI operating system for small businesses. Automate inventory, sync billing, and stop doing manual paperwork — all in one beautifully intelligent platform.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+            <Link
+              href="/signup"
+              className="group relative flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 text-black font-bold rounded-full overflow-hidden transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.4)] w-full sm:w-auto"
+            >
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+              <span className="relative z-10">Get Started Free <ArrowRight className="inline w-5 h-5 ml-1 relative z-10 group-hover:translate-x-1 transition-transform" /></span>
+            </Link>
+
+            <button className="group flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 text-white font-medium rounded-full hover:bg-white/10 hover:border-white/20 transition-all w-full sm:w-auto">
+              <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Play className="w-3 h-3 text-emerald-400 fill-emerald-400 ml-0.5" />
+              </div>
+              Watch Demo
+            </button>
+          </div>
+
+          <div className="mt-8 flex items-center justify-center lg:justify-start gap-3 text-sm font-medium text-[#71717A]">
+            <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10B981]" /> No credit card required</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-white/10" />
+            <span>Cancel anytime</span>
+          </div>
+        </motion.div>
+
+        {/* RIGHT: AUTO-SLIDER SHOWCASE */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="flex-1 w-full max-w-none lg:max-w-auto min-w-[50%] relative perspective-[2000px]"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Slider Navigation Pills */}
+          <div className="flex flex-wrap lg:flex-nowrap items-center justify-center lg:justify-start gap-2 mb-6">
+            {SLIDES.map((slide, idx) => {
+              const isActive = activeSlide === idx;
+              return (
+                <button
+                  key={slide.id}
+                  onClick={() => {
+                    setActiveSlide(idx);
+                    setProgress(0);
+                  }}
+                  className={`relative flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${isActive
+                    ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-105"
+                    : "bg-white/5 text-[#A1A1AA] border border-white/10 hover:bg-white/10 hover:text-white"
+                    }`}
+                >
+                  <slide.icon className={`w-4 h-4 ${isActive ? "text-emerald-500" : ""}`} />
+                  {slide.title}
+
+                  {/* Subtle Progress Bar for Active Pill */}
+                  {isActive && !isHovered && (
+                    <div className="absolute bottom-0 left-0 h-[2px] bg-emerald-500 rounded-b-full transition-all ease-linear" style={{ width: `${progress}%` }} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Interactive Mockup Container */}
+          <div className="relative group rounded-2xl w-full aspect-[4/3] max-h-[75vh] bg-[#0A0A0A] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-500 hover:shadow-[0_0_80px_rgba(16,185,129,0.15)] hover:border-white/20 mx-auto lg:ml-auto">
+
+            {/* Mockup Toolbar (Mac style) */}
+            <div className="h-10 border-b border-white/10 bg-[#111] flex items-center px-4 gap-2 relative z-20">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+              </div>
+              <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/5 text-xs text-[#71717A] max-w-[250px] truncate">
+                solicio.app/app/{SLIDES[activeSlide].id}
+              </div>
+            </div>
+
+            {/* Slide Images */}
+            <div className="relative w-full h-[calc(100%-40px)] bg-[#050505] overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeSlide}
+                  initial={{ opacity: 0, scale: 0.98, x: 20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.98, x: -20 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="absolute inset-0 w-full h-full"
+                >
+                  {/* Fallback pattern if image is missing, otherwise Next/Image */}
+                  <div className="w-full h-full relative p-2 bg-white flex items-center justify-center">
+                    {/* Note: using native img for demo to ensure fast load, can swap to next/image */}
+                    <img
+                      src={SLIDES[activeSlide].image}
+                      alt={SLIDES[activeSlide].title}
+                      className="w-full h-full object-cover object-left-top rounded-lg border border-slate-200 shadow-inner"
+                    />
+
+                    {/* Floating UI Elements (Micro-interactions) */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.4 }}
+                      className="absolute bottom-6 right-6 bg-white border border-slate-200 shadow-xl rounded-xl p-4 flex items-start gap-4 w-72"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                        <Sparkles className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <div className="text-[15px] font-bold text-slate-900">{SLIDES[activeSlide].caption}</div>
+                        <div className="text-xs text-slate-500 mt-1">{SLIDES[activeSlide].description}</div>
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Glow overlay inside the mockup frame */}
+            <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] pointer-events-none z-10" />
+          </div>
+
+        </motion.div>
+
       </div>
     </section>
   );

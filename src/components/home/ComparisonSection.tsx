@@ -18,78 +18,82 @@ const rows = [
 
 export function ComparisonSection() {
   return (
-    <section className="py-24 bg-white dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="py-28 bg-[#0a0a0a] relative overflow-hidden transition-colors duration-300">
+       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] bg-repeat pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14"
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 dark:text-white mb-4">
-            Solicio vs <span className="text-slate-400 dark:text-slate-500">Others</span>
+          <h2 className="text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6">
+            Solicio <span className="text-slate-600">vs</span> Others
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
-            See why thousands of small businesses are switching to Solicio
+          <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">
+            See why thousands of forward-thinking businesses are switching out of legacy software.
           </p>
         </motion.div>
 
         {/* Table Card */}
-        <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden transition-colors duration-300">
+        <div className="bg-[#111] rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden transition-colors duration-300">
           {/* Header Row */}
-          <div className="grid grid-cols-3 px-8 py-5 border-b border-slate-200 dark:border-slate-700/50 text-sm font-medium text-slate-600 dark:text-slate-400">
-            <div>Feature</div>
-            <div className="flex justify-center">
-              <span className="px-4 py-1 rounded-full bg-emerald-600 text-white text-sm font-semibold">
+          <div className="grid grid-cols-3 px-6 md:px-10 py-6 border-b border-white/10 text-sm font-bold text-slate-400 tracking-wider uppercase bg-white/5">
+            <div className="flex items-center">Feature</div>
+            <div className="flex justify-center items-center">
+              <span className="px-5 py-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                 Solicio
               </span>
             </div>
-            <div className="flex justify-center">
-              <span className="px-4 py-1 rounded-full bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 text-sm font-semibold">
-                Tally / Khatabook
+            <div className="flex justify-center items-center">
+              <span className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-slate-400 text-sm font-bold">
+                Legacy Tools
               </span>
             </div>
           </div>
 
           {/* Rows */}
-          {rows.map((row, i) => (
-            <motion.div
-              key={row[0] as string}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.04 }}
-              className="grid grid-cols-3 px-8 py-5 border-b last:border-0 border-slate-100 dark:border-slate-700/50 text-slate-700 dark:text-slate-300"
-            >
-              {/* Feature */}
-              <div className="font-medium">{row[0]}</div>
+          <div className="divide-y divide-white/5">
+            {rows.map((row, i) => (
+              <motion.div
+                key={row[0] as string}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04 }}
+                className="grid grid-cols-3 px-6 md:px-10 py-6 text-slate-300 hover:bg-white/5 transition-colors"
+              >
+                {/* Feature */}
+                <div className="font-medium flex items-center text-sm md:text-base">{row[0]}</div>
 
-              {/* Solicio */}
-              <div className="flex justify-center">
-                {row[1] === true ? (
-                  <span className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  </span>
-                ) : (
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                    {row[1]}
-                  </span>
-                )}
-              </div>
+                {/* Solicio */}
+                <div className="flex justify-center items-center">
+                  {row[1] === true ? (
+                    <span className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    </span>
+                  ) : (
+                    <span className="text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 text-sm">
+                      {row[1]}
+                    </span>
+                  )}
+                </div>
 
-              {/* Others */}
-              <div className="flex justify-center">
-                {row[2] === false ? (
-                  <span className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
-                    <X className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                  </span>
-                ) : (
-                  <span className="text-slate-600 dark:text-slate-400">{row[2]}</span>
-                )}
-              </div>
-            </motion.div>
-          ))}
+                {/* Others */}
+                <div className="flex justify-center items-center text-center">
+                  {row[2] === false ? (
+                    <span className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                      <X className="w-4 h-4 text-slate-500" />
+                    </span>
+                  ) : (
+                    <span className="text-slate-500 font-medium text-sm md:text-base">{row[2]}</span>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

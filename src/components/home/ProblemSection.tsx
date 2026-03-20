@@ -32,26 +32,29 @@ const problems = [
 
 export function ProblemsSection() {
   return (
-    <section className="py-24 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="py-28 bg-[#050505] relative overflow-hidden transition-colors duration-300">
+      {/* Ambient background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/10 blur-[150px] rounded-full pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center max-w-3xl mx-auto mb-20"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium mb-8 backdrop-blur shadow-[0_0_20px_rgba(239,68,68,0.1)]">
             <AlertCircle className="w-4 h-4" />
             The Problem We Saw
           </div>
 
-          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 dark:text-white mb-6">
+          <h2 className="text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
             Software Should Not Just{" "}
-            <span className="text-red-600 dark:text-red-400">Record</span> Your Business
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500">Record</span> Your Business
           </h2>
 
-          <p className="text-lg text-slate-700 dark:text-slate-300">
+          <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">
             Most business tools make you a data entry clerk. They record
             everything but tell you nothing. You deserve better.
           </p>
@@ -62,39 +65,39 @@ export function ProblemsSection() {
           {problems.map((p, i) => (
             <motion.div
               key={p.title}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.12 }}
-              whileHover={{ y: -4 }}
-              className="relative bg-white dark:bg-slate-800/50 rounded-2xl p-8
-                         border border-slate-200 dark:border-slate-700/50
-                         shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.3)]
-                         transition-all duration-300"
+              transition={{ delay: i * 0.15, duration: 0.5 }}
+              whileHover={{ y: -8 }}
+              className="relative bg-[#0a0a0a] rounded-3xl p-8 border border-white/10 hover:border-red-500/30 group transition-all duration-300"
             >
+              {/* Subtle hover glow inside card */}
+              <div className="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl pointer-events-none" />
+
               {/* Number */}
-              <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center text-sm font-semibold border border-transparent dark:border-red-500/20">
-                {i + 1}
+              <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 text-red-500 flex items-center justify-center text-sm font-bold shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                0{i + 1}
               </div>
 
               {/* Icon */}
-              <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/10 border border-transparent dark:border-red-500/20 flex items-center justify-center mb-6">
-                <p.icon className="w-6 h-6 text-red-600 dark:text-red-400" />
+              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
+                <p.icon className="w-7 h-7 text-red-400" />
               </div>
 
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
+              <h3 className="text-2xl font-bold tracking-tight text-white mb-4 relative z-10">
                 {p.title}
               </h3>
 
-              <p className="text-slate-700 dark:text-slate-400 mb-6 leading-relaxed">
+              <p className="text-slate-400 mb-8 leading-relaxed font-light relative z-10">
                 {p.description}
               </p>
 
-              <div className="pt-5 border-t border-slate-200 dark:border-slate-700/50">
-                <div className="text-2xl font-semibold text-red-600 dark:text-red-400">
+              <div className="pt-6 border-t border-white/10 relative z-10">
+                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-1">
                   {p.stat}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-500">
+                <div className="text-sm font-medium text-slate-500 uppercase tracking-widest">
                   {p.label}
                 </div>
               </div>
@@ -107,10 +110,10 @@ export function ProblemsSection() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="text-center mt-14"
+          transition={{ delay: 0.5 }}
+          className="text-center mt-20"
         >
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-medium">
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium hover:bg-emerald-500/20 transition-colors cursor-pointer">
             There’s a better way
             <ArrowRight className="w-4 h-4" />
           </div>
@@ -119,5 +122,3 @@ export function ProblemsSection() {
     </section>
   );
 }
-
-

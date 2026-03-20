@@ -5,8 +5,11 @@ import { Check, Sparkles, Zap } from "lucide-react";
 
 export function PricingSection() {
   return (
-    <section className="py-28 bg-slate-100 dark:bg-slate-950 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-28 bg-[#050505] relative overflow-hidden transition-colors duration-300">
+      {/* Background ambient glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-emerald-600/10 blur-[150px] rounded-full pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -14,47 +17,46 @@ export function PricingSection() {
           viewport={{ once: true }}
           className="text-center max-w-3xl mx-auto mb-20"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-emerald-300 text-sm font-medium mb-8 backdrop-blur-md">
             <Sparkles className="w-4 h-4" />
             Simple Pricing
           </div>
 
-          <h2 className="text-4xl lg:text-5xl font-semibold text-slate-900 dark:text-white mb-6">
+          <h2 className="text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6">
             Plans That Grow{" "}
-            <span className="text-emerald-600 dark:text-emerald-400">With Your Business</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">With Your Business</span>
           </h2>
 
-          <p className="text-lg text-slate-600 dark:text-slate-300">
+          <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">
             Start free, upgrade when you're ready. No hidden fees, no long-term
             contracts. Cancel anytime.
           </p>
         </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid lg:grid-cols-3 gap-8 items-stretch">
+        <div className="grid lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto pt-8">
           {/* FREE */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-8 shadow-sm transition-colors duration-300"
+            transition={{ delay: 0.1 }}
+            className="flex flex-col bg-[#0a0a0a] border border-white/10 rounded-3xl p-8 hover:border-white/20 transition-colors duration-300 group"
           >
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">
-              Free
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <h3 className="text-2xl font-bold text-white mb-2">Free</h3>
+            <p className="text-slate-400 mb-8 font-light">
               Perfect for getting started
             </p>
 
-            <div className="text-4xl font-semibold text-slate-900 dark:text-white mb-6">
-              ₹0 <span className="text-base font-normal text-slate-500 dark:text-slate-400">/month</span>
+            <div className="text-5xl font-bold text-white mb-8 tracking-tight">
+              ₹0 <span className="text-lg font-normal text-slate-500 tracking-normal">/month</span>
             </div>
 
-            <button className="w-full py-3 rounded-lg border border-slate-300 dark:border-slate-700 font-medium mb-8 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-white transition-colors">
+            <button className="w-full py-4 rounded-xl border border-white/20 text-white font-medium hover:bg-white/10 transition-colors mb-10 group-hover:bg-white/5">
               Start Free
             </button>
 
-            <ul className="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+            <ul className="space-y-4 text-slate-300 flex-1">
               {[
                 "Up to 100 products",
                 "Basic stock tracking",
@@ -62,48 +64,50 @@ export function PricingSection() {
                 "Mobile app access",
                 "Email support",
               ].map((f) => (
-                <li key={f} className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
-                    <Check className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                <li key={f} className="flex items-start gap-4">
+                  <span className="mt-1 w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 text-emerald-400" />
                   </span>
-                  {f}
+                  <span>{f}</span>
                 </li>
               ))}
             </ul>
           </motion.div>
 
-          {/* PRO */}
+          {/* PRO (Glowing Card) */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative bg-white dark:bg-slate-800/80 border-2 border-emerald-600 dark:border-emerald-500 rounded-2xl p-8 shadow-lg dark:shadow-emerald-900/20 transition-colors duration-300"
+            transition={{ delay: 0.2 }}
+            className="relative flex flex-col bg-[#0f0f0f] border border-emerald-500/30 rounded-3xl p-8 shadow-[0_0_50px_rgba(16,185,129,0.15)] hover:shadow-[0_0_80px_rgba(16,185,129,0.3)] hover:border-emerald-400/50 transition-all duration-300 transform lg:-translate-y-4"
           >
+            {/* Animated Glow absolute layer */}
+            <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent rounded-3xl pointer-events-none" />
+
             {/* Badge */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-black px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 shadow-[0_0_20px_rgba(16,185,129,0.4)]">
               <Zap className="w-3 h-3" />
               Most Popular
             </div>
 
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">
-              Pro
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Pro</h3>
+            <p className="text-slate-400 mb-8 font-light relative z-10">
               For growing businesses
             </p>
 
-            <div className="text-4xl font-semibold text-slate-900 dark:text-white mb-6">
+            <div className="text-5xl font-bold text-white mb-8 tracking-tight relative z-10">
               ₹499{" "}
-              <span className="text-base font-normal text-slate-500 dark:text-slate-400">
+              <span className="text-lg font-normal text-slate-500 tracking-normal">
                 /month
               </span>
             </div>
 
-            <button className="w-full py-3 rounded-lg bg-emerald-600 text-white font-medium mb-8 hover:bg-emerald-700 transition">
+            <button className="relative w-full py-4 rounded-xl bg-white text-black font-semibold hover:bg-slate-200 transition-colors mb-10 z-10 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-[0.98]">
               Start 14-Day Trial
             </button>
 
-            <ul className="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+            <ul className="space-y-4 text-slate-200 flex-1 relative z-10">
               {[
                 "Unlimited products",
                 "Real-time stock tracking",
@@ -113,11 +117,11 @@ export function PricingSection() {
                 "Priority support",
                 "Multi-user access",
               ].map((f) => (
-                <li key={f} className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-                    <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                <li key={f} className="flex items-start gap-4">
+                  <span className="mt-1 w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 text-emerald-400" />
                   </span>
-                  {f}
+                  <span>{f}</span>
                 </li>
               ))}
             </ul>
@@ -125,30 +129,29 @@ export function PricingSection() {
 
           {/* BUSINESS */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-8 shadow-sm transition-colors duration-300"
+            transition={{ delay: 0.3 }}
+            className="flex flex-col bg-[#0a0a0a] border border-white/10 rounded-3xl p-8 hover:border-white/20 transition-colors duration-300 group"
           >
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-1">
-              Business
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <h3 className="text-2xl font-bold text-white mb-2">Business</h3>
+            <p className="text-slate-400 mb-8 font-light">
               For established businesses
             </p>
 
-            <div className="text-4xl font-semibold text-slate-900 dark:text-white mb-6">
+            <div className="text-5xl font-bold text-white mb-8 tracking-tight">
               ₹999{" "}
-              <span className="text-base font-normal text-slate-500 dark:text-slate-400">
+              <span className="text-lg font-normal text-slate-500 tracking-normal">
                 /month
               </span>
             </div>
 
-            <button className="w-full py-3 rounded-lg border border-slate-300 dark:border-slate-700 font-medium mb-8 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-white transition-colors">
+            <button className="w-full py-4 rounded-xl border border-white/20 text-white font-medium hover:bg-white/10 transition-colors mb-10 group-hover:bg-white/5">
               Contact Sales
             </button>
 
-            <ul className="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+            <ul className="space-y-4 text-slate-300 flex-1">
               {[
                 "Everything in Pro",
                 "Multiple store locations",
@@ -158,11 +161,11 @@ export function PricingSection() {
                 "Dedicated account manager",
                 "White-label option",
               ].map((f) => (
-                <li key={f} className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
-                    <Check className="w-3 h-3 text-slate-500" />
+                <li key={f} className="flex items-start gap-4">
+                  <span className="mt-1 w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 text-slate-400" />
                   </span>
-                  {f}
+                  <span>{f}</span>
                 </li>
               ))}
             </ul>
@@ -172,4 +175,3 @@ export function PricingSection() {
     </section>
   );
 }
-
