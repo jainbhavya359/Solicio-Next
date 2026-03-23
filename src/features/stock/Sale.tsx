@@ -236,38 +236,38 @@ export default function Sale({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl sm:rounded-[2.5rem] border border-slate-100 bg-white shadow-xl sm:shadow-2xl shadow-slate-200/50"
+      className="relative overflow-hidden rounded-2xl sm:rounded-[2.5rem] border border-white/10 bg-[#0a0a0a] shadow-[0_0_40px_rgba(52,211,153,0.03)]"
     >
       {/* Background Grid */}
-      <div className="absolute inset-0 z-0 opacity-[0.4] pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" />
+      <div className="absolute inset-0 z-0 opacity-[0.2] pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:16px_16px]" />
       </div>
 
       <div className="relative z-10 font-outfit">
         {/* Header - StockReport Alignment */}
-        <div className="px-5 py-6 sm:px-8 sm:py-10 border-b border-slate-100 bg-slate-50/30 backdrop-blur-sm">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider mb-2 sm:mb-4 border border-emerald-200">
+        <div className="px-5 py-6 sm:px-8 sm:py-10 border-b border-white/5 bg-white/5 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-2 sm:mb-4 border border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.1)]">
             <TrendingUp className="w-3 h-3" />
             Revenue Deployment
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
-              Quick <span className="text-emerald-600">Sale</span>
+            <h1 className="text-4xl lg:text-5xl font-bold text-white tracking-tight">
+              Quick <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-emerald-600">Sale</span>
             </h1>
-            <p className="text-lg text-slate-500 font-medium mt-2 max-w-2xl">
+            <p className="text-lg text-slate-400 font-medium mt-2 max-w-2xl">
               High-velocity inventory conversion interface for real-time liquidity management.
             </p>
           </div>
           {/* Mobile Title */}
-          <h1 className="block sm:hidden text-2xl font-bold text-slate-900 tracking-tight">
-            Quick <span className="text-emerald-600">Sale</span>
+          <h1 className="block sm:hidden text-2xl font-bold text-white tracking-tight">
+            Quick <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-emerald-600">Sale</span>
           </h1>
         </div>
 
         <div className="p-4 sm:p-8 space-y-6 sm:space-y-10">
           {/* Asset Selector - Label Alignment */}
           <div ref={dropdownRef} className="relative">
-            <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 sm:mb-3 px-1">
+            <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-2 sm:mb-3 px-1">
               Select Liquid Asset
             </label>
 
@@ -275,24 +275,24 @@ export default function Sale({
               onClick={() => setShowProducts((v) => !v)}
               className={`
                 w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl text-left flex items-center justify-between
-                border transition-all duration-300 group
+                border transition-all duration-300 group outline-none
                 ${showProducts
-                  ? "border-emerald-500 ring-4 ring-emerald-500/10 bg-white shadow-lg"
-                  : "border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-200 hover:shadow-sm"
+                  ? "border-emerald-500 ring-4 ring-emerald-500/20 bg-white/5 shadow-[0_0_30px_rgba(52,211,153,0.1)]"
+                  : "border-white/10 bg-black/40 hover:bg-white/5 hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(52,211,153,0.05)]"
                 }
               `}
             >
               <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-                <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors ${selectedProduct ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400"}`}>
+                <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ${selectedProduct ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-slate-500"}`}>
                   <Package className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <span className={`text-base sm:text-lg font-bold truncate ${selectedProduct ? "text-slate-900" : "text-slate-400"}`}>
+                <span className={`text-base sm:text-lg font-bold truncate ${selectedProduct ? "text-white" : "text-slate-500"}`}>
                   {selectedProduct
                     ? `${selectedProduct.name} (${selectedProduct.unit})`
                     : "Analyze inventory stack"}
                 </span>
               </div>
-              <ChevronDown className={`w-4 h-4 sm:w-5 sm:h-5 text-slate-300 transition-transform duration-300 shrink-0 ${showProducts ? "rotate-180 text-emerald-500" : "group-hover:text-emerald-400"}`} />
+              <ChevronDown className={`w-4 h-4 sm:w-5 sm:h-5 text-slate-500 transition-transform duration-300 shrink-0 ${showProducts ? "rotate-180 text-emerald-500" : "group-hover:text-emerald-400"}`} />
             </button>
 
             <AnimatePresence>
@@ -304,8 +304,9 @@ export default function Sale({
                   className="
                     absolute z-50 mt-2 sm:mt-4 w-full
                     max-h-80 overflow-y-auto
-                    rounded-2xl sm:rounded-[2rem] border border-slate-200
-                    bg-white shadow-2xl p-2 sm:p-3
+                    rounded-2xl sm:rounded-[2rem] border border-white/10
+                    bg-[#0a0a0a] shadow-[0_20px_60px_rgba(0,0,0,0.8)] p-2 sm:p-3
+                    backdrop-blur-xl
                   "
                 >
                   <div className="space-y-1">
@@ -326,25 +327,25 @@ export default function Sale({
                           }}
                           className={`
                             w-full px-4 sm:px-5 py-4 sm:py-4 text-left rounded-xl sm:rounded-2xl
-                            hover:bg-slate-50 transition group flex items-center justify-between
+                            hover:bg-white/5 transition-all group flex items-center justify-between
                             ${outOfStock ? "opacity-50 cursor-not-allowed" : ""}
                           `}
                         >
                           <div>
-                            <p className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                            <p className="text-sm sm:text-base font-bold text-slate-300 group-hover:text-white transition-colors">
                               {p.name}
                             </p>
-                            <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            <p className="text-[10px] sm:text-xs font-black text-emerald-500/70 uppercase tracking-wider mt-1 group-hover:text-emerald-400">
                               In Stock: {stock} {p.unit}
                             </p>
                           </div>
                           {!outOfStock && (
                             <div className="opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                              <TrendingUp className="w-5 h-5 text-emerald-500" />
+                              <TrendingUp className="w-5 h-5 text-emerald-400" />
                             </div>
                           )}
                           {outOfStock && (
-                            <span className="text-[9px] sm:text-[10px] font-bold text-rose-500 uppercase tracking-widest bg-rose-50 px-2 py-1 rounded-md">Empty</span>
+                            <span className="text-[9px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-500/10 border border-rose-500/20 px-2 py-1 rounded-md">Empty</span>
                           )}
                         </button>
                       );
@@ -364,36 +365,36 @@ export default function Sale({
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl sm:rounded-[2rem] border border-emerald-100 bg-emerald-50/20 p-4 sm:px-8 sm:py-6 gap-4 sm:gap-0">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl sm:rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-4 sm:px-8 sm:py-6 gap-4 sm:gap-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]">
                   <div className="flex items-center gap-3 sm:gap-5">
-                    <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-white border border-emerald-100 flex items-center justify-center shadow-md shadow-emerald-900/5">
-                      <Package className="h-5 w-5 sm:h-7 sm:w-7 text-emerald-600" />
+                    <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                      <Package className="h-5 w-5 sm:h-7 sm:w-7 text-emerald-400" />
                     </div>
                     <div>
-                      <p className="text-base sm:text-xl font-bold text-slate-900">
+                      <p className="text-base sm:text-xl font-bold text-white tracking-tight">
                         {selectedProduct.name}
                       </p>
-                      <p className="text-[9px] sm:text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-0.5">
+                      <p className="text-[9px] sm:text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-0.5 drop-shadow-[0_0_5px_rgba(52,211,153,0.3)]">
                         Conversion Depth: {quantity}x {selectedProduct.unit}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 sm:gap-4 bg-white p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-sm self-end sm:self-auto">
+                  <div className="flex items-center gap-2 sm:gap-4 bg-black/60 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] self-end sm:self-auto">
                     <button
                       onClick={decrement}
-                      className="h-10 w-10 sm:h-11 w-11 rounded-lg sm:rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-500 transition-colors active:bg-slate-100"
+                      className="h-10 w-10 sm:h-11 w-11 rounded-lg sm:rounded-xl hover:bg-white/5 flex items-center justify-center text-slate-500 transition-colors active:bg-white/10"
                     >
                       <Minus size={18} className="sm:w-5 sm:h-5" />
                     </button>
-                    <span className="w-8 sm:w-10 text-center text-lg sm:text-2xl font-bold text-slate-900 tabular-nums">
+                    <span className="w-8 sm:w-12 text-center text-xl sm:text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tabular-nums">
                       {quantity}
                     </span>
                     <button
                       onClick={increment}
-                      className="h-10 w-10 sm:h-11 w-11 rounded-lg sm:rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-200 transition-transform active:scale-95 hover:bg-emerald-600"
+                      className="h-10 w-10 sm:h-11 w-11 rounded-lg sm:rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.3)] transition-all active:scale-95 hover:bg-emerald-400 hover:shadow-[0_0_25px_rgba(52,211,153,0.5)]"
                     >
-                      <Plus size={18} className="sm:w-5 sm:h-5" />
+                      <Plus size={18} className="sm:w-5 sm:h-5 stroke-[3]" />
                     </button>
                   </div>
                 </div>
@@ -404,28 +405,28 @@ export default function Sale({
           {/* Transaction Metadata - Section Header Pattern */}
           <div className="space-y-6 sm:space-y-8">
             <div className="flex items-center gap-4">
-              <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.25em] whitespace-nowrap px-1">Transaction Parameters</span>
-              <div className="h-px w-full bg-slate-100" />
+              <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.25em] whitespace-nowrap px-1">Transaction Parameters</span>
+              <div className="h-px w-full bg-white/5 border-t border-dashed border-white/10" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
               <div className="space-y-2 sm:space-y-3">
-                <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Legal Structure</label>
+                <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Legal Structure</label>
                 <div className="relative">
                   <select
                     value={partyCategory}
                     onChange={e => setPartyCategory(e.target.value as any)}
-                    className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all outline-none appearance-none"
+                    className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 font-bold text-sm sm:text-base text-white focus:bg-white/5 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all outline-none appearance-none"
                   >
-                    <option value="Individual">Individual (B2C)</option>
-                    <option value="Company">Company (B2B)</option>
+                    <option value="Individual" className="bg-slate-900">Individual (B2C)</option>
+                    <option value="Company" className="bg-slate-900">Company (B2B)</option>
                   </select>
-                  <ChevronDown className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/50 pointer-events-none" />
                 </div>
               </div>
 
               <div className="space-y-2 sm:space-y-3 relative" ref={partyRef}>
-                <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Beneficiary</label>
+                <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Beneficiary</label>
                 <input
                   placeholder="Customer Identity"
                   value={partyName}
@@ -434,7 +435,7 @@ export default function Sale({
                     setShowParties(true);
                   }}
                   onFocus={() => setShowParties(true)}
-                  className="w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all outline-none placeholder:text-slate-300"
+                  className="w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 font-bold text-sm sm:text-base text-white focus:bg-white/5 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all outline-none placeholder:text-slate-600"
                 />
 
                 {/* 🔽 Auto-complete Dropdown */}
@@ -444,7 +445,7 @@ export default function Sale({
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute z-50 w-full mt-2 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden"
+                      className="absolute z-50 w-full mt-2 bg-[#0a0a0a] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden backdrop-blur-xl"
                     >
                       <div className="max-h-60 overflow-y-auto p-2 space-y-1">
                         {filteredParties.map((p) => (
@@ -458,14 +459,14 @@ export default function Sale({
                               if (p.paymentTerms) setPaymentTerms(p.paymentTerms);
                               setShowParties(false);
                             }}
-                            className="p-3 rounded-xl hover:bg-emerald-50 cursor-pointer transition-colors group flex items-center justify-between"
+                            className="p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors group flex items-center justify-between"
                           >
                             <div>
-                              <p className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">{p.name}</p>
-                              {p.gstin && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">GSTIN: {p.gstin}</p>}
+                              <p className="text-sm font-bold text-slate-300 group-hover:text-white transition-colors">{p.name}</p>
+                              {p.gstin && <p className="text-[10px] font-black text-emerald-500/70 uppercase tracking-widest mt-1">GSTIN: {p.gstin}</p>}
                             </div>
-                            <div className="w-8 h-8 rounded-lg bg-emerald-100/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Plus className="w-4 h-4 text-emerald-600" />
+                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Plus className="w-4 h-4 text-emerald-400" />
                             </div>
                           </div>
                         ))}
@@ -476,32 +477,32 @@ export default function Sale({
               </div>
 
               <div className="space-y-2 sm:space-y-3">
-                <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Valuation (₹)</label>
+                <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Valuation (₹)</label>
                 <input
                   type="text"
                   placeholder="Rate/Unit"
                   value={formatIndianNumber(price)}
                   onChange={handlePriceChange}
-                  className="w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all outline-none placeholder:text-slate-300"
+                  className="w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 font-bold text-sm sm:text-base text-white focus:bg-white/5 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all outline-none placeholder:text-slate-600"
                 />
               </div>
 
               {/* Always-visible Fiscal Rate */}
               <div className="space-y-2 sm:space-y-3">
-                <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Fiscal Rate (GST)</label>
+                <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Fiscal Rate (GST)</label>
                 <div className="relative">
                   <select
                     value={gstRate}
                     onChange={e => setGstRate(Number(e.target.value))}
-                    className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 outline-none focus:border-emerald-500 appearance-none focus:bg-white transition-all"
+                    className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 font-bold text-sm sm:text-base text-white outline-none focus:border-emerald-500 appearance-none focus:bg-white/5 transition-all"
                   >
                     {GST_RATES.map(r => (
-                      <option key={r.value} value={r.value}>
+                      <option key={r.value} value={r.value} className="bg-slate-900">
                         {r.label}
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/50 pointer-events-none" />
                 </div>
               </div>
 
@@ -512,61 +513,61 @@ export default function Sale({
                   className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6"
                 >
                   <div className="space-y-2 sm:space-y-3">
-                    <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">GSTIN</label>
+                    <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">GSTIN</label>
                     <input
                       placeholder="Tax Identifier"
                       value={taxId}
                       onChange={e => setTaxId(e.target.value.toUpperCase())}
-                      className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                      className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 font-bold text-sm sm:text-base text-white outline-none focus:border-emerald-500 focus:bg-white/5 transition-all placeholder:text-slate-600"
                     />
                   </div>
                   <div className="space-y-2 sm:space-y-3">
-                    <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Region</label>
+                    <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Region</label>
                     <input
                       placeholder="State Code"
                       value={partyState}
                       onChange={e => setPartyState(e.target.value)}
-                      className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                      className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 font-bold text-sm sm:text-base text-white outline-none focus:border-emerald-500 focus:bg-white/5 transition-all placeholder:text-slate-600"
                     />
                   </div>
                   <div className="space-y-2 sm:space-y-3">
-                    <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Settlement</label>
+                    <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Settlement</label>
                     <div className="relative">
                       <select
                         value={paymentTerms}
                         onChange={e => setPaymentTerms(e.target.value)}
-                        className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 outline-none focus:border-emerald-500 appearance-none focus:bg-white transition-all"
+                        className="w-full h-12 sm:h-14 px-4 sm:px-5 rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 font-bold text-sm sm:text-base text-white outline-none focus:border-emerald-500 appearance-none focus:bg-white/5 transition-all"
                       >
-                        <option value="">Standard Terms</option>
+                        <option value="" className="bg-slate-900">Standard Terms</option>
                         {PAYMENT_TERMS.map(p => (
-                          <option key={p.value} value={p.value}>
+                          <option key={p.value} value={p.value} className="bg-slate-900">
                             {p.label}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/50 pointer-events-none" />
                     </div>
                   </div>
                 </motion.div>
               )}
 
               <div className="md:col-span-2 space-y-2 sm:space-y-3">
-                <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Strategic Annotations</label>
+                <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Strategic Annotations</label>
                 <textarea
                   placeholder="Deployment context for audit trail..."
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
-                  className="w-full h-24 sm:h-32 px-4 sm:px-6 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] border border-slate-200 bg-slate-50/50 font-medium text-sm sm:text-base text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all outline-none placeholder:text-slate-300 resize-none"
+                  className="w-full h-24 sm:h-32 px-4 sm:px-6 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] border border-white/10 bg-black/40 font-medium text-sm sm:text-base text-white focus:bg-white/5 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all outline-none placeholder:text-slate-600 resize-none"
                 />
               </div>
 
               <div className="space-y-2 sm:space-y-3">
-                <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] pl-1">Conversion Date</label>
+                <label className="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Conversion Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 font-bold text-sm sm:text-base text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all outline-none"
+                  className="w-full h-12 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border border-white/10 bg-black/40 font-bold text-sm sm:text-base text-white focus:bg-white/5 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all outline-none [color-scheme:dark]"
                 />
               </div>
             </div>
@@ -574,14 +575,14 @@ export default function Sale({
         </div>
 
         {/* Footer actions */}
-        <div className="px-5 py-6 sm:px-10 sm:py-10 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+        <div className="px-5 py-6 sm:px-10 sm:py-10 border-t border-white/5 bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 animate-pulse" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.15)]">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 animate-pulse" />
             </div>
             <div>
-              <p className="text-xs sm:text-sm font-bold text-slate-900">Conversion Synced</p>
-              <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global revenue hub impact live</p>
+              <p className="text-xs sm:text-sm font-bold text-white tracking-tight">Conversion Synced</p>
+              <p className="text-[9px] sm:text-[10px] font-black text-emerald-500/70 uppercase tracking-widest">Global revenue hub impact live</p>
             </div>
           </div>
 
@@ -591,21 +592,20 @@ export default function Sale({
             className="
               relative group overflow-hidden
               px-8 sm:px-12 h-14 sm:h-16 rounded-xl sm:rounded-2xl
-              bg-slate-900 text-white
-              font-extrabold text-xs sm:text-sm uppercase tracking-[0.3em]
-              hover:bg-emerald-600 active:scale-95
-              disabled:opacity-50
-              transition-all duration-300 shadow-2xl shadow-slate-900/20
+              bg-emerald-500 text-slate-950
+              font-black text-xs sm:text-sm uppercase tracking-[0.3em]
+              hover:bg-emerald-400 active:scale-95
+              disabled:opacity-20 disabled:shadow-none
+              transition-all duration-300 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:shadow-[0_0_30px_rgba(52,211,153,0.5)]
               w-full sm:w-auto
             "
           >
             <span className="relative z-10 flex items-center justify-center gap-3">
               {loading ? "Processing..." : "Execute Sale"}
-              <div className="w-4 h-4 sm:w-5 sm:h-5 rounded bg-white/20 flex items-center justify-center group-hover:bg-white/40 transition-colors">
-                <ChevronDown className="w-3 h-3 -rotate-90" />
+              <div className="w-4 h-4 sm:w-5 sm:h-5 rounded bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors">
+                <ChevronDown className="w-3 h-3 -rotate-90 stroke-[3]" />
               </div>
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-emerald-700 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-full group-hover:translate-y-0" />
           </button>
         </div>
       </div>

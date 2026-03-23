@@ -75,8 +75,31 @@ export default function HeroSection() {
     <section className="relative min-h-[90vh] bg-[#050505] flex items-center justify-center pt-32 pb-20 overflow-hidden font-sans">
 
       {/* AMBIENT BACKGROUND EFFECTS */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-600/20 blur-[150px] rounded-full mix-blend-screen pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/10 blur-[180px] rounded-full mix-blend-screen pointer-events-none" />
+      <motion.div
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.2, 0.3, 0.2],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-600/20 blur-[150px] rounded-full mix-blend-screen pointer-events-none"
+      />
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.1, 0.2, 0.1],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1,
+        }}
+        className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/10 blur-[180px] rounded-full mix-blend-screen pointer-events-none"
+      />
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] bg-repeat pointer-events-none" />
 
       {/* FULL WIDTH CONTAINER */}
@@ -94,7 +117,7 @@ export default function HeroSection() {
             AI-Powered Productivity
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-bold tracking-tighter text-white mb-6 leading-[1.05]">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-bold tracking-tighter text-white mb-6 leading-[1.05] drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
             Run Your Business.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Not Your Software.</span>
           </h1>
@@ -106,9 +129,9 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
             <Link
               href="/signup"
-              className="group relative flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 text-black font-bold rounded-full overflow-hidden transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.4)] w-full sm:w-auto"
+              className="group relative flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 text-black font-bold rounded-full overflow-hidden transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.4)] w-full sm:w-auto active:scale-95"
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:animate-[shine_1s_ease-in-out] pointer-events-none" />
               <span className="relative z-10">Get Started Free <ArrowRight className="inline w-5 h-5 ml-1 relative z-10 group-hover:translate-x-1 transition-transform" /></span>
             </Link>
 
@@ -141,40 +164,61 @@ export default function HeroSection() {
             {SLIDES.map((slide, idx) => {
               const isActive = activeSlide === idx;
               return (
-                <button
+                <motion.button
                   key={slide.id}
+                  whileHover={{ scale: 1.05, translateY: -2 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     setActiveSlide(idx);
                     setProgress(0);
                   }}
-                  className={`relative flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${isActive
-                    ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-105"
-                    : "bg-white/5 text-[#A1A1AA] border border-white/10 hover:bg-white/10 hover:text-white"
+                  className={`relative flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-500 overflow-hidden ${isActive
+                    ? "bg-white text-slate-900 shadow-[0_10px_25px_-5px_rgba(255,255,255,0.3),0_5px_10px_-5px_rgba(0,0,0,0.5)]"
+                    : "bg-[#111]/60 backdrop-blur-md border border-white/5 text-zinc-400 hover:text-white hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]"
                     }`}
                 >
-                  <slide.icon className={`w-4 h-4 ${isActive ? "text-emerald-500" : ""}`} />
-                  {slide.title}
+                  <slide.icon className={`w-4 h-4 transition-colors duration-300 ${isActive ? "text-emerald-500" : "text-zinc-500 group-hover:text-emerald-400"}`} />
+                  <span className="relative z-10">{slide.title}</span>
 
                   {/* Subtle Progress Bar for Active Pill */}
                   {isActive && !isHovered && (
-                    <div className="absolute bottom-0 left-0 h-[2px] bg-emerald-500 rounded-b-full transition-all ease-linear" style={{ width: `${progress}%` }} />
+                    <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-black/5 overflow-hidden">
+                      <motion.span 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ type: "spring", bounce: 0, duration: 0.1 }}
+                        className="absolute inset-y-0 left-0 bg-emerald-500 shadow-[0_0_10px_#10B981]" 
+                      />
+                    </span>
                   )}
-                </button>
+                  
+                  {/* Subtle Glow behind icon in active state */}
+                  {isActive && (
+                    <div className="absolute top-1/2 left-4 -translate-y-1/2 w-6 h-6 bg-emerald-500/20 blur-md rounded-full pointer-events-none" />
+                  )}
+                </motion.button>
               );
             })}
           </div>
 
           {/* Interactive Mockup Container */}
-          <div className="relative group rounded-2xl w-full aspect-[4/3] max-h-[75vh] bg-[#0A0A0A] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-500 hover:shadow-[0_0_80px_rgba(16,185,129,0.15)] hover:border-white/20 mx-auto lg:ml-auto">
+          <motion.div 
+            whileHover={{ scale: 1.01 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="relative group rounded-2xl w-full aspect-[4/3] max-h-[75vh] bg-[#0A0A0A] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-500 hover:shadow-[0_0_80px_rgba(16,185,129,0.15)] hover:border-white/20 mx-auto lg:ml-auto"
+          >
 
             {/* Mockup Toolbar (Mac style) */}
-            <div className="h-10 border-b border-white/10 bg-[#111] flex items-center px-4 gap-2 relative z-20">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+            <div className="h-10 border-b border-white/10 bg-[#111]/90 backdrop-blur-md flex items-center px-4 gap-2 relative z-20">
+              <div className="flex gap-1.5 grayscale opacity-50">
+                <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
               </div>
-              <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/5 text-xs text-[#71717A] max-w-[250px] truncate">
+              <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-md bg-white/5 border border-white/5 text-[10px] text-[#71717A] max-w-[250px] truncate">
+                <div className="w-2.5 h-2.5 flex items-center justify-center">
+                  <svg className="w-2.5 h-2.5 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
                 solicio.app/app/{SLIDES[activeSlide].id}
               </div>
             </div>
@@ -184,19 +228,19 @@ export default function HeroSection() {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeSlide}
-                  initial={{ opacity: 0, scale: 0.98, x: 20 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.98, x: -20 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  initial={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   className="absolute inset-0 w-full h-full"
                 >
                   {/* Fallback pattern if image is missing, otherwise Next/Image */}
-                  <div className="w-full h-full relative p-2 bg-white flex items-center justify-center">
+                  <div className="w-full h-full relative p-2 bg-[#0D0D0D] flex items-center justify-center">
                     {/* Note: using native img for demo to ensure fast load, can swap to next/image */}
                     <img
                       src={SLIDES[activeSlide].image}
                       alt={SLIDES[activeSlide].title}
-                      className="w-full h-full object-cover object-left-top rounded-lg border border-slate-200 shadow-inner"
+                      className="w-full h-full object-cover object-left-top rounded-lg border border-white/10"
                     />
 
                     {/* Floating UI Elements (Micro-interactions) */}
@@ -204,14 +248,14 @@ export default function HeroSection() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.4 }}
-                      className="absolute bottom-6 right-6 bg-white border border-slate-200 shadow-xl rounded-xl p-4 flex items-start gap-4 w-72"
+                      className="absolute bottom-6 right-6 bg-[#111]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.6)] rounded-xl p-4 flex items-start gap-4 w-72"
                     >
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                        <Sparkles className="w-5 h-5 text-emerald-600" />
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                        <Sparkles className="w-5 h-5 text-emerald-400" />
                       </div>
                       <div>
-                        <div className="text-[15px] font-bold text-slate-900">{SLIDES[activeSlide].caption}</div>
-                        <div className="text-xs text-slate-500 mt-1">{SLIDES[activeSlide].description}</div>
+                        <div className="text-[15px] font-bold text-white">{SLIDES[activeSlide].caption}</div>
+                        <div className="text-xs text-[#A1A1AA] mt-1">{SLIDES[activeSlide].description}</div>
                       </div>
                     </motion.div>
                   </div>
@@ -221,11 +265,19 @@ export default function HeroSection() {
 
             {/* Glow overlay inside the mockup frame */}
             <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] pointer-events-none z-10" />
-          </div>
+          </motion.div>
 
         </motion.div>
 
       </div>
+
+      <style jsx global>{`
+        @keyframes shine {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
     </section>
   );
 }

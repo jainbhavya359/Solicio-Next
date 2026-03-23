@@ -4,7 +4,7 @@ import Footer from "@/src/components/layout/Footer";
 
 export default function BusinessPage() {
     return (
-        <div className="bg-slate-50 min-h-screen flex flex-col">
+        <div className="bg-[#050505] min-h-screen flex flex-col">
             <Header />
             <main className="flex-grow pt-20">
                 <Business />

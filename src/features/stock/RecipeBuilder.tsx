@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Trash2, ChevronRight, Sparkles } from "lucide-react";
+import { Trash2, ChevronRight, Sparkles, Plus } from "lucide-react";
 
 type Product = {
   _id: string;
@@ -67,16 +67,16 @@ export default function RecipeBuilder({
   return (
     <div className="space-y-8 font-outfit">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-[0_0_15px_rgba(52,211,153,0.2)]">
           <Sparkles className="w-4 h-4" />
         </div>
-        <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">
+        <h4 className="text-xs font-black text-white uppercase tracking-[0.2em]">
           Recipe Manifest
         </h4>
       </div>
 
       {/* ADD INGREDIENT */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end p-6 rounded-2xl bg-white border border-slate-100 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end p-6 rounded-3xl bg-[#0a0a0a] border border-white/10 shadow-[0_0_40px_rgba(52,211,153,0.02)]">
         <div className="md:col-span-6 space-y-2">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
             Ingredient Selector
@@ -85,16 +85,16 @@ export default function RecipeBuilder({
             <select
               value={selectedProductId}
               onChange={e => setSelectedProductId(e.target.value)}
-              className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-xs font-bold appearance-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all cursor-pointer"
+              className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-xs font-bold text-white appearance-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer outline-none"
             >
-              <option value="">Select product</option>
+              <option value="" className="bg-slate-900 text-slate-300">Select asset</option>
               {safeProducts.map(p => (
-                <option key={p._id} value={p._id}>
+                <option key={p._id} value={p._id} className="bg-slate-900 text-white">
                   {p.name} ({p.unit})
                 </option>
               ))}
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-emerald-500/50">
               <ChevronRight className="w-4 h-4 rotate-90" />
             </div>
           </div>
@@ -102,7 +102,7 @@ export default function RecipeBuilder({
 
         <div className="md:col-span-4 space-y-2">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-            Quantity {selectedProduct && `(${selectedProduct.unit})`}
+            Volume {selectedProduct && `(${selectedProduct.unit})`}
           </label>
           <input
             type="number"
@@ -111,7 +111,7 @@ export default function RecipeBuilder({
             value={qty}
             onChange={e => setQty(e.target.value)}
             placeholder="0.00"
-            className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-xs font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
+            className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-xs font-bold text-white placeholder:text-slate-600 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
           />
         </div>
 
@@ -119,9 +119,9 @@ export default function RecipeBuilder({
           <button
             onClick={addIngredient}
             disabled={!selectedProduct || !qty}
-            className="h-12 w-full rounded-xl bg-slate-900 text-white flex items-center justify-center hover:bg-emerald-600 disabled:opacity-40 transition-all duration-300 shadow-lg shadow-slate-900/10"
+            className="h-12 w-full rounded-2xl bg-emerald-500 text-slate-950 font-black flex items-center justify-center hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(52,211,153,0.4)] disabled:opacity-20 disabled:shadow-none transition-all duration-300"
           >
-            <Plus size={20} />
+            <Plus size={20} className="stroke-[3]" />
           </button>
         </div>
       </div>
@@ -129,9 +129,9 @@ export default function RecipeBuilder({
       {/* INGREDIENT LIST */}
       <AnimatePresence initial={false}>
         {safeValue.length > 0 ? (
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-              Active Ingredients List
+          <div className="space-y-4">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+              Active Parameters
             </label>
             <div className="grid gap-3">
               {safeValue.map(item => (
@@ -140,17 +140,17 @@ export default function RecipeBuilder({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
-                  className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-emerald-200 transition-colors group"
+                  className="flex items-center justify-between p-4 bg-[#0a0a0a] border border-white/5 rounded-2xl shadow-sm hover:border-emerald-500/30 hover:shadow-[0_8px_32px_rgba(52,211,153,0.05)] transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 group-hover:bg-emerald-500/10 group-hover:text-emerald-400 transition-colors shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
                       <Box className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-900 tracking-tight">
+                      <p className="text-sm font-bold text-white tracking-tight">
                         {item.productName}
                       </p>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400 group-hover:text-emerald-300 transition-colors">
                         {item.qtyRequired} {item.unit}
                       </p>
                     </div>
@@ -158,7 +158,7 @@ export default function RecipeBuilder({
 
                   <button
                     onClick={() => removeIngredient(item.productId)}
-                    className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                    className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 hover:shadow-[0_0_15px_rgba(244,63,94,0.2)] transition-all"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -167,12 +167,12 @@ export default function RecipeBuilder({
             </div>
           </div>
         ) : (
-          <div className="text-center py-10 rounded-3xl border border-dashed border-slate-200">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="text-center py-12 rounded-3xl border border-dashed border-white/10 bg-white/5">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
               No configuration detected.
             </p>
-            <p className="text-[10px] text-slate-300 mt-2">
-              Add ingredients required to formulate this composite product.
+            <p className="text-[10px] text-slate-600 mt-2">
+              Add structural components required to formulate this asset.
             </p>
           </div>
         )}
