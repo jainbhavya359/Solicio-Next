@@ -38,8 +38,20 @@ export default function Dashboard() {
   const current = sectionInfo[activeSection];
 
   return (
-    <div className="min-h-screen bg-[#F7FAF9] flex overflow-x-hidden w-full">
-      <Toaster />
+    <div className="min-h-screen bg-[#050505] text-slate-200 flex overflow-x-hidden w-full relative selection:bg-emerald-500/30">
+      {/* Global Ambient Glows */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
+      
+      <Toaster 
+        toastOptions={{
+          style: {
+            background: '#1e293b',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }
+        }} 
+      />
 
       {/* ── Layout Shell ─────────────────────────────── */}
       <DashboardMobileHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -53,7 +65,7 @@ export default function Dashboard() {
       />
 
       {/* ── Main Content ──────────────────────────────── */}
-      <main className="flex-1 min-w-0 w-full lg:ml-20 peer-hover:lg:ml-[280px] min-h-screen pt-16 lg:pt-0 [zoom:0.85] lg:[zoom:1] transition-all duration-300 ease-in-out">
+      <main className="flex-1 min-w-0 w-full lg:ml-20 peer-hover:lg:ml-[280px] min-h-screen pt-16 lg:pt-0 [zoom:0.85] lg:[zoom:1] transition-all duration-300 ease-in-out relative z-10">
 
         {/* Ledger search — only visible on overview */}
         {email && activeSection === "overview" && (
@@ -70,8 +82,8 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 sm:mb-8"
           >
-            <h1 className="text-xl sm:text-2xl font-bold text-stone-900">{current.title}</h1>
-            <p className="text-xs sm:text-base text-stone-500 mt-1">{current.subtitle}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{current.title}</h1>
+            <p className="text-xs sm:text-base text-slate-400 mt-1 font-medium">{current.subtitle}</p>
           </motion.div>
 
           {/* Section panels */}

@@ -4,9 +4,9 @@ import Footer from "@/src/components/layout/Footer";
 
 export default function loanPage() {
     return (
-        <div className="bg-slate-50 min-h-screen flex flex-col">
+        <div className="bg-[#020202] min-h-screen flex flex-col">
             <Header />
-            <main className="flex-grow pt-20">
+            <main className="flex-grow">
                 <Loan />
             </main>
             <Footer />

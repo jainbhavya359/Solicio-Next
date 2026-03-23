@@ -10,17 +10,17 @@ interface Props {
 
 export default function DashboardMobileHeader({ sidebarOpen, setSidebarOpen }: Props) {
   return (
-    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white rounded-b-2xl shadow-sm border-b border-slate-100">
+    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl rounded-b-2xl shadow-md border-b border-white/10">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-[#050505] shadow-[0_0_15px_rgba(52,211,153,0.3)]">
             {Icons.logo}
           </div>
-          <span className="font-semibold text-stone-900">Solicio</span>
+          <span className="font-bold text-white tracking-tight">Solicio</span>
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 rounded-lg hover:bg-stone-100 text-stone-600 transition-colors"
+          className="p-2 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 text-slate-300 transition-colors"
         >
           {sidebarOpen ? Icons.close : Icons.menu}
         </button>
@@ -39,7 +39,7 @@ export function SidebarOverlay({ open, onClose }: { open: boolean; onClose: () =
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="lg:hidden fixed inset-0 z-40 bg-black/30"
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
         />
       )}
     </AnimatePresence>

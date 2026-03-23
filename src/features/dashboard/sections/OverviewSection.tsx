@@ -1,29 +1,23 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { CreditGauge } from "../../../components/Loan";
-import { useCreditStore } from "../../../store/useCreditStore";
-import BusinessHealthCard from "../../health/BusinessHealthCard";
-import CashFlowWatch from "../../Insights/CashFlow";
-import {
-  ActionSuggestionCard,
-  ForecastSummaryCard,
-  MarginTrendGraph,
-  SalesTrendGraphCard,
-  TopProductDonut,
-} from "../../Insights/SalesTrendInsightsCard";
-import KPICards from "../KPICards";
+import { DashboardData } from "../types/dashboard";
 import DateFilterBar from "../components/DateFilterBar";
 import OverviewSkeleton from "../components/skeletons/OverviewSkeleton";
-import { DashboardData } from "../types/dashboard";
 
-const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
-};
+// New Dark Premium Components
+import OverviewHero from "../components/overview/OverviewHero";
+import HealthScoreCard from "../components/overview/HealthScoreCard";
+import AlertsPanel from "../components/overview/AlertsPanel";
+import MetricsGrid from "../components/overview/MetricsGrid";
+import FinancialSnapshot from "../components/overview/FinancialSnapshot";
+import TrendChart from "../components/overview/TrendChart";
+import SecondaryInsights from "../components/overview/SecondaryInsights";
+import SmartActions from "../components/overview/SmartActions";
+
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
 
 interface Props {
@@ -47,7 +41,6 @@ export default function OverviewSection({
   setToDate,
   onViewInventory,
 }: Props) {
-  const { score } = useCreditStore();
 
   if (loadingDashboard) return <OverviewSkeleton />;
 
@@ -56,60 +49,58 @@ export default function OverviewSection({
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
-      className="space-y-4 sm:space-y-6 w-full min-w-0"
+      className="space-y-6 sm:space-y-8 w-full min-w-0 pb-12"
     >
       {/* Date Filter */}
-      <DateFilterBar
-        fromDate={fromDate}
-        toDate={toDate}
-        setFromDate={setFromDate}
-        setToDate={setToDate}
-      />
-
-      {/* KPIs + Business Health */}
-      <div className="space-y-4 sm:space-y-8">
-        <KPICards data={dashboardData?.kpis} />
-        <BusinessHealthCard data={dashboardData?.healthSummary} />
+      <div className="bg-[#050505] p-2 rounded-2xl border border-white/5 inline-block mb-4">
+        <DateFilterBar
+          fromDate={fromDate}
+          toDate={toDate}
+          setFromDate={setFromDate}
+          setToDate={setToDate}
+        />
       </div>
 
-      {/* Credit + Cash Flow */}
-      <div className="grid md:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
-        <motion.div variants={fadeInUp} className="h-full min-w-0 w-full">
-          <CreditGauge score={score} />
-        </motion.div>
-        <motion.div variants={fadeInUp} className="h-full min-w-0 w-full">
-          <CashFlowWatch data={dashboardData?.cashFlow} />
-        </motion.div>
-      </div>
+      <div className="bg-[#050505] min-h-screen text-slate-200">
+          
+          <OverviewHero data={dashboardData?.kpis} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="col-span-1 lg:col-span-2">
+              <HealthScoreCard data={dashboardData?.healthSummary} />
+            </div>
+            <div className="col-span-1">
+              <AlertsPanel alerts={dashboardData?.healthSummary?.alerts} />
+            </div>
+          </div>
 
-      {/* Sales Trend Insights */}
-      {!salesTrendData ? (
-        <div className="bg-white rounded-2xl p-10 text-center text-stone-500 mt-8">
-          Unable to load insights
-        </div>
-      ) : (
-        <section className="mx-auto max-w-7xl w-full min-w-0 px-0 sm:px-4 py-8 sm:py-20 space-y-6 sm:space-y-10">
-          <div className="w-full min-w-0">
-            <SalesTrendGraphCard data={salesTrendData} />
+          <div className="mb-8">
+            <MetricsGrid 
+              salesTrend={dashboardData?.healthSummary?.salesTrend}
+              stockMovement={dashboardData?.healthSummary?.stockMovement}
+              activityRecency={dashboardData?.healthSummary?.activityRecency}
+            />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 w-full min-w-0">
-            <div className="w-full min-w-0 h-full">
-              <ForecastSummaryCard data={salesTrendData} />
+
+          <div className="mb-8">
+            <FinancialSnapshot cashFlow={dashboardData?.cashFlow} />
+          </div>
+
+          {!salesTrendData ? (
+            <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl p-10 text-center text-slate-500">
+              Unable to load insights
             </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 w-full min-w-0">
-            <div className="w-full min-w-0 h-full">
-              <TopProductDonut data={salesTrendData} onViewInventory={onViewInventory} />
+          ) : (
+            <div className="space-y-8">
+              <TrendChart data={salesTrendData} />
+              
+              <SecondaryInsights data={salesTrendData} />
+              
+              <SmartActions data={salesTrendData} />
             </div>
-            <div className="w-full min-w-0 h-full">
-              <MarginTrendGraph data={salesTrendData} />
-            </div>
-          </div>
-          <div className="w-full min-w-0">
-            <ActionSuggestionCard data={salesTrendData} />
-          </div>
-        </section>
-      )}
+          )}
+
+      </div>
     </motion.div>
   );
 }
