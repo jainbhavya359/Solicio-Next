@@ -1,5 +1,5 @@
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
-import { TotalStock } from "@/src/models/totalStockModel";
+import { Products } from "@/src/models/ProductModel";
 
 const DAYS_SLOW_THRESHOLD = 30;
 
@@ -57,7 +57,7 @@ export async function computeStockMovement(email: string) {
   ]);
 
   /* ---------- STOCK ---------- */
-  const stock = await TotalStock.find({
+  const stock = await Products.find({
     email,
     quantity: { $gt: 0 },
   }).lean();
@@ -95,7 +95,7 @@ export async function computeStockMovement(email: string) {
       scoredProducts++;
     }
 
-    const value = (s.quantity || 0) * (s.price || 0);
+    const value = (s.quantity || 0) * (s.purchasePrice || 0);
     totalStockValue += value;
     
     const category = categoryFromDays(daysSinceSale);

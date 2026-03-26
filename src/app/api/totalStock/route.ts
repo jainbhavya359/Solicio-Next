@@ -1,5 +1,5 @@
 import connect from "@/src/dbConfig/dbConnection";
-import { TotalStock } from "@/src/models/totalStockModel";
+import { Products } from "@/src/models/ProductModel";
 import { NextRequest, NextResponse } from "next/server";
 
 const DAY = 86400000;
@@ -18,7 +18,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const stocks = await TotalStock.find({ email }).lean();
+    // Consolidated: Fetching from Products (the source of truth)
+    const stocks = await Products.find({ email }).lean();
 
     const now = Date.now();
 
@@ -33,8 +34,11 @@ export async function GET(req: NextRequest) {
 
     let slowValue = 0;
 
-    const breakdown = stocks.map((s) => {
-      const value = s.quantity * s.price;
+    const breakdown = stocks.map((s: any) => {
+      // Use purchasePrice for inventory valuation
+      const price = s.purchasePrice || 0;
+      const value = s.quantity * price;
+      
       totalStockValue += value;
       totalQuantity += s.quantity;
 
@@ -75,7 +79,7 @@ export async function GET(req: NextRequest) {
         product: s.name,
         unit: s.unit,
         quantity: s.quantity,
-        price: s.price,
+        price: price,
         stockValue: value,
         daysSinceLastSale,
         category,
@@ -138,7 +142,7 @@ export async function GET(req: NextRequest) {
       risks,
     });
   } catch (error) {
-    console.error("Inventory enrichment error:", error);
+    console.error("Inventory insights error:", error);
     return NextResponse.json(
       { error: "Failed to compute inventory insights" },
       { status: 500 }

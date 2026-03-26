@@ -5,8 +5,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { Products } from "@/src/models/ProductModel";
 import { StockLayer } from "@/src/models/StockLayerModel";
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
-import Stock from "@/src/models/stockModel";
-import { TotalStock } from "@/src/models/totalStockModel";
 import { Document } from "@/src/models/DocumentModel";
 import { CompanyProfile } from "@/src/models/CompanyProfileModel";
 import { Party } from "@/src/models/PartyModel";
@@ -45,21 +43,6 @@ export async function POST(req: NextRequest) {
       date: txDate,
       session,
     });
-
-    /* 📦 Stock history */
-    await Stock.create(
-      [{
-        email,
-        name: product.name,
-        unit: product.unit,
-        quantity: product.quantity,
-        price: product.rate,
-        date: txDate,
-        entryNo: voucherNo,
-        voucher: "Purchase",
-      }],
-      { session }
-    );
 
     /* 📒 Ledger */
     const [ledger] = await LedgerEntry.create(
@@ -105,16 +88,6 @@ export async function POST(req: NextRequest) {
       { email, name: product.name, unit: product.unit },
       { $inc: { quantity: product.quantity }, $set: { purchasePrice: product.rate } },
       { session }
-    );
-
-    /* 📊 TotalStock */
-    await TotalStock.findOneAndUpdate(
-      { email, name: product.name, unit: product.unit },
-      {
-        $inc: { quantity: product.quantity, price: amount },
-        $set: { updatedAt: txDate },
-      },
-      { upsert: true, session }
     );
 
     /* 🏢 Company snapshot */
@@ -244,9 +217,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No email Found" }, { status: 400 });
     }
 
-    const Stocks = await Stock.find({ email }).sort({ date: -1, createdAt: -1 });
+    const ledgerEntries = await LedgerEntry.find({ email }).sort({ date: -1, createdAt: -1 });
 
-    return NextResponse.json(Stocks);
+    // Map to legacy Stock format for UI compatibility
+    const legacyStock = ledgerEntries.map(entry => ({
+      _id: entry._id,
+      name: entry.itemName,
+      quantity: entry.debitQty || entry.creditQty, // For generic history, show the movement magnitude
+      unit: entry.unit,
+      entryNo: entry.voucherNo,
+      price: entry.rate,
+      date: entry.date,
+      email: entry.email,
+      voucher: entry.voucherType,
+    }));
+
+    return NextResponse.json(legacyStock);
   } catch (error) {
     console.log("Error: ", error);
     return NextResponse.json({ error: error }, { status: 500 });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connect from "@/src/dbConfig/dbConnection";
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
-import { TotalStock } from "@/src/models/totalStockModel";
+import { Products } from "@/src/models/ProductModel";
 
 const DAYS_THRESHOLD = 14;
 const MIN_BLOCKED_VALUE = 10000; // ₹10,000
@@ -41,9 +41,9 @@ export async function GET(req: NextRequest) {
     }
 
     /* ---------------------------------------------------
-       2️⃣ Get current stock
+       2️⃣ Get current stock from Products master data
     --------------------------------------------------- */
-    const stock = await TotalStock.find({ email }).lean();
+    const stock = await Products.find({ email }).lean();
 
     const alerts: any[] = [];
 
@@ -51,9 +51,9 @@ export async function GET(req: NextRequest) {
        3️⃣ Evaluate stagnation
     --------------------------------------------------- */
     for (const item of stock) {
-      const itemName = item.itemName;
+      const itemName = item.name;
       const qty = item.quantity || 0;
-      const price = item.purchasePrice || item.costPrice || 0;
+      const price = item.purchasePrice || 0;
 
       const stockValue = qty * price;
 
@@ -74,14 +74,14 @@ export async function GET(req: NextRequest) {
       alerts.push({
         type: "warning",
         title: "Stock not moving",
-        why: `${itemName} hasn’t sold in ${daysSinceLastSale} days`,
+        why: `${itemName} hasn’t sold in ${daysSinceLastSale === Infinity ? "a long time" : daysSinceLastSale + " days"}`,
         impact: `₹${stockValue.toLocaleString()} blocked in inventory`,
         action: "Discount, bundle, or stop reordering this product",
         entity: {
           type: "product",
           name: itemName,
         },
-        metric: daysSinceLastSale,
+        metric: daysSinceLastSale === Infinity ? 999 : daysSinceLastSale,
         priority: 90,
       });
     }
@@ -90,8 +90,6 @@ export async function GET(req: NextRequest) {
        4️⃣ Sort by priority & impact
     --------------------------------------------------- */
     alerts.sort((a, b) => b.priority - a.priority);
-
-    //console.log(alerts);
 
     return NextResponse.json({
       count: alerts.length,

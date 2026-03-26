@@ -63,6 +63,71 @@ const LedgerEntrySchema = new Schema(
       },
     ],
 
+    /* ========================================================= */
+    /* 🚀 ERP ACCOUNTING LAYER: ADDITIVE COMPLIANCE METADATA     */
+    /* ========================================================= */
+
+    // Core Accounting Spine Linkage
+    journalEntryId: {
+      type: Schema.Types.ObjectId,
+      ref: "JournalEntry",
+      default: null,
+      index: true
+    },
+    
+    // Explicit Product Entity Linkage (Backwards Compatible alongside itemName)
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: "Products",
+      default: null,
+      index: true
+    },
+
+    // Multi-Item Invoice Mapping (Scales beyond single itemName entries)
+    items: [
+      {
+        productId: { type: Schema.Types.ObjectId, ref: "Products" },
+        qty: { type: Number, default: 0 },
+        rate: { type: Number, default: 0 },
+        amount: { type: Number, default: 0 },
+        gstRate: { type: Number, default: 0 },
+        hsnSac: { type: String, default: "" },
+        batchNumber: { type: String, default: "" },
+        locationId: { type: Schema.Types.ObjectId, ref: "Location" }
+      }
+    ],
+
+    // GST Specific Routing (GSTR1/GSTR3B)
+    taxDetails: {
+      cgst: { type: Number, default: 0 },
+      sgst: { type: Number, default: 0 },
+      igst: { type: Number, default: 0 },
+      totalTax: { type: Number, default: 0 }
+    },
+
+    // IRP E-Invoice Payload Storage
+    einvoice: {
+      irn: { type: String, default: null },
+      ackNo: { type: String, default: null },
+      ackDate: { type: Date, default: null },
+      qrCode: { type: String, default: null }, // Usually base64 or secure URL
+      status: {
+        type: String,
+        enum: ["pending", "generated", "failed", "cancelled", null],
+        default: null
+      }
+    },
+
+    // Synchronization Buffers
+    syncState: {
+      type: String,
+      enum: ["synced", "pending", "conflict"],
+      default: "synced",
+      index: true
+    },
+    
+    meta: { type: Schema.Types.Mixed, default: {} },
+
     narration: { type: String, default: "" },
   },
   { timestamps: true, bufferCommands: false }

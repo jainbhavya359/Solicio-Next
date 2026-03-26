@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
-import Stock from "@/src/models/stockModel";
+import { Products } from "@/src/models/ProductModel";
 import connect from "@/src/dbConfig/dbConnection";
 
 function generateSalesForecast(
@@ -235,10 +235,10 @@ export async function GET(req: NextRequest) {
       totalQty > 0 ? totalProfit / totalQty : 0;
 
     /* ---------------- INVENTORY IMPACT ---------------- */
-    const stock = (await Stock.find({ email }).lean()) as unknown as StockItem[];
+    const products = await Products.find({ email }).lean();
 
-    const stockValue = stock.reduce(
-      (s: number, i) => s + i.quantity * i.price,
+    const stockValue = products.reduce(
+      (s: number, p: any) => s + p.quantity * (p.purchasePrice || 0),
       0
     );
 

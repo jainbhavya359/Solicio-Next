@@ -1,5 +1,5 @@
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
-import { TotalStock } from "@/src/models/totalStockModel";
+import { Products } from "@/src/models/ProductModel";
 
 /**
  * Convert stock-to-sales ratio → score (0–25)
@@ -16,10 +16,10 @@ export async function computeInventoryBalance(email: string) {
   const today = new Date();
 
   /* ---------- STOCK VALUE ---------- */
-  const stock = await TotalStock.find({ email }).select("price").lean();
+  const products = await Products.find({ email }).select("quantity purchasePrice").lean();
 
-  const totalStockValue = stock.reduce(
-    (s, i) => s + (i.price || 0),
+  const totalStockValue = products.reduce(
+    (s, p: any) => s + ((p.quantity || 0) * (p.purchasePrice || 0)),
     0
   );
 

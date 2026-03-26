@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connect from "@/src/dbConfig/dbConnection";
 import { LedgerEntry } from "@/src/models/LedgerEntryModel";
-import { TotalStock } from "@/src/models/totalStockModel";
 import { StockLayer } from "@/src/models/StockLayerModel";
 import { EntryCounter } from "@/src/models/EntryCounterModel";
 import { generateVoucherNo } from "@/src/utils/voucher";
@@ -42,13 +41,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (original.voucherType === "Purchase") {
-      const currentStock = await TotalStock.findOne({
+      const product = await Products.findOne({
         email: original.email,
         name: original.itemName,
         unit: original.unit,
-      });
+      }).session(session);
 
-      if (!currentStock || currentStock.quantity < original.debitQty) {
+      if (!product || product.quantity < original.debitQty) {
         return NextResponse.json(
           {
             error: "Cannot reverse purchase. Stock already consumed.",
@@ -97,27 +96,6 @@ export async function POST(req: NextRequest) {
       original.voucherType === "Sale"
         ? original.creditQty
         : -original.debitQty;
-
-    // Updating total Stock
-    const stockUpdate = await TotalStock.findOneAndUpdate(
-      {
-        email: original.email,
-        name: original.itemName,
-        unit: original.unit,
-      },
-      {
-        $inc: {
-          quantity: qtyDelta,
-          price: original.costAmount,
-        },
-        $set: { updatedAt: new Date() },
-      },
-      { session }
-    );
-
-    if (!stockUpdate) {
-      throw new Error("STOCK_NOT_FOUND");
-    }
 
     // updating product quantity 
     await Products.updateOne(
