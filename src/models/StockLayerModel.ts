@@ -11,29 +11,21 @@ const StockLayerSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "LedgerEntry",
       required: true,
-      index: true, // 🔥 used during reversal restore
     },
 
     qtyIn: { type: Number, required: true },
-    
+
     // SCALABILITY & INTEGRITY FIX: Prevents concurrent POS bursts from pushing stock negative.
-    qtyRemaining: { 
-      type: Number, 
+    qtyRemaining: {
+      type: Number,
       required: true,
-      min: 0 
+      min: 0
     },
 
     rate: { type: Number, required: true },
 
     date: { type: Date, required: true },
 
-    /* ========================================================= */
-    /* 🚀 CONTEXT-AWARE INVENTORY LAYER: SCALABLE & ADDITIVE     */
-    /* ========================================================= */
-
-    // 1. Strong Product Linkage (Backward Compatible)
-    // Why: `productName` is fragile at scale (renaming/collisions). 
-    // Fallback: Existing core FIFO logic running against `productName` remains explicitly intact.
     productId: {
       type: Schema.Types.ObjectId,
       ref: "Products",
@@ -41,23 +33,15 @@ const StockLayerSchema = new Schema(
       index: true
     },
 
-    // 2. Batch & Expiry Tracking
-    // Why: Critical for FMCG/Pharma routing where strict FIFO isn't sufficient (Requires FEFO).
-    // Conflict avoidance: Nullable strings/dates ensure standard products safely ignore these fields entirely.
     batchNumber: { type: String, index: true },
     expiryDate: { type: Date, index: true },
 
-    // 3. Multi-Location Support (Optional)
-    // Why: Allows grouping warehouse-specific inventory distributions.
-    // Compatibility: Existing `find` executions missing `locationId` map as the baseline origin organically.
     locationId: {
       type: Schema.Types.ObjectId,
       ref: "Location",
       index: true
     },
 
-    // 4. Offline Sync Support
-    // Why: Permits buffering POS transactions globally to resolve isolated network sync merges across multiple store nodes.
     syncState: {
       type: String,
       enum: ["synced", "pending", "conflict"],
@@ -109,7 +93,7 @@ StockLayerSchema.index(
 StockLayerSchema.index({
   email: 1,
   productId: 1,
-  qtyRemaining: 1, 
+  qtyRemaining: 1,
   date: 1
 });
 

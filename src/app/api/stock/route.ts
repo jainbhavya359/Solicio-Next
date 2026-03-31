@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
           },
           $set: { lastTransactionDate: txDate }
         },
-        { upsert: true, session }
+        { upsert: true, session, returnDocument: 'after' }
       );
 
       // Auto-generate Payment History if terms are IMMEDIATE
@@ -210,6 +210,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    await connect();
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
 

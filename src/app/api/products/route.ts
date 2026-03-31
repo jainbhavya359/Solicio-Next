@@ -40,7 +40,12 @@ export async function POST(request: NextRequest) {
   await connect();
 
   try {
-    const { email, name, unit, sellingPrice, gstRate } = await request.json();
+    const payload = await request.json();
+    const { 
+      email, name, unit, sellingPrice, gstRate, purchasePrice, mrp, 
+      sku, barcode, category, productNature, hsnSac, taxability, 
+      isTaxInclusive, quantity, lowStockConfig, isBatchTracked, isExpiryTracked 
+    } = payload;
 
     if (!email || !name || !unit) {
       return NextResponse.json(
@@ -59,14 +64,25 @@ export async function POST(request: NextRequest) {
           email,
           name: normalizedName,
           unit,
-          quantity: 0,
+          quantity: quantity || 0,
           sellingPrice: sellingPrice || 0,
           gstRate: gstRate || 0,
-          purchasePrice: 0,
+          purchasePrice: purchasePrice || 0,
+          mrp: mrp || 0,
+          sku,
+          barcode,
+          category,
+          productNature,
+          hsnSac,
+          taxability,
+          isTaxInclusive,
+          lowStockConfig,
+          isBatchTracked,
+          isExpiryTracked,
         },
       },
       {
-        new: true,
+        returnDocument: 'after',
         upsert: true,
         includeResultMetadata: true,
       }
@@ -117,7 +133,12 @@ export async function PUT(request: NextRequest) {
   await connect();
 
   try {
-    const { _id, email, name, sellingPrice, gstRate } = await request.json();
+    const payload = await request.json();
+    const { 
+      _id, email, name, sellingPrice, gstRate, purchasePrice, mrp, 
+      sku, barcode, category, productNature, hsnSac, taxability, 
+      isTaxInclusive, lowStockConfig, isBatchTracked, isExpiryTracked 
+    } = payload;
 
     if (!_id || !email) {
       return NextResponse.json(
@@ -126,10 +147,21 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updateFields: Record<string, any> = {
-      sellingPrice: sellingPrice ?? 0,
-      gstRate: gstRate ?? 0,
-    };
+    const updateFields: Record<string, any> = {};
+    if (sellingPrice !== undefined) updateFields.sellingPrice = sellingPrice;
+    if (gstRate !== undefined) updateFields.gstRate = gstRate;
+    if (purchasePrice !== undefined) updateFields.purchasePrice = purchasePrice;
+    if (mrp !== undefined) updateFields.mrp = mrp;
+    if (sku !== undefined) updateFields.sku = sku;
+    if (barcode !== undefined) updateFields.barcode = barcode;
+    if (category !== undefined) updateFields.category = category;
+    if (productNature !== undefined) updateFields.productNature = productNature;
+    if (hsnSac !== undefined) updateFields.hsnSac = hsnSac;
+    if (taxability !== undefined) updateFields.taxability = taxability;
+    if (isTaxInclusive !== undefined) updateFields.isTaxInclusive = isTaxInclusive;
+    if (lowStockConfig !== undefined) updateFields.lowStockConfig = lowStockConfig;
+    if (isBatchTracked !== undefined) updateFields.isBatchTracked = isBatchTracked;
+    if (isExpiryTracked !== undefined) updateFields.isExpiryTracked = isExpiryTracked;
 
     if (name && name.trim()) {
       updateFields.name = name.trim().toLowerCase();
@@ -142,7 +174,7 @@ export async function PUT(request: NextRequest) {
     const updatedProduct = await Products.findOneAndUpdate(
       { _id, email },
       { $set: updateFields },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updatedProduct) {

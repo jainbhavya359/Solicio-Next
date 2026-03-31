@@ -450,12 +450,8 @@ export default function StockReport({
                 if (payload._id) {
                   // EDIT MODE
                   await axios.put("/api/products", {
-                    _id: payload._id,
                     email,
-                    name: payload.name,
-                    unit: payload.unit,
-                    sellingPrice: payload.sellingPrice,
-                    gstRate: payload.gstRate
+                    ...payload,
                   });
                   toast.success("Product Updated");
                 } else {
@@ -466,11 +462,7 @@ export default function StockReport({
                       : "/api/composite-product",
                     {
                       email,
-                      name: payload.name,
-                      unit: payload.unit,
-                      sellingPrice: payload.sellingPrice,
-                      gstRate: payload.gstRate,
-                      recipe: payload.recipe,
+                      ...payload,
                     }
                   );
                   toast.success("Product Created");

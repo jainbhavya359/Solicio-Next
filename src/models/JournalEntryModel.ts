@@ -5,14 +5,14 @@ const JournalEntrySchema = new Schema(
     email: { type: String, required: true, index: true, immutable: true },
 
     date: { type: Date, required: true, immutable: true, index: true },
-    
+
     voucherType: {
       type: String,
       required: true,
       immutable: true,
       index: true
     },
-    
+
     voucherNo: { type: String, required: true, immutable: true, index: true },
 
     // Idempotency: Drop duplicate network retries natively atomically
@@ -46,7 +46,7 @@ const JournalEntrySchema = new Schema(
 
 /* -------------------- CA-GRADE VALIDATION -------------------- */
 // 1. Double-Entry Balance Enforcement (Driver Level)
-JournalEntrySchema.pre("save", function(next: any) {
+JournalEntrySchema.pre("save", function (next: any) {
   let debitTotal = 0;
   let creditTotal = 0;
 

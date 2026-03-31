@@ -90,7 +90,7 @@ export async function PUT(req: NextRequest) {
         const party = await Party.findOneAndUpdate(
             { _id, email },
             { $set: updates },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!party) {

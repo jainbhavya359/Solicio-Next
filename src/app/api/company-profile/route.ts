@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const profile = await CompanyProfile.findOneAndUpdate(
     { email: payload.email },
     payload,
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 
   return NextResponse.json({ success: true, profile });

@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const counter = await EntryCounter.findOneAndUpdate(
       { email, series: voucherType, dateKey },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true, session }
+      { returnDocument: 'after', upsert: true, session }
     );
 
     const voucherNo = `${rule.prefix}-${dateKey}-${String(counter.seq).padStart(3, "0")}`;

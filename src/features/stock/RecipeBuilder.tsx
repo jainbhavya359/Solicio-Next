@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, ChevronRight, Sparkles, Plus } from "lucide-react";
+import { Trash2, ChevronRight, Sparkles, Plus, Box } from "lucide-react";
 
 type Product = {
   _id: string;
@@ -70,24 +70,24 @@ export default function RecipeBuilder({
         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-[0_0_15px_rgba(52,211,153,0.2)]">
           <Sparkles className="w-4 h-4" />
         </div>
-        <h4 className="text-xs font-black text-white uppercase tracking-[0.2em]">
+        <h4 className="text-sm font-black text-white uppercase tracking-[0.2em]">
           Recipe Manifest
         </h4>
       </div>
 
       {/* ADD INGREDIENT */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end p-6 rounded-3xl bg-[#0a0a0a] border border-white/10 shadow-[0_0_40px_rgba(52,211,153,0.02)]">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-6 rounded-[2rem] bg-black/40 border border-white/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]">
         <div className="md:col-span-6 space-y-2">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
             Ingredient Selector
           </label>
           <div className="relative">
             <select
               value={selectedProductId}
               onChange={e => setSelectedProductId(e.target.value)}
-              className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-xs font-bold text-white appearance-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer outline-none"
+              className="h-12 w-full rounded-2xl border border-white/10 bg-black/60 px-4 text-sm font-bold text-white appearance-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer outline-none"
             >
-              <option value="" className="bg-slate-900 text-slate-300">Select asset</option>
+              <option value="" className="bg-slate-900 text-slate-500">Select asset required</option>
               {safeProducts.map(p => (
                 <option key={p._id} value={p._id} className="bg-slate-900 text-white">
                   {p.name} ({p.unit})
@@ -101,7 +101,7 @@ export default function RecipeBuilder({
         </div>
 
         <div className="md:col-span-4 space-y-2">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
             Volume {selectedProduct && `(${selectedProduct.unit})`}
           </label>
           <input
@@ -111,7 +111,7 @@ export default function RecipeBuilder({
             value={qty}
             onChange={e => setQty(e.target.value)}
             placeholder="0.00"
-            className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-xs font-bold text-white placeholder:text-slate-600 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
+            className="h-12 w-full rounded-2xl border border-white/10 bg-black/60 px-4 text-sm font-bold text-white placeholder:text-slate-600 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
           />
         </div>
 
@@ -140,7 +140,7 @@ export default function RecipeBuilder({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
-                  className="flex items-center justify-between p-4 bg-[#0a0a0a] border border-white/5 rounded-2xl shadow-sm hover:border-emerald-500/30 hover:shadow-[0_8px_32px_rgba(52,211,153,0.05)] transition-all group"
+                  className="flex items-center justify-between p-4 bg-black/40 border border-white/10 rounded-2xl shadow-sm hover:border-emerald-500/30 transition-all group"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 group-hover:bg-emerald-500/10 group-hover:text-emerald-400 transition-colors shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
@@ -150,7 +150,7 @@ export default function RecipeBuilder({
                       <p className="text-sm font-bold text-white tracking-tight">
                         {item.productName}
                       </p>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400 group-hover:text-emerald-300 transition-colors mt-0.5">
                         {item.qtyRequired} {item.unit}
                       </p>
                     </div>
@@ -167,34 +167,16 @@ export default function RecipeBuilder({
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 rounded-3xl border border-dashed border-white/10 bg-white/5">
+          <div className="text-center py-12 rounded-[2rem] border border-dashed border-white/10 bg-black/20">
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-              No configuration detected.
+              No configuration detected
             </p>
-            <p className="text-[10px] text-slate-600 mt-2">
+            <p className="text-[10px] text-slate-600 mt-2 font-medium">
               Add structural components required to formulate this asset.
             </p>
           </div>
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-function Box({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-      <path d="m3.3 7 8.7 5 8.7-5" />
-      <path d="M12 22V12" />
-    </svg>
   );
 }

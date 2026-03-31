@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
                 $inc: updateField,
                 $set: { lastTransactionDate: txDate } // Consider a payment as a transaction activity
             },
-            { new: true, session }
+            { returnDocument: 'after', session }
         );
 
         if (!updatedParty) {

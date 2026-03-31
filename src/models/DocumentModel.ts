@@ -89,7 +89,6 @@ const DocumentSchema = new Schema(
     journalEntryId: {
       type: Schema.Types.ObjectId,
       ref: "JournalEntry",
-      index: true
     },
 
     // 🚀 INVENTORY INTEGRATION: Directly overrides StockLayer FIFO decay safely via parameter
@@ -136,7 +135,7 @@ const DocumentSchema = new Schema(
       igst: { rate: { type: Number, default: 0 }, amount: { type: Number, default: 0 } },
       totalTax: { type: Number, default: 0 }
     },
-    
+
     placeOfSupply: String,
     isInterState: { type: Boolean, default: false },
 
