@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
+import { setupDbTelemetry } from "@/src/lib/telemetry/dbTelemetry";
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI not defined");
 }
+
+setupDbTelemetry();
 
 let cached = (global as any).mongoose;
 

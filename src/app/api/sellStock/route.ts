@@ -1,4 +1,5 @@
 import connect from "@/src/dbConfig/dbConnection";
+import { withTelemetry } from "@/src/utils/withTelemetry";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,7 +18,7 @@ import { calculateFIFO } from "@/src/utils/fifo";
 import { generateVoucherNo } from "@/src/utils/voucher";
 import { computeGST } from "@/src/utils/gst";
 
-export async function POST(req: NextRequest) {
+export const POST = withTelemetry(async function POST(req: NextRequest) {
   await connect();
   await Payment.createCollection().catch(() => { }); // Ensure collection exists before transaction
   const session = await mongoose.startSession();
@@ -310,9 +311,9 @@ export async function POST(req: NextRequest) {
   } finally {
     session.endSession();
   }
-}
+});
 
-export async function GET(request: NextRequest) {
+export const GET = withTelemetry(async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
@@ -328,4 +329,4 @@ export async function GET(request: NextRequest) {
     console.log("Error: ", error);
     return NextResponse.json({ error: error }, { status: 500 });
   }
-}
+});

@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import Header from "@/src/components/layout/Header"
 import Footer from "@/src/components/layout/Footer"
 import { ClerkProvider } from "@clerk/nextjs"
+import AnalyticsTracker from "@/src/components/telemetry/AnalyticsTracker"
 
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -26,6 +27,7 @@ export default function RootLayout({
     <ClerkProvider >
       <html lang="en">
         <body className={`${outfit.variable} font-sans bg-white text-slate-900 antialiased`}>
+          <AnalyticsTracker />
           {children}
         </body>
       </html>
