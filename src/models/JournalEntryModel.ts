@@ -46,7 +46,7 @@ const JournalEntrySchema = new Schema(
 
 /* -------------------- CA-GRADE VALIDATION -------------------- */
 // 1. Double-Entry Balance Enforcement (Driver Level)
-JournalEntrySchema.pre("save", function (next: any) {
+JournalEntrySchema.pre("save", function () {
   let debitTotal = 0;
   let creditTotal = 0;
 
@@ -57,20 +57,20 @@ JournalEntrySchema.pre("save", function (next: any) {
 
   // Float precision buffer mapping Javascript arithmetic drift
   if (Math.abs(debitTotal - creditTotal) > 0.001) {
-    const err = new Error(`DOUBLE_ENTRY_VIOLATION: Debits (${debitTotal}) do not equal Credits (${creditTotal}).`);
-    return next(err);
+    throw new Error(`DOUBLE_ENTRY_VIOLATION: Debits (${debitTotal}) do not equal Credits (${creditTotal}).`);
   }
 
   // Total validation
   if (Math.abs(debitTotal - this.totalAmount) > 0.001) {
-    const err = new Error(`TOTAL_AMOUNT_MISMATCH: Computed total (${debitTotal}) does not match declared totalAmount.`);
-    return next(err);
+    throw new Error(`TOTAL_AMOUNT_MISMATCH: Computed total (${debitTotal}) does not match declared totalAmount.`);
   }
-
-  next();
 });
 
 JournalEntrySchema.index({ email: 1, date: 1 });
 JournalEntrySchema.index({ email: 1, voucherNo: 1 });
 
-export const JournalEntry = models.JournalEntry || model("JournalEntry", JournalEntrySchema);
+if (models.JournalEntry) {
+  delete models.JournalEntry;
+}
+
+export const JournalEntry = model("JournalEntry", JournalEntrySchema);

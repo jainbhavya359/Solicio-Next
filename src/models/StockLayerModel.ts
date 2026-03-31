@@ -75,12 +75,9 @@ StockLayerSchema.index({
 });
 
 /**
- * 3️⃣ Prevent duplicate layers per ledger
+ * 3️⃣ Fast lookup for associated transaction
  */
-StockLayerSchema.index(
-  { sourceLedgerId: 1 },
-  { unique: true }
-);
+StockLayerSchema.index({ sourceLedgerId: 1 });
 
 /* -------------------- MODERN INDEXES (ADDITIVE & OPTIMIZED) -------------------- */
 // NOTE: Future queries replacing `productName` MUST use `productId`. Example:

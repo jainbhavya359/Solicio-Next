@@ -139,6 +139,20 @@ const DocumentSchema = new Schema(
     placeOfSupply: String,
     isInterState: { type: Boolean, default: false },
 
+    // 🚀 DYNAMIC PROCUREMENT METADATA
+    charges: {
+      freight: { type: Number, default: 0 },
+      discount: { type: Number, default: 0 },
+      discountType: { type: String, enum: ["%", "₹", null], default: null }
+    },
+
+    reverseCharge: { type: Boolean, default: false },
+
+    currencyDetails: {
+      code: { type: String, default: "INR" },
+      exchangeRate: { type: Number, default: 1 }
+    },
+
     // 🚀 EXPORT BILLING ROUTING
     exportDetails: {
       isExport: { type: Boolean, default: false },
@@ -176,7 +190,6 @@ DocumentSchema.index({ email: 1, voucherNo: 1 });
 
 // 🚀 DYNAMIC BILLING INDEX STRATEGY
 DocumentSchema.index({ documentType: 1, date: -1 });
-DocumentSchema.index({ journalEntryId: 1 });
 DocumentSchema.index({ "items.productId": 1 });
 
 /* ========================================================= */
@@ -255,7 +268,7 @@ DocumentSchema.pre("save", async function () {
 });
 
 
-if (process.env.NODE_ENV !== "production") {
+if (models.Document) {
   delete models.Document;
 }
 

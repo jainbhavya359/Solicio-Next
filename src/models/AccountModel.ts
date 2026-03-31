@@ -6,6 +6,8 @@ const AccountSchema = new Schema(
 
     name: { type: String, required: true },
 
+    code: { type: String, required: true },
+
     // Core accounting groups mapping Trial Balance
     type: {
       type: String,
@@ -15,7 +17,6 @@ const AccountSchema = new Schema(
     },
 
     // Materialized Path for CA-grade hierarchical P&L aggregation (e.g., "/Assets/Current/Bank/HDFC")
-    // Prevents expensive recursive database graph lookups at massive scale
     path: { type: String, required: true, index: true },
     parentAccountId: { type: Types.ObjectId, ref: "Account", default: null },
 
@@ -36,10 +37,12 @@ const AccountSchema = new Schema(
 );
 
 // Prevent duplicate account nomenclatures colliding within the same hierarchy per tenant map
+AccountSchema.index({ email: 1, code: 1 }, { unique: true });
 AccountSchema.index({ email: 1, name: 1, parentAccountId: 1 }, { unique: true });
 
-export const Account = models.Account || model("Account", AccountSchema);
-delete models.Account;
+// 🚀 HOT-RELOAD FIX: Deeply purge cached model to ensure "code" field is recognized in development
+if (models.Account) {
+    delete models.Account;
 }
 
 export const Account = model("Account", AccountSchema);
