@@ -35,12 +35,12 @@ graph TD
 
     %% API Controller Layer
     subgraph API ["Serverless API Gateways (Next.js App Router)"]
-        API_Dash[/api/dashboard]
-        API_PL[/api/profit-loss]
-        API_Stock[/api/stock]
-        API_Loans[/api/loans]
-        API_Voucher[/api/financial-entry]
-        API_Health[/api/health/*]
+        API_Dash["/api/dashboard"]
+        API_PL["/api/profit-loss"]
+        API_Stock["/api/stock"]
+        API_Loans["/api/loans"]
+        API_Voucher["/api/financial-entry"]
+        API_Health["/api/health/*"]
     end
 
     %% Business Utility Layer
