@@ -1,5 +1,7 @@
 # 🚀 Solicio | Premium MSME Bookkeeping & Financial Dashboard
 
+**[Live Demo](https://solicio-app.vercel.app/)**
+
 [![Next.js](https://img.shields.io/badge/Next.js-16.1.1-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.2.3-blue?style=for-the-badge&logo=react)](https://react.dev/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4.0-38bdf8?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
@@ -7,13 +9,54 @@
 [![Clerk](https://img.shields.io/badge/Clerk-Authentication-6c47ff?style=for-the-badge&logo=clerk)](https://clerk.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 
-Solicio is a premium, high-performance business administration, accounting, and financial analytics dashboard engineered for Micro, Small, and Medium Enterprises (MSMEs). By combining robust double-entry bookkeeping, sophisticated inventory costing algorithms, active loan amortization trackers, and dynamic health reports, Solicio enables modern business owners to operate with enterprise-grade clarity and compliance.
+---
+
+# Overview
+
+Solicio is a simple and premium dashboard built for small and medium business owners to manage their business, money, and stock in one place.
+
+Instead of jumping between messy spreadsheets, separate invoicing tools, and confusing accounting software, Solicio gives you a single, unified workspace to track everything. It takes care of the complex math in the background, showing you your real profit margins, inventory levels, and overall business health at a glance.
 
 ---
 
-## 🏛️ System Architecture
+# Features at a Glance
 
-Solicio utilizes a **Domain-Driven Feature Slice** pattern layered over a serverless Next.js App Router environment. This architecture ensures high modularity, strict separation of concerns, and clean API orchestration.
+*   **📊 Unified Dashboard:** A clean overview of your cash flow, active loans, and key business metrics.
+*   **💸 Simple Bookkeeping:** Easily log sales, purchases, and payments. The app enforces balanced accounting entries automatically.
+*   **📦 Stock Tracker & Valuation:** Keep track of exactly what inventory is left, its value, and get alerted when stock runs low.
+*   **🏥 Business Health Score:** A simple score from 0 to 100 calculated from your sales trends and stock levels to let you know how your business is performing.
+*   **📈 Sales & Margin Insights:** Smart charts showing your revenue growth and profit margins, along with recommendations to improve operations.
+*   **🏦 Loan & License Alerts:** Track active business loans, calculate monthly payments, and get notified before regulatory business licenses expire.
+*   **👥 Contact Directory:** Manage profiles for customers and suppliers to track who you owe money to and who owes you.
+
+---
+
+# How It Works (Under the Hood)
+
+For developers or those interested in the technical details:
+
+### 1. Hierarchical Chart of Accounts & Balanced Ledger
+The system structures your accounts using a path-based hierarchy (e.g., `/Asset/Cash`, `/Expense/Purchases`). 
+*   **Balanced Vouchers:** When you log transactions, the system checks that debits match credits before saving.
+*   **Audit Lock:** Past accounting periods can be locked to prevent older records from being altered.
+
+### 2. First-In First-Out (FIFO) Costing Engine
+To calculate your exact Cost of Goods Sold (COGS) and profit margins:
+*   Each batch of stock purchased is stored with its own cost and date.
+*   When a sale happens, the system automatically subtracts inventory from the oldest available batch first.
+
+### 3. Business Health Scoring Algorithm
+The system calculates the 0-100 health score based on four key metrics:
+*   **Stock Movement (30%):** Flags slow-moving items that are locking up cash.
+*   **Sales Trend (30%):** Measures week-over-week revenue growth.
+*   **Inventory Balance (20%):** Keeps track of stock-to-sales ratios to avoid stockouts.
+*   **Activity Recency (20%):** Detects if there has been a long gap in operations.
+
+---
+
+# System Architecture
+
+Solicio utilizes a **Domain-Driven Feature Slice** pattern layered over a serverless Next.js App Router environment to ensure modularity and clean API orchestration.
 
 ```mermaid
 graph TD
@@ -87,30 +130,7 @@ graph TD
 
 ---
 
-## ✨ Core Modules & Algorithms
-
-### 📖 1. Double-Entry Bookkeeping & Materialized Paths
-Accounting transactions are recorded via balanced financial entries. The chart of accounts uses a **Materialized Path** hierarchy (e.g., `/Asset/Cash`, `/Expense/Purchases`) supporting multi-level account rollups:
-*   **Voucher Verification:** Strict debit/credit balance enforcement through a customizable rules schema (`src/utils/voucherRules.ts`).
-*   **Locked Accounting Periods:** Prevents retrofitting transactions into past, finalized cycles, ensuring fiscal auditability (`src/utils/accounting.ts`).
-
-### 📦 2. First-In First-Out (FIFO) Costing Engine
-Inventory and COGS (Cost of Goods Sold) calculations are computed using a pure-functional FIFO layer tracking mechanism (`src/utils/fifo.ts`).
-*   Each inventory acquisition creates a distinct, time-stamped `StockLayer` indicating `qtyRemaining` and unit purchase `rate`.
-*   Sales dynamically consume these layers from oldest to newest.
-*   **COGS Calculation:** $\text{COGS} = \text{Opening Stock} + \text{Purchases} - \text{Closing Stock}$. Underneath, the system performs a localized transaction trace:
-    $$\text{COGS} = \sum (\text{Layer Unit Rate} \times \text{Consumed Quantity})$$
-
-### 🏥 3. Business Health Scoring Algorithm
-The system aggregates telemetry from ledger activity and stock logs to output an active **Business Health Score (0-100)**:
-1.  **Stock Movement Score (30%):** Measures days since the last sale per product to flag slow-moving capital.
-2.  **Sales Trend Score (30%):** Calculates week-over-week revenue growth.
-3.  **Inventory Balance Score (20%):** Computes the Stock-to-Sales Ratio to prevent over-stocking and stockouts.
-4.  **Activity Recency Score (20%):** Identifies operational gaps or periods of business dormancy.
-
----
-
-## 📂 Project Directory Structure
+# 📂 Project Directory Structure
 
 ```filepath
 solicio-next/
@@ -168,7 +188,7 @@ solicio-next/
 
 ---
 
-## 🛠️ Getting Started & Installation
+# 🛠️ Getting Started & Installation
 
 ### Prerequisites
 *   [Node.js](https://nodejs.org/) (v20+ recommended)
@@ -217,7 +237,7 @@ solicio-next/
 
 ---
 
-## 💻 Tech Stack Highlights
+# 💻 Tech Stack Highlights
 
 *   **Framework:** Next.js 16.1 (App Router)
 *   **Base Language:** React 19, TypeScript
@@ -230,5 +250,6 @@ solicio-next/
 
 ---
 
-## 📄 License
+# 📄 License
+
 This project is private and proprietary. All rights reserved.
